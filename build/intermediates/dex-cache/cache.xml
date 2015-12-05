@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\liuchun\.gradle\caches\modules-2\files-2.1\com.parse.bolts\bolts-android\1.1.4\129874135e6081269ace2312092031558865de12\bolts-android-1.1.4.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="129874135e6081269ace2312092031558865de12">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\bolts-android-1.1.4-4d6f2f84f9347b103b728f6670ed0a312bbc3c25.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.facebook.fresco\drawee\0.5.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="8e9ebd5a5721081e4c0b7957bcc23685e558dc59">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-af15ecadef3184c9cef1bdf2dc7301dc34f264e6.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="5b37cf49773f7f17aca9830efd3053b0cac56728">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-45e24e2f71cbae172d9b76223a7a26a25934d843.jar" />
+    </item>
+    <item
+        jar="C:\Users\liuchun\.gradle\caches\modules-2\files-2.1\org.jsoup\jsoup\1.8.2\64238922c4006c3d0a9951c4c03983ecc6a1e1a0\jsoup-1.8.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="64238922c4006c3d0a9951c4c03983ecc6a1e1a0">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\jsoup-1.8.2-a6b7238d2dd29d7143697f78bc7dd7e6c552945a.jar" />
+    </item>
+    <item
+        jar="C:\Users\liuchun\.gradle\caches\modules-2\files-2.1\com.loopj.android\android-async-http\1.4.7\cd78109020f9ec803ef4e652c17ee4615b03e20a\android-async-http-1.4.7.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="cd78109020f9ec803ef4e652c17ee4615b03e20a">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\android-async-http-1.4.7-5e840efa2d7b37482d967fc3cefdf9e900799973.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.android.support\design\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="fc63b820d54c8a27a3a614bdd93920e0076581c2">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-5aae6594560060fed459d16254f13076f567a5fa.jar" />
+    </item>
+    <item
+        jar="C:\Users\liuchun\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\library-2.4.0-65543f34c1cf82b9c26b067e5d776f0c21477890.jar" />
+    </item>
+    <item
+        jar="D:\Program Files\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\22.2.0\support-annotations-22.2.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="66b42a1f3eb7676070b7ef7f14b603483aecbee1">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\support-annotations-22.2.0-ed148b79a2e32691150cd675671d029625c3d8f8.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.0\jars\libs\internal_impl-22.2.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="57f2ab85c164ff1676ec64dee787981c046fab79">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\internal_impl-22.2.0-7e0885d441bd32d625cb56a3179cc8822006ec04.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="73753982da6bde518f3a4c6b372749981d14d1a0">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-184ffcabcfcdca932e2cdece738a453c2e11dc0d.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="1ee588ff2c4daf7b97c1cbf922a6c7f027285c2f">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-f41b9588efd25f57a85fff9e12be7e1a8bec776c.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.facebook.fresco\fresco\0.5.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="71192edbd53cb8a9da4e3e5fbf0228b59d740372">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-2cfb9f18b9a7f7f72b4616f007a9381e8eb8807a.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.facebook.fresco\fbcore\0.5.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="067695186c4ce223dec400b852d0041b0feccd87">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-0bee4a49d011a11c7e465cb4f8def705ab0cb785.jar" />
+    </item>
+    <item
+        jar="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\exploded-aar\com.facebook.fresco\imagepipeline\0.5.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="a610522dec6278bf9db2e8c8a4e63c631d050752">
+        <dex dex="E:\Projects\AndroidStudio\SneezeReader\app\build\intermediates\pre-dexed\debug\classes-363856bc020363208e6efcf78b02ccbecd1b8793.jar" />
+    </item>
+
+</items>

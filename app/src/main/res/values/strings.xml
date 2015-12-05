@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SneezeReader</string>
+
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- 底部导航和标题 -->
+    <string name="title_tugua">图卦</string>
+    <string name="title_wenzhang">乐活</string>
+    <string name="title_yitu">意图</string>
+    <string name="title_duanzi">段子</string>
+
+</resources>
