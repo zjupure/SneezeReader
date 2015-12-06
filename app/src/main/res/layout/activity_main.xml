@@ -6,11 +6,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/content_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/toolbar" />
+
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+        </FrameLayout>
+
+        <RadioGroup
+            android:id="@+id/tab_menu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/tab_background"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/tab_tugua"
+                style="@style/tab_bottom"
+                android:checked="true"
+                android:drawableTop="@drawable/tugua"
+                android:text="@string/title_tugua"/>
+            <RadioButton
+                android:id="@+id/tab_lehuo"
+                style="@style/tab_bottom"
+                android:drawableTop="@drawable/wenzhang"
+                android:text="@string/title_wenzhang"/>
+            <RadioButton
+                android:id="@+id/tab_yitu"
+                style="@style/tab_bottom"
+                android:drawableTop="@drawable/yitu"
+                android:text="@string/title_yitu"/>
+            <RadioButton
+                android:id="@+id/tab_duanzi"
+                style="@style/tab_bottom"
+                android:drawableTop="@drawable/duanzi"
+                android:text="@string/title_duanzi"/>
+        </RadioGroup>
+    </LinearLayout>
+
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"

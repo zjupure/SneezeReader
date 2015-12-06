@@ -4,19 +4,10 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@mipmap/wight"
-    android:minHeight="@dimen/abc_action_bar_default_height_material">
+    android:background="@color/colorPrimary"
+    android:minHeight="48dp"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <TextView
-            android:id="@+id/pagetitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/title_tugua"/>
-    </RelativeLayout>
 </android.support.v7.widget.Toolbar>
 <!-- From: file:/E:/Projects/Android/SneezeReader/app/src/main/res/layout/toolbar.xml -->

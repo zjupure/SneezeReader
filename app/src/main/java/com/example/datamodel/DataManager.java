@@ -8,19 +8,18 @@ import java.util.List;
  * Created by liuchun on 2015/7/17.
  */
 public class DataManager {
-    private List<Datainfo> mTugua;       //图卦的数据集
-    private List<Datainfo> mLehuo;       //乐活的数据集
-    private List<Datainfo> mYitu;        //意图的数据集
-    private List<Datainfo> mDuanzi;      //段子的数据集
+    private List<Article> mTugua;       //图卦的数据集
+    private List<Article> mLehuo;       //乐活的数据集
+    private List<Article> mYitu;        //意图的数据集
+    private List<Article> mDuanzi;      //段子的数据集
 
-    private static final Object LOCK = new Object();
     private static DataManager instance = null;
 
     private DataManager(){
-        mTugua = new ArrayList<Datainfo>();
-        mLehuo = new ArrayList<Datainfo>();
-        mYitu = new ArrayList<Datainfo>();
-        mDuanzi = new ArrayList<Datainfo>();
+        mTugua = new ArrayList<>();
+        mLehuo = new ArrayList<>();
+        mYitu = new ArrayList<>();
+        mDuanzi = new ArrayList<>();
     }
 
     /**
@@ -29,7 +28,7 @@ public class DataManager {
      */
     public static DataManager getInstance(){
         if(instance == null){
-            synchronized (LOCK){
+            synchronized (DataManager.class){
                 if(instance == null){
                     instance = new DataManager();
                 }
@@ -43,18 +42,18 @@ public class DataManager {
      * 添加一个Datainfo到数据管理器
      * @param datainfo
      */
-    public void addData(Datainfo datainfo){
+    public void addData(Article datainfo){
         switch (datainfo.getType()){
-            case Datainfo.TUGUA:
+            case Article.TUGUA:
                 mTugua.add(datainfo);
                 break;
-            case Datainfo.LEHUO:
+            case Article.LEHUO:
                 mLehuo.add(datainfo);
                 break;
-            case Datainfo.YITU:
+            case Article.YITU:
                 mYitu.add(datainfo);
                 break;
-            case Datainfo.DUANZI:
+            case Article.DUANZI:
                 mDuanzi.add(datainfo);
                 break;
             default:break;
@@ -65,9 +64,9 @@ public class DataManager {
      * 添加集合到数据管理器
      * @param datoinfos
      */
-    public void addDataset(List<Datainfo> datoinfos){
+    public void addDataset(List<Article> datoinfos){
         //添加到数据集
-        for(Datainfo datainfo : datoinfos){
+        for(Article datainfo : datoinfos){
             addData(datainfo);
         }
     }
@@ -77,15 +76,15 @@ public class DataManager {
      * @param type
      * @return
      */
-    public List<Datainfo> getData(int type){
+    public List<Article> getData(int type){
         switch (type){
-            case Datainfo.TUGUA:
+            case Article.TUGUA:
                 return mTugua;
-            case Datainfo.LEHUO:
+            case Article.LEHUO:
                 return mLehuo;
-            case Datainfo.YITU:
+            case Article.YITU:
                 return mYitu;
-            case Datainfo.DUANZI:
+            case Article.DUANZI:
                 return mDuanzi;
             default: return null;
         }

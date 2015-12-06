@@ -2,8 +2,6 @@ package com.example.storage;
 
 import android.os.Environment;
 
-import com.example.network.SneezeRules;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,11 +11,11 @@ import java.io.IOException;
  * Created by liuchun on 2015/7/17.
  */
 public class FileManager {
-    private static final Object LOCK = new Object();
+    public static final String DEFAULT_PAGE_DIR = "SneezeReader";
     private static FileManager instance = null;
 
     private FileManager(){
-        File file = new File(Environment.getExternalStorageDirectory(), SneezeRules.PAGE_DIR);
+        File file = new File(Environment.getExternalStorageDirectory(), DEFAULT_PAGE_DIR);
         if(isSDExist()){
             file.mkdir();    //创建目录
         }
@@ -29,7 +27,7 @@ public class FileManager {
      */
     public static FileManager getInstance(){
         if(instance == null){
-            synchronized (LOCK){
+            synchronized (FileManager.class){
                 if(instance == null){
                     instance = new FileManager();
                 }
@@ -44,7 +42,7 @@ public class FileManager {
      * @param filename
      */
     public boolean writeHTML(String filename, String content){
-        File file = new File(Environment.getExternalStorageDirectory(), filename);
+        File file = new File(getDefaultPageDir(), filename);
         boolean isOk = false;
         if(isSDExist()){
             try {
@@ -63,6 +61,15 @@ public class FileManager {
 
         return isOk;
     }
+
+    public String getDefaultPageDir(){
+        return Environment.getExternalStorageState() + File.separator + DEFAULT_PAGE_DIR;
+    }
+
+    public String getAbsolutPath(String filename){
+        return getDefaultPageDir() + File.separator + filename;
+    }
+
     /**
      * 判断SD卡是否存在
      * @return

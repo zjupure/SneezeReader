@@ -11,17 +11,18 @@ public class DBHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "sneeze.db";
     private static final int DATABASE_VERSION = 1;
     //创建表命令
-    private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS paper" +
+    private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS articles" +
             "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-            "title VARCHAR(200) NOT NULL, " +
             "type TINYINT NOT NULL, " +
+            "title VARCHAR(200) NOT NULL, " +
+            "remote_link TEXT, " +
             "author CHAR(10), " +
-            "publishdate DATE, " +
-            "content TEXT, " +
-            "remote_url TEXT, " +
-            "local_url TEXT NOT NULL)";
-    //在remote_url上创建索引
-    private static final String CREATE_INDEX_URL = "CREATE INDEX paper_url on paper (remote_url)";
+            "pubDate DATE, " +
+            "description TEXT, " +
+            "imgurl TEXT, " +
+            "local_link TEXT)";
+    //在type+pubDate上创建索引
+    private static final String CREATE_INDEX_TYPEDATE = "CREATE INDEX typeDate on articles (type, pubDate)";
 
     public DBHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -34,7 +35,7 @@ public class DBHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE);
-        db.execSQL(CREATE_INDEX_URL);
+        db.execSQL(CREATE_INDEX_TYPEDATE);
     }
 
     /**

@@ -1,8 +1,9 @@
 package com.example.fragment;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -15,9 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
-import com.example.datamodel.Datainfo;
 import com.example.liuchun.sneezereader.R;
+import com.example.sneezereader.DetailActivity;
 
 import java.util.List;
 
@@ -27,11 +29,15 @@ import java.util.List;
 public class ItemFragment extends Fragment {
     private final static int SWIPE_LONG = 2000;
     private final static String[] ENTRY_TAG = {"tugua_entry", "lehuo_entry"};   //图卦二级目录
+
     private View rootView;  //缓存根View,防止重复渲染
     private SwipeRefreshLayout mRefreshView;  //下拉刷新控件
     private RecyclerView mRecyclerView;   //列表控件
+    private LinearLayoutManager mLayoutManager;
     private MyRecylcerAdapter mAdapter;   //适配器
     private int curpos;    //当前页面标识
+    // RecycleView数据集
+    private List<Article> mDataSet;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,7 +53,7 @@ public class ItemFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         curpos = getArguments().getInt("pos");
@@ -61,6 +67,7 @@ public class ItemFragment extends Fragment {
         mRecyclerView = (RecyclerView)rootView.findViewById(R.id.tugua_list);
 
         //设置刷新时的颜色
+        mRefreshView.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
         mRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -82,39 +89,58 @@ public class ItemFragment extends Fragment {
             }
         });
 
+
         mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         //根据当前页面的位置,从数据管理器中获取数据
-        List<Datainfo> mDataset = DataManager.getInstance().getData(curpos);
+        mDataSet = DataManager.getInstance().getData(curpos);
         //定义Adapter
-        mAdapter = new MyRecylcerAdapter(mDataset);  //绑定数据集
+        mAdapter = new MyRecylcerAdapter(mDataSet, curpos);  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
 
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int lastVisibleItem = 0;
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && lastVisibleItem + 1 == mAdapter.getItemCount()) {
+                    mRefreshView.setRefreshing(true);
+                    //发起请求
+                    //handler.sendEmptyMessageDelayed();
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+            }
+        });
+
         //设置item点击事件
-        mAdapter.setOnClickListener(new ItemClickListener() {
+        mAdapter.setOnItemClickListener(new ItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                //只有图卦和乐活页面的Item才响应点击事件
-                if(curpos != 0 && curpos != 1)
+                // 图卦和乐活页面响应点击事件,段子页面无效
+                if (curpos > 1) {
                     return;
+                }
 
-                Toast.makeText(getActivity(), "点击item", Toast.LENGTH_SHORT).show();
-
-                //点击Item,替换Fragment
-                Fragment frag = new YituFragment();    //新建一个Fragment
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putInt("pos", curpos);
-                bundle.putInt("subitem", position);
-                frag.setArguments(bundle);
-                FragmentManager fm = getActivity().getSupportFragmentManager();  //获取父Activity的管理器
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.frag_container, frag, ENTRY_TAG[curpos]);
-                ft.addToBackStack(null);
-                ft.commit();
-
+                Article article = mDataSet.get(position);
+                bundle.putString("title", article.getTitle());
+                bundle.putString("remote_link", article.getRemote_link());
+                bundle.putString("description", article.getDescription());
+                bundle.putString("local_link", article.getLocal_link());
+                intent.putExtra("detail", bundle);
+                startActivity(intent);
             }
         });
     }

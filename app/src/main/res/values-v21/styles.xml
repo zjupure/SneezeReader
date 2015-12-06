@@ -1,0 +1,21 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- toolbar color -->
+        <item name="android:colorPrimary">#4876ff</item>
+        <!-- statusbar color -->
+        <item name="android:colorPrimaryDark">#3a5fcd</item>
+        <!-- window background color -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <!-- text color
+        <item name="android:textColorPrimary">#fffff0</item>
+        -->
+        <!-- SearchView-->
+        <item name="android:searchViewStyle">@android:style/Widget.Material.SearchView</item>
+    </style>
+
+
+    <style name="AppTheme" parent="@style/AppBaseTheme"></style>
+
+</resources>
