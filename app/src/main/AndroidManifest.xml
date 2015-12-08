@@ -29,8 +29,12 @@
         </activity>
 
         <activity
-            android:name="com.example.sneezereader.DetailActivity" >
-
+            android:name="com.example.sneezereader.DetailActivity"
+            android:parentActivityName="com.example.sneezereader.MainActivity">
+            <!-- meta-data 用于支持support 4.0以及以下指明上级活动 -->
+            <meta-data
+                android:name="android:support.PARENT_ACTIVITY"
+                android:value="com.example.sneezereader.MainActivity" />
         </activity>
 
     </application>

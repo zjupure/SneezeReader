@@ -108,12 +108,13 @@ public class ItemFragment extends Fragment {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
+                /*
                 if (newState == RecyclerView.SCROLL_STATE_IDLE
                         && lastVisibleItem + 1 == mAdapter.getItemCount()) {
                     mRefreshView.setRefreshing(true);
                     //发起请求
                     //handler.sendEmptyMessageDelayed();
-                }
+                }*/
             }
 
             @Override
@@ -135,11 +136,14 @@ public class ItemFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
                 Bundle bundle = new Bundle();
                 Article article = mDataSet.get(position);
+                bundle.putParcelable("article", article);
+                /*
                 bundle.putString("title", article.getTitle());
                 bundle.putString("remote_link", article.getRemote_link());
                 bundle.putString("description", article.getDescription());
-                bundle.putString("local_link", article.getLocal_link());
+                bundle.putString("local_link", article.getLocal_link()); */
                 intent.putExtra("detail", bundle);
+                intent.putExtra("position", position);
                 startActivity(intent);
             }
         });

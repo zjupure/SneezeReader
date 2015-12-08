@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/toolbar" />
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- content layout -->
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+        </FrameLayout>
+
+        <!-- Navigation View -->
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            app:headerLayout="@layout/drawer_header"
+            app:menu="@menu/drawer"/>
+    </android.support.v4.widget.DrawerLayout>
+
+    <RadioGroup
+        android:id="@+id/tab_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/tab_background"
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/tab_tugua"
+            style="@style/tab_bottom"
+            android:checked="true"
+            android:drawableTop="@drawable/tugua"
+            android:text="@string/title_tugua"/>
+        <RadioButton
+            android:id="@+id/tab_lehuo"
+            style="@style/tab_bottom"
+            android:drawableTop="@drawable/wenzhang"
+            android:text="@string/title_wenzhang"/>
+        <RadioButton
+            android:id="@+id/tab_yitu"
+            style="@style/tab_bottom"
+            android:drawableTop="@drawable/yitu"
+            android:text="@string/title_yitu"/>
+        <RadioButton
+            android:id="@+id/tab_duanzi"
+            style="@style/tab_bottom"
+            android:drawableTop="@drawable/duanzi"
+            android:text="@string/title_duanzi"/>
+    </RadioGroup>
+</LinearLayout>

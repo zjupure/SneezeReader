@@ -1,6 +1,7 @@
 package com.example.network;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.database.DBManager;
@@ -41,6 +42,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
     @Override
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
+
         ArticleData[] datas = JsonParserUtil.JsonArticleParser(responseString);
 
         for(ArticleData data : datas){
@@ -48,15 +50,16 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 continue;  // filter advertisement
             }
 
+            /*
             String remote_url = data.getLink();
             if(dbManager.isExist(remote_url)){
                 continue;  // exist in the database
-            }
+            }*/
 
             Article article = new Article();
             article.setType(type);
             article.setTitle(data.getTitle());
-            article.setRemote_link(remote_url);
+            article.setRemote_link(data.getLink());
             article.setAuthor(data.getAuthor());
             article.setPubDate(data.getPubDate());
             article.setDescription(data.getDescription());
@@ -72,7 +75,6 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         if(type != Article.DUANZI){
             downLoadPages(articles);
         }
-
 
     }
 

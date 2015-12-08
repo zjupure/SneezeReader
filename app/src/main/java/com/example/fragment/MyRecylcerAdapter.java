@@ -2,11 +2,11 @@ package com.example.fragment;
 
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.datamodel.Article;
@@ -55,8 +55,10 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
 
         if(type == Article.TUGUA){
             holder.mTextView.setText(mDataset.get(position).getTitle());
+
             Uri uri = Uri.parse(mDataset.get(position).getImgurl());
             holder.mImageView.setImageURI(uri);
+            //Log.d("RecyclerView", mDataset.get(position).getImgurl());
         }else if(type == Article.LEHUO){
             holder.mTextView.setText(mDataset.get(position).getTitle());
         }else if(type == Article.DUANZI){

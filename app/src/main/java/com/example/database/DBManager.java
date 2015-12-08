@@ -145,7 +145,7 @@ public class DBManager {
      */
     public boolean isExist(String remote_link){
 
-        String sql = "SELECT id FROM articles WHERE remote_link = %s";
+        String sql = "SELECT id FROM articles WHERE remote_link = '%s'";
 
         sql = String.format(sql, remote_link);
         Cursor cursor = db.rawQuery(sql, null);
@@ -183,5 +183,18 @@ public class DBManager {
         cursor.close();
 
         return datainfos;
+    }
+
+    private static String sqliteEscape(String keyword){
+        keyword.replace("/", "//");
+        keyword.replace("'", "''");
+        keyword.replace("[", "/[");
+        keyword.replace("]", "/]");
+        keyword.replace("%", "/%");
+        keyword.replace("_", "/_");
+        keyword.replace("(", "/(");
+        keyword.replace(")", "/(");
+
+        return keyword;
     }
 }

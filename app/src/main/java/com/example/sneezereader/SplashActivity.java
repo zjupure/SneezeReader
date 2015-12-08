@@ -85,11 +85,11 @@ public class SplashActivity extends Activity {
             }
         });
 
-        RequestParams params = client.getRequestParams(1, 30);
-        client.get(SneezeClient.TUGUA_PATH, params, new SneezeJsonResponseHandler(this, Article.TUGUA));
-        client.post(SneezeClient.LEHUO_PATH, params, new SneezeJsonResponseHandler(this, Article.LEHUO));
-        client.post(SneezeClient.YITU_PATH, params, new SneezeJsonResponseHandler(this, Article.YITU));
-        client.post(SneezeClient.DUANZI_PATH, params, new SneezeJsonResponseHandler(this, Article.DUANZI));
+        client.getTugua(new SneezeJsonResponseHandler(this, Article.TUGUA));
+
+        //client.getArticle(SneezeClient.LEHUO_PATH, new SneezeJsonResponseHandler(this, Article.LEHUO));
+        //client.getArticle(SneezeClient.YITU_PATH, new SneezeJsonResponseHandler(this, Article.YITU));
+        //client.getArticle(SneezeClient.DUANZI_PATH, new SneezeJsonResponseHandler(this, Article.DUANZI));
     }
 
     private void saveLoadUrl(String loadUrl){

@@ -36,3 +36,4 @@ captures/
 .idea/
 app/build/
 build/
+build/intermediates/

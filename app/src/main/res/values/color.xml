@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#4876ff</color>
+
+    <color name="title">#000000</color>
 </resources>

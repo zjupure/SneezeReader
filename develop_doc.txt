@@ -1,0 +1,295 @@
+喷嚏网Android客户端设计
+
+项目需求
+	实现喷嚏网的手机客户端阅读app，过滤广告，优化体验。
+	喷嚏网主页：http://www.dapenti.com/blog/index.asp
+	主要栏目：图卦、乐活、意图和段子。
+
+技术实现
+	使用Fiddler抓包工具分析官方App的通讯数据格式，获取API请求地址和响应JSON数据，进行设计。
+	采用开源组件进行快速开发。
+		网络请求：Android Async Http Client,  https://github.com/loopj/android-async-http
+		图片缓存：Facebook的Fresco， https://github.com/facebook/fresco
+		JSON解析：Google的Gson, https://github.com/google/gson
+	UI设计，采用Material Design风格。DrawLayout + Navigation View作页面导航, ToolBar + Fragment + Bottom Tab组合呈现内容，ViewPager + WebView承载详情页面。使用SwipeLayout，RecycleView，CardView集成下拉刷新，优化页卡展示。
+	数据存储，数据库存储文章基本信息，获取远程html文件缓存到本地，方便离线阅读。
+
+Fiddler抓包结果
+
+请求1：更新Splash图片, GET请求, 参数 s = /Home/api/loading_pic
+	GET http://appb.dapenti.com/index.php?s=/Home/api/loading_pic HTTP/1.1
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Accept-Encoding: gzip
+
+响应1：
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 01:07:35 GMT
+	Content-Type: application/json; charset=utf-8
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Set-Cookie: PHPSESSID=h472054dlhki4u99rrudvn7cc0; path=/
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+	Content-Length: 99    // indicate the length
+
+	{"msg":"","error":0,"data":"http:\/\/ww4.sinaimg.cn\/mw1024\/6283e751gw1ey8sgrd13cj20b40h3jro.jpg"}
+
+JSON数据：
+	msg: ""
+	error: 0
+	data: "http://ww4.sinaimg.cn/mw1024/6283e751gw1ey8sgrd13cj20b40h3jro.jpg"
+
+请求2：App更新, POST请求
+	POST http://appb.dapenti.com/index.php?s=/Home/api/upgrade.html HTTP/1.1
+	Content-Length: 0
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=h472054dlhki4u99rrudvn7cc0
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+
+响应2：响应格式: 长度 + Json + "0"(结束符)
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 01:07:36 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	82    // json长度
+	{"msg":"","error":0,"data":{"title":"1.0.17","version":"17","download_link":"http:\/\/www.dapenti.com\/blog\/app\/penti_n17.apk"}}
+	0     // end
+
+JSON数据：
+	msg: ""
+	error: 0
+	data:
+	  |--title: "1.0.17"
+	  |--version: "17"
+	  |--download_link: "http://www.dapenti.com/blog/app/penti_n17.apk"
+
+请求3：获取图卦页面, GET请求, 参数p=1&limit=30
+	GET http://appb.dapenti.com/index.php?s=/Home/api/tugua&p=1&limit=30 HTTP/1.1
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=h472054dlhki4u99rrudvn7cc0
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+响应3：响应格式: 长度 + Json + "0"(结束符)
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 01:07:36 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	35b2
+	{"msg":"","error":0,"data":[{"title":"\u3010\u55b7\u568f\u56fe\u536620151205\u3011\u4f60\u4f4f\u7684\u57ce\u5e02\u4e0b\u96e8\u4e86\uff0c\u5f88\u60f3\u95ee\u4f60\u6709\u6ca1\u6709\u8df5\u884c\u793e\u4f1a\u4e3b\u4e49\u6838\u5fc3\u4ef7\u503c\u89c2","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=106480","author":"xilei","pubDate":"2015-12-05 14:29:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=106480","imgurl":"http:\/\/pic.yupoo.com\/dapenti\/F9Aek65s\/medium.jpg","top_pic":null},{"title":"AD","description":"http:\/\/appb.dapenti.com\/index.php?s=\/home\/api\/show_ad\/id\/18","imgurl":"http:\/\/ww2.sinaimg.cn\/mw1024\/6283e751gw1ewja7vptk8j20hs05k3zu.jpg","link":"http:\/\/www.3mmr.com\/product-1294.html"},
+	......
+	{"title":"\u3010\u55b7\u568f\u56fe\u536620151106\u3011\u7f51\u7edc\u5de8\u9b54","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=105421","author":"xilei","pubDate":"2015-11-06 14:29:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=105421","imgurl":"http:\/\/pic.yupoo.com\/dapenti\/F59MHIoc\/medium.jpg","top_pic":null}]}
+	0
+
+JSON数据格式：分为正常数据和广告内容
+	msg: ""
+	error: 0
+	data: [
+	  {
+		|--title: "【喷嚏图卦20151205】你住的城市下雨了，很想问你有没有践行社会主义核心价值观"
+		|--link: "http://www.dapenti.com/blog/more.asp?name=xilei&id=106480"
+		|--author: "xilei",
+		|--pubDate:  "2015-12-05 14:29:00",
+		|--description: "https://dapenti.com/blog/readapp2.asp?name=xilei&id=106480"
+		|--imgurl: "http://pic.yupoo.com/dapenti/F9Aek65s/medium.jpg"
+		|--top_pic: null
+	  },
+	  {
+		|--title: "AD"
+		|--description: "http://appb.dapenti.com/index.php?s=/home/api/show_ad/id/18"
+		|--imgurl: "http://ww2.sinaimg.cn/mw1024/6283e751gw1ewja7vptk8j20hs05k3zu.jpg"
+		|--link: "http://www.3mmr.com/product-1294.html"
+	  }
+	]
+
+
+请求4： 获取乐活页面, POST请求, 参数p=1&limit=10
+	POST http://appb.dapenti.com/index.php?s=/Home/api/lehuo HTTP/1.1
+	Content-Length: 12
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=h472054dlhki4u99rrudvn7cc0
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	p=1&limit=10
+
+响应4: 响应格式: 长度 + Json + "0"(结束符)
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 01:28:48 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	cdf
+	{"msg":"","error":0,"data":[{"title":"\u8f6e\u56de.Samsara","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=106529","author":"xilei","pubDate":"2015-12-06 23:46:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=106529"},
+	......
+	{"title":"\u524d\u5b9e\u5fb7\u96c6\u56e2\u3001\u5b9e\u5fb7\u4ff1\u4e50\u90e8\u8463\u4e8b\u957f\u5f90\u660e\u670d\u5211\u671f\u95f4\u53bb\u4e16","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=106501","author":"xilei","pubDate":"2015-12-06 13:39:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=106501","imgurl":"http:\/\/pic.yupoo.com\/dapenti\/F9Ims0kd\/square.jpg"}]}
+	0
+
+JSON数据格式：
+	msg: ""
+	error: 0
+	data: [
+	  {
+	  	|--title: "轮回.Samsara"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=xilei&id=106529"
+	  	|--author: "xilei"
+	  	|--pubDate: "2015-12-06 23:46:00"
+	  	|--description: "https://dapenti.com/blog/readapp2.asp?name=xilei&id=106529"
+	  },
+	  {
+	  	|--title: "前实德集团、实德俱乐部董事长徐明服刑期间去世"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=xilei&id=106501"
+	  	|--author: "xilei"
+	  	|--description: "https://dapenti.com/blog/readapp2.asp?name=xilei&id=106501"
+	  	|--imgurl: "http://pic.yupoo.com/dapenti/F9Ims0kd/square.jpg"
+	  }
+	]
+
+
+请求5: 请求意图页面, POST请求, 参数p=1&limit=30
+	POST http://appb.dapenti.com/index.php?s=/Home/api/yitu HTTP/1.1
+	Content-Length: 12
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=h472054dlhki4u99rrudvn7cc0
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	p=1&limit=30
+
+响应5: 响应格式: 长度 + Json + "0"(结束符)
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 01:31:45 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	1f26
+	{"msg":"","error":0,"data":[{"title":"\u5b87\u5b99\u91cc\u7684\u6211\u4eec","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=tupian&id=106511","author":"tupian","pubDate":"2015-12-06 18:46:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=tupian&id=106511","imgurl":"http:\/\/pic.yupoo.com\/penti\/F9KrvKkL\/square.jpg"},
+	......
+	{"title":"\u6211\u4eec\u61c2\u5f97\u9003\u907f\u4e0e\u5fcd\u6c14\u541e\u58f0\u6765\u9057\u5fd8","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=tupian&id=106206","author":"tupian","pubDate":"2015-11-27 14:00:00","description":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=tupian&id=106206","imgurl":"http:\/\/ptimg.org:88\/penti\/F8lzBVxP\/square.jpg"}]}
+	0
+
+JSON数据格式:
+	msg: ""
+	error: 0
+	data: [
+	  {
+	  	|--title: "宇宙里的我们"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=tupian&id=106511"
+	  	|--author: "tupian"
+	  	|--pubDate: "2015-12-06 18:46:00";
+	  	|--description: "https://dapenti.com/blog/readapp2.asp?name=tupian&id=106511"
+	  	|--imgurl:  "http://pic.yupoo.com/penti/F9KrvKkL/square.jpg"
+	  },
+	  {
+	  	|--title: "我们懂得逃避与忍气吞声来遗忘"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=tupian&id=106206"
+	  	|--author: "tupian"
+	  	|--pubDate: "2015-11-27 14:00:00"
+	  	|--description: "https://dapenti.com/blog/readapp2.asp?name=tupian&id=106206"
+	  	|--imgurl: "http://ptimg.org:88/penti/F8lzBVxP/square.jpg"
+	  }
+	]
+
+
+请求6: 请求段子页面, POST请求, 参数p=1&limit=10
+	POST http://appb.dapenti.com/index.php?s=/Home/api/duanzi HTTP/1.1
+	Content-Length: 12
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=7moahmv1nhq54cof9ucpm7b6u3
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	p=1&limit=10
+
+响应6: 响应格式: 长度 + Json + "0"(结束符)
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Mon, 07 Dec 2015 02:09:01 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	1f26
+	{"msg":"","error":0,"data":[{"title":"\u3010\u6bb5\u5b50\u3011\u7ea2\u5305","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=106485","author":"xilei","pubDate":"2015-12-05 19:57:00","description":"\u81ea\u4ece\u6709\u4e86\u7ea2\u5305\u4ee5\u540e\uff0c\u62a2\u7ea2\u5305\u5df2\u7ecf\u5b8c\u5168\u6467\u6bc1\u4e86\u6211\u7684\u4ef7\u503c\u89c2\u3002\u4ee5\u524d\u5730\u4e0a\u6389\u4e00\u6bdb\u94b1\u6211\u8fde\u770b\u90fd\u4e0d\u770b\uff0c\u73b0\u5728\u8d85\u8fc71\u5143\u6211\u5c31\u89c9\u5f97\u662f\u4e00\u7b14\u5de8\u6b3e\uff0c\u8d85\u8fc75\u5143\u6211\u5c31\u7a92\u606f\u4e86\uff0c\u8d85\u8fc710\u5143\u773c\u7736\u5c31\u6e7f\u4e86\u3002\u3002\u3002\u8fd9\u5e74\u5934\u6bcf1\u5206\u94b1\u90fd\u6765\u4e4b\u4e0d\u6613\u554a\u3002\u3002\u3002"},{"title":"\u3010\u6bb5\u5b50\u3011\u8bba\u571f\u8033\u5176\u51fb\u843d\u4fc4\u7f57\u65af\u6218\u673a\u5bf9\u4e8e\u4e2d\u56fd\u7684\u5f71\u54cd","link":"http:\/\/www.dapenti.com\/blog\/more.asp?name=xilei&id=106102","author":"xilei","pubDate":"1970-01-01 08:00:00","description":"<div>\n\t\u3010\u8bba\u571f\u8033\u5176\u51fb\u843d\u4fc4\u7f57\u65af\u6218\u673a\u5bf9\u4e8e\u4e2d\u56fd\u7684\u5f71\u54cd\u3011\u4fc4\u7f57\u65af\u51fa\u5175\u571f\u8033\u5176\uff0c\u5317\u7ea6\u8bf8\u56fd\u4ecb\u5165\uff0c\u4e2d\u4e1c\u6218\u706b\u56db\u8d77&nbsp;\u4f0a\u62c9\u514b\u3001\u6c99\u7279\u3001\u5361\u5854\u5c14\u3001\u4f0a\u6717\u3001\u7ea6\u65e6\u5c06\u4e00\u7247\u72fc\u85c9\uff0c\u671d\u9c9c\u501f\u673a\u653b\u6253\u97e9\u56fd\uff0c\u7f8e\u56fd\u5206\u8eab\u4e4f\u672f\uff0c\u65e5\u672c\u6d3e\u51fa\u81ea\u536b\u961f\uff0c\u672c\u571f\u906d\u9047\u671d\u9c9c\u6838\u6253\u51fb\uff0c\u671d\u65e5\u97e9\u4e00\u5915\u4e4b\u95f4\u4e5f\u4e0d\u590d\u5b58\u5728\u3002\u3002\u3002\u3002\u53d1\u73b0\u4ec0\u4e48\u4e86\u5417&nbsp;\uff1f\u56fd\u8db3\u7ec8\u4e8e\u6709\u673a\u4f1a\u51fa\u7ebf\u4e86\uff01&nbsp;\n<\/div>"}]}
+	0
+
+JSON数据格式：
+	msg: ""
+	error: 0
+	data: [
+	  {
+	  	|--title: "【段子】红包"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=xilei&id=106485"
+	  	|--author: "xilei"
+	  	|--pubDate:  "2015-12-05 19:57:00"
+	  	|--description: "自从有了红包以后，抢红包已经完全摧毁了我的价值观。以前地上掉一毛钱我连看都不看，现在超过1元我就觉得是一笔巨款，超过5元我就窒息了，超过10元眼眶就湿了。。。这年头每1分钱都来之不易啊。。。"
+	  },
+	  {
+	  	|--title: "【段子】论土耳其击落俄罗斯战机对于中国的影响"
+	  	|--link: "http://www.dapenti.com/blog/more.asp?name=xilei&id=106102"
+	  	|--author: "author": "xilei"
+	  	|--pubDate: "1970-01-01 08:00:00"
+	  	|--description: "<div>\n\t【论土耳其击落俄罗斯战机对于中国的影响】俄罗斯出兵土耳其，北约诸国介入，中东战火四起&nbsp;伊拉克、沙特、卡塔尔、伊朗、约旦将一片狼藉，朝鲜借机攻打韩国，美国分身乏术，日本派出自卫队，本土遭遇朝鲜核打击，朝日韩一夕之间也不复存在。。。。发现什么了吗&nbsp;？国足终于有机会出线了！&nbsp;\n</div>"
+	  }
+	]
+
+总结:
+Http通讯协议格式：Json数据长度 + Json数据 + “0”
+Json数据均为{msg, error, data}三个域,根据请求类型的不同, data域稍有变化。对于文章的请求, data域是数组的形式，每个item是对文章基本信息的描述。
+
+数据库设计
+
+articles：字段，并在type+pubDate上建索引，方便查询最近的文章并显示。
+|  id  |  type  |  title  |  remote_link  |  author  | pubDate  |  description  |  imgurl  |  local_link  |
+| 主键 |  类型  |  标题   |   远程链接    |   作者   | 发表日期 |      描述     | 图片链接 |   本地链接   |
+
+
