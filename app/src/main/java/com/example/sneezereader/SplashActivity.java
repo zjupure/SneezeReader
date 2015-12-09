@@ -11,11 +11,9 @@ import android.widget.Toast;
 
 import com.example.datamodel.Article;
 import com.example.jsonparser.JsonParserUtil;
-import com.example.liuchun.sneezereader.R;
 import com.example.network.SneezeClient;
 import com.example.network.SneezeJsonResponseHandler;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
 import cz.msebera.android.httpclient.Header;
@@ -27,10 +25,11 @@ import cz.msebera.android.httpclient.Header;
 public class SplashActivity extends Activity {
     //闪屏页
     private static final int SPLASH_LONG = 1500;
-    private SimpleDraweeView splash;
 
-    private String oldUrl;
+    //private String oldUrl;
     private Handler handler = new Handler();
+
+    private SimpleDraweeView splash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +38,10 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.splash_layout);
         splash = (SimpleDraweeView) findViewById(R.id.splash_image);
 
-        /*
-        oldUrl = restoreLoadUrl();
-        if(!oldUrl.isEmpty()){
-            Uri uri = Uri.parse(oldUrl);
-            splash.setImageURI(uri);
-        }*/
+
         // request for the new picture
         SneezeClient client = SneezeClient.getInstance(this);
+
         client.get(SneezeClient.DOWNLOAD_SPLASH_PATH, null, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
@@ -59,15 +54,8 @@ public class SplashActivity extends Activity {
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
                 String loadUrl = JsonParserUtil.JsonLoadUrlParser(responseString);
                 // update the splash image url
-                /*
-                if(!loadUrl.equals(oldUrl)){
-                    oldUrl = loadUrl;
-                    saveLoadUrl(loadUrl);
 
-                    Uri uri = Uri.parse(loadUrl);
-                    splash.setImageURI(uri);
-                }*/
-                saveLoadUrl(loadUrl);
+                //saveLoadUrl(loadUrl);
 
                 Uri uri = Uri.parse(loadUrl);
                 splash.setImageURI(uri);
@@ -91,6 +79,8 @@ public class SplashActivity extends Activity {
         //client.getArticle(SneezeClient.YITU_PATH, new SneezeJsonResponseHandler(this, Article.YITU));
         //client.getArticle(SneezeClient.DUANZI_PATH, new SneezeJsonResponseHandler(this, Article.DUANZI));
     }
+
+
 
     private void saveLoadUrl(String loadUrl){
         SharedPreferences preference = getSharedPreferences("config", Context.MODE_PRIVATE);

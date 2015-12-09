@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
-import com.example.liuchun.sneezereader.R;
+import com.example.sneezereader.R;
 import com.example.sneezereader.DetailActivity;
 
 import java.util.List;

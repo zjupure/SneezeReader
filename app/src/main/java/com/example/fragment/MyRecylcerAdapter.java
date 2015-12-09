@@ -10,7 +10,7 @@ import android.view.ViewStub;
 import android.widget.TextView;
 
 import com.example.datamodel.Article;
-import com.example.liuchun.sneezereader.R;
+import com.example.sneezereader.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.List;

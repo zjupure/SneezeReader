@@ -35,5 +35,6 @@ captures/
 *.properties
 .idea/
 app/build/
+build
 build/
 build/intermediates/

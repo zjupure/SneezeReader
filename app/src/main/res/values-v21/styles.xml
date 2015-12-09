@@ -3,9 +3,9 @@
     <!-- Base application theme. -->
     <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- toolbar color -->
-        <item name="android:colorPrimary">#4876ff</item>
+        <item name="android:colorPrimary">#66ccff</item>
         <!-- statusbar color -->
-        <item name="android:colorPrimaryDark">#3a5fcd</item>
+        <item name="android:colorPrimaryDark">#66ccff</item>
         <!-- window background color -->
         <item name="android:windowBackground">@android:color/white</item>
         <!-- text color

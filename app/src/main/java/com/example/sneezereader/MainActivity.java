@@ -10,13 +10,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RadioGroup;
 
 import com.example.fragment.ItemFragment;
 import com.example.fragment.YituFragment;
-import com.example.liuchun.sneezereader.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity{
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     //界面组件
     private DrawerLayout mDrawerLayout;
+    private NavigationView mNavView;
     private ActionBarDrawerToggle mToggle;
     private Toolbar mToolBar;
     private RadioGroup mTabMenu;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("MainActivity", "this is main screen");
+
         initView();
     }
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity{
         mToolBar.setNavigationIcon(R.drawable.user_logo);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        NavigationView mNavView = (NavigationView)findViewById(R.id.nav_view);
+        mNavView = (NavigationView)findViewById(R.id.nav_view);
 
         if(mNavView != null){
             mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){

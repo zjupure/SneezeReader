@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-import com.example.liuchun.sneezereader.R;
+import com.example.sneezereader.R;
 
 
 /**
