@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.example.datamodel.Article;
 import com.example.jsonparser.JsonParserUtil;
@@ -15,6 +15,7 @@ import com.example.network.SneezeClient;
 import com.example.network.SneezeJsonResponseHandler;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.loopj.android.http.TextHttpResponseHandler;
+
 
 import cz.msebera.android.httpclient.Header;
 
@@ -25,6 +26,7 @@ import cz.msebera.android.httpclient.Header;
 public class SplashActivity extends Activity {
     //闪屏页
     private static final int SPLASH_LONG = 1500;
+    private static final int SPLASH_SHORT = 500;
 
     //private String oldUrl;
     private Handler handler = new Handler();
@@ -42,16 +44,23 @@ public class SplashActivity extends Activity {
         // request for the new picture
         SneezeClient client = SneezeClient.getInstance(this);
 
-        client.get(SneezeClient.DOWNLOAD_SPLASH_PATH, null, new TextHttpResponseHandler() {
+        client.getSplashImage(new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(SplashActivity.this, "ImageDownLoad Failed", Toast.LENGTH_SHORT);
+
+                Log.d("SplashActivity", "Splash Image Download Failed!");
+
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                SplashActivity.this.startActivity(intent);
+                startActivity(intent);
+
+                finish();
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
+
+                Log.d("SplashActivity", "Splash Image Download Successful!");
+
                 String loadUrl = JsonParserUtil.JsonLoadUrlParser(responseString);
                 // update the splash image url
 
@@ -65,21 +74,20 @@ public class SplashActivity extends Activity {
                     public void run() {
                         //entry the main activity
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                        SplashActivity.this.startActivity(intent);
+                        startActivity(intent);
 
                         finish();
                     }
-                }, SPLASH_LONG);
+                }, SPLASH_SHORT);
             }
         });
 
-        client.getTugua(new SneezeJsonResponseHandler(this, Article.TUGUA));
+        client.getArticle(Article.TUGUA, new SneezeJsonResponseHandler(this, Article.TUGUA));
+        client.getArticle(Article.LEHUO, new SneezeJsonResponseHandler(this, Article.LEHUO));
+        client.getArticle(Article.YITU, new SneezeJsonResponseHandler(this, Article.YITU));
+        client.getArticle(Article.DUANZI, new SneezeJsonResponseHandler(this, Article.DUANZI));
 
-        //client.getArticle(SneezeClient.LEHUO_PATH, new SneezeJsonResponseHandler(this, Article.LEHUO));
-        //client.getArticle(SneezeClient.YITU_PATH, new SneezeJsonResponseHandler(this, Article.YITU));
-        //client.getArticle(SneezeClient.DUANZI_PATH, new SneezeJsonResponseHandler(this, Article.DUANZI));
     }
-
 
 
     private void saveLoadUrl(String loadUrl){

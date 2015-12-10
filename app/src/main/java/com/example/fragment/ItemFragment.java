@@ -1,20 +1,21 @@
 package com.example.fragment;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
@@ -27,17 +28,39 @@ import java.util.List;
  * Created by liuchun on 2015/7/16.
  */
 public class ItemFragment extends Fragment {
-    private final static int SWIPE_LONG = 2000;
-    private final static String[] ENTRY_TAG = {"tugua_entry", "lehuo_entry"};   //图卦二级目录
+
+    private static final int IDLE = 1;
+    private static final int PULL_TO_REFRESH = 2;
+    private static final int RELEASE_TO_REFRESH = 3;
+    private static final int REFRESHING = 4;
 
     private View rootView;  //缓存根View,防止重复渲染
-    private SwipeRefreshLayout mRefreshView;  //下拉刷新控件
+    // Refresh Header
+    private RelativeLayout mRefreshView;
+    private ProgressBar mRefreshProgressBar;
+    private ImageView mRefreshImageView;
+    private TextView mRefreshTextView;
+    private TextView mLastUpdatedTextView;
+    private ViewGroup.MarginLayoutParams headerLayoutParams;
+
     private RecyclerView mRecyclerView;   //列表控件
     private LinearLayoutManager mLayoutManager;
     private MyRecylcerAdapter mAdapter;   //适配器
     private int curpos;    //当前页面标识
     // RecycleView数据集
     private List<Article> mDataSet;
+
+    private int mCurrentScrollState;
+    private int mRefreshState;
+
+    private RotateAnimation mFlipAnimation;
+    private RotateAnimation mReverseFlipAnimation;
+
+    private int mRefreshViewHeight;
+    private int mRefreshOriginalTopPadding;
+    private int mLastMotionY;
+
+    private boolean mBounceHack;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,6 +72,7 @@ public class ItemFragment extends Fragment {
         if(parent != null){
             parent.removeView(rootView);
         }
+
         return rootView;
     }
 
@@ -58,38 +82,13 @@ public class ItemFragment extends Fragment {
 
         curpos = getArguments().getInt("pos");
         //初始化界面View
-        initView();
+        initRecyclerView();
+        initSwipeRefreshView();
     }
 
+    public void initRecyclerView(){
 
-    public void initView(){
-        mRefreshView = (SwipeRefreshLayout)rootView.findViewById(R.id.swipe_refresh);
         mRecyclerView = (RecyclerView)rootView.findViewById(R.id.tugua_list);
-
-        //设置刷新时的颜色
-        mRefreshView.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
-        mRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                //刷新操作
-                //Toast.makeText(getActivity(), "正在刷新", Toast.LENGTH_SHORT).show();
-                //发送网络请求更新数据
-
-                //异步通知
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Toast.makeText(getActivity(), "刷新完成", Toast.LENGTH_SHORT).show();
-                        //刷新完成
-
-                        mRefreshView.setRefreshing(false);
-
-                    }
-                }, SWIPE_LONG);
-            }
-        });
-
-
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -101,26 +100,66 @@ public class ItemFragment extends Fragment {
         mAdapter = new MyRecylcerAdapter(mDataSet, curpos);  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
 
+        mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int y = (int)event.getY();
+
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    case MotionEvent.ACTION_DOWN:
+                        mLastMotionY = y;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        adjustRefreshHeight(event);
+                        break;
+                }
+
+                return false;
+            }
+        });
+
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int lastVisibleItem = 0;
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+                mCurrentScrollState = newState;
 
-                /*
-                if (newState == RecyclerView.SCROLL_STATE_IDLE
-                        && lastVisibleItem + 1 == mAdapter.getItemCount()) {
-                    mRefreshView.setRefreshing(true);
-                    //发起请求
-                    //handler.sendEmptyMessageDelayed();
-                }*/
+                if(mCurrentScrollState == RecyclerView.SCROLL_STATE_IDLE){
+                    mBounceHack = false;
+                }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+                int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+                // When the refresh view is completely visible, change the text to say
+                // "Release to refresh..." and flip the arrow drawable
+                /*
+                if(mCurrentScrollState == RecyclerView.SCROLL_STATE_DRAGGING
+                        && mRefreshState != REFRESHING){
+
+                    if(firstVisibleItem == 0){
+                        mRefreshImageView.setVisibility(View.VISIBLE);
+                        if((mRefreshView.getBottom() >= mRefreshViewHeight + 20
+                                || mRefreshView.getTop() >= 0)
+                            && mRefreshState != RELEASE_TO_REFRESH){
+                            mRefreshTextView.setText(R.string.pull_to_refresh_release_label);
+                            mRefreshImageView.clearAnimation();
+                            mRefreshImageView.startAnimation(mFlipAnimation);
+                            mRefreshState = RELEASE_TO_REFRESH;
+                        }else if(mRefreshView.getBottom() < mRefreshViewHeight + 20
+                                && mRefreshState != PULL_TO_REFRESH){
+                            mRefreshTextView.setText(R.string.pull_to_refresh_pull_label);
+                            if(mRefreshState != IDLE){
+                                mRefreshImageView.clearAnimation();
+                                mRefreshImageView.startAnimation(mReverseFlipAnimation);
+                            }
+                            mRefreshState = PULL_TO_REFRESH;
+                        }
+                    }
+                }*/
             }
         });
 
@@ -137,11 +176,6 @@ public class ItemFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 Article article = mDataSet.get(position);
                 bundle.putParcelable("article", article);
-                /*
-                bundle.putString("title", article.getTitle());
-                bundle.putString("remote_link", article.getRemote_link());
-                bundle.putString("description", article.getDescription());
-                bundle.putString("local_link", article.getLocal_link()); */
                 intent.putExtra("detail", bundle);
                 intent.putExtra("position", position);
                 startActivity(intent);
@@ -149,6 +183,39 @@ public class ItemFragment extends Fragment {
         });
     }
 
+
+    private void initSwipeRefreshView(){
+        // Load all of the animations
+        mFlipAnimation = new RotateAnimation(0,-180, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+        mFlipAnimation.setInterpolator(new LinearInterpolator());
+        mFlipAnimation.setDuration(250);
+        mFlipAnimation.setFillAfter(true);
+
+        mReverseFlipAnimation = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+        mReverseFlipAnimation.setInterpolator(new LinearInterpolator());
+        mReverseFlipAnimation.setDuration(250);
+        mReverseFlipAnimation.setFillAfter(true);
+
+        mRefreshView = (RelativeLayout) rootView.findViewById(R.id.pull_to_refresh_header);
+        mRefreshTextView = (TextView) rootView.findViewById(R.id.pull_to_refresh_text);
+        mLastUpdatedTextView = (TextView) rootView.findViewById(R.id.pull_to_refresh_updated_at);
+        mRefreshProgressBar = (ProgressBar) rootView.findViewById(R.id.pull_to_refresh_progress);
+        mRefreshImageView = (ImageView) rootView.findViewById(R.id.pull_to_refresh_image);
+
+        mRefreshState = IDLE;
+        mRefreshOriginalTopPadding = mRefreshView.getPaddingTop();
+        mRefreshViewHeight = mRefreshView.getHeight();
+        // hide the header
+        headerLayoutParams = (ViewGroup.MarginLayoutParams) mRefreshView.getLayoutParams();
+        headerLayoutParams.topMargin = -mRefreshViewHeight;
+    }
+
+
+    private void adjustRefreshHeight(MotionEvent event){
+
+    }
     /**
      * Item单击接口
      */

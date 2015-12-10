@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<android.support.v4.widget.SwipeRefreshLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipe_refresh"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <include layout="@layout/pull_to_refresh_header" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/tugua_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:cacheColorHint="@null"
-        android:scrollbars="vertical"/>
+        android:layout_height="wrap_content"
+        android:cacheColorHint="@null" />
 
-</android.support.v4.widget.SwipeRefreshLayout>
+    <TextView
+        android:id="@+id/load_more"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/tap_to_load_more"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"/>
+</LinearLayout>
 

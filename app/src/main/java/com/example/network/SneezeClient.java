@@ -14,14 +14,14 @@ import com.loopj.android.http.RequestParams;
 public class SneezeClient{
 
     public static final String BASE_URL = "http://appb.dapenti.com/index.php";
-    public static final String DOWNLOAD_SPLASH_PATH = "?s=/Home/api/loading_pic";
+    public static final String SPLASH_IMAGE_PARAM = "/Home/api/loading_pic";
     //private static final String UPDATE_APP_PATH = "s=/Home/api/upgrade.html";
-    public static final String TUGUA_PATH = "?s=/Home/api/tugua";  // GET
-    public static final String LEHUO_PATH = "?s=/Home/api/lehuo";  // POST
-    public static final String YITU_PATH = "?s=/Home/api/yitu";    // POST
-    public static final String DUANZI_PATH = "?s=/Home/api/duanzi";  // POST
+    public static final String TUGUA_PARAM = "/Home/api/tugua";  // GET
+    public static final String LEHUO_PARAM = "/Home/api/lehuo";  // GET
+    public static final String YITU_PARAM = "/Home/api/yitu";    // GET
+    public static final String DUANZI_PARAM = "/Home/api/duanzi";  // GET
     //
-    //public static final String[] APP_PATHS = new String[]{TUGUA_PATH, LEHUO_PATH, YITU_PATH, DUANZI_PATH};
+    public static final String[] APP_PARAMS = new String[]{TUGUA_PARAM, LEHUO_PARAM, YITU_PARAM, DUANZI_PARAM};
     // parameters: p=1&limit=10
     private static final int DEFAULT_PAGE_NUMBER = 1;
     private static final int DEFAULT_LIMIT_NUMER = 10;
@@ -54,45 +54,44 @@ public class SneezeClient{
         return instance;
     }
 
-    public void get(String url, RequestParams params, AsyncHttpResponseHandler responseHandler){
-        client.get(getAbsoluteUrl(url), params, responseHandler);
+    public void get(String url, RequestParams params, AsyncHttpResponseHandler handler){
+        client.get(url, params, handler);
     }
 
-    public void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler){
-        client.post(getAbsoluteUrl(url), params, responseHandler);
+    public void post(String url, RequestParams params, AsyncHttpResponseHandler handler){
+        client.post(url, params, handler);
     }
 
     /**
-     * 图卦是GET请求
-     * @param responseHandler
+     * 文章所有请求都采用GET方式
+     * @param type
+     * @param handler
      */
-    public void getTugua(AsyncHttpResponseHandler responseHandler){
-        RequestParams params = new RequestParams("s", "/Home/api/tugua");
-        params.add("p", Integer.toString(page_num));
-        params.add("limit", Integer.toString(limit_num));
-        //String tu_url = BASE_URL + TUGUA_PATH + "&p=1&limit=10";
-        client.get(BASE_URL, params, responseHandler);
+    public void getArticle(int type, AsyncHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("s", APP_PARAMS[type]);
+        params.put("p", Integer.toString(page_num));
+        params.put("limit", Integer.toString(limit_num));
+
+        client.get(BASE_URL, params, handler);
     }
 
     /**
-     * 乐活, 意图, 段子是POST请求
+     * 获取Splash图片
+     * @param handler
+     */
+    public void getSplashImage(AsyncHttpResponseHandler handler){
+        RequestParams params = new RequestParams("s", SPLASH_IMAGE_PARAM);
+        client.get(BASE_URL, params, handler);
+    }
+
+    /**
+     * 获取页面Html源码
      * @param url
      * @param responseHandler
      */
-    public void getArticle(String url, AsyncHttpResponseHandler responseHandler){
-        RequestParams params = new RequestParams();
-        params.add("p", Integer.toString(page_num));
-        params.add("limit", Integer.toString(limit_num));
-
-        client.post(getAbsoluteUrl(url), responseHandler);
-    }
-
     public void getPageContent(String url, AsyncHttpResponseHandler responseHandler){
         client.get(url, responseHandler);
-    }
-
-    public String getAbsoluteUrl(String url){
-        return BASE_URL + url;
     }
 
     public void setRequestParams(int page_num, int limit_num){
@@ -100,11 +99,7 @@ public class SneezeClient{
         this.limit_num = limit_num;
     }
 
-    public RequestParams getRequestParams(int page_num, int limit_num){
-        RequestParams params = new RequestParams();
-        params.put("p", Integer.toString(page_num));
-        params.put("limit", Integer.toString(limit_num));
-
-        return params;
+    public void setLimitNum(int limit_num){
+        this.limit_num = limit_num;
     }
 }

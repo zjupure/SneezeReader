@@ -29,7 +29,7 @@ public class ArticleDataDeserializer implements JsonDeserializer<ArticleData> {
         }
         String description = jsonObject.get("description").getAsString();
         String imgurl = "";
-        if(!jsonObject.get("imgurl").isJsonNull()){
+        if(jsonObject.get("imgurl") != null){
             imgurl = jsonObject.get("imgurl").getAsString();
         }
 

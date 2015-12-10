@@ -110,7 +110,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnTouchLis
         mWebView.setOnTouchListener(this);
 
         WebSettings webSettings = mWebView.getSettings();
-        //webSettings.setJavaScriptEnabled(false);   // 通过禁用js来禁用广告
+        //webSettings.setJavaScriptEnabled(true);   // 通过禁用js来禁用广告
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setLoadsImagesAutomatically(true);
@@ -119,8 +119,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnTouchLis
         // description is the subscription url
         String url = article.getDescription();
         mWebView.loadUrl(url);
-        //String url = "http://www.baidu.com";
-        //mWebView.loadUrl(url);
     }
 
     @Override
@@ -170,9 +168,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnTouchLis
             }
         }
 
-        String url = article.getDescription();
         mProgressBar.setVisibility(View.VISIBLE);
         mProgressBar.setProgress(0); // reset
+
+        mWebView.getSettings().setBlockNetworkImage(true);
+        String url = article.getDescription();
         mWebView.loadUrl(url);
     }
 }

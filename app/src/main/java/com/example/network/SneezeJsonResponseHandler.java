@@ -37,11 +37,14 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
     @Override
     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-        Toast.makeText(context, "network error", Toast.LENGTH_SHORT);
+
+        Log.d("JsonResponse", "network error");
     }
 
     @Override
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
+
+        Log.d("JsonResponse", responseString);
 
         ArticleData[] datas = JsonParserUtil.JsonArticleParser(responseString);
 

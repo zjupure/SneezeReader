@@ -43,7 +43,7 @@ JSON数据：
 	error: 0
 	data: "http://ww4.sinaimg.cn/mw1024/6283e751gw1ey8sgrd13cj20b40h3jro.jpg"
 
-请求2：App更新, POST请求
+请求2：App更新, GET请求也可以获取数据
 	POST http://appb.dapenti.com/index.php?s=/Home/api/upgrade.html HTTP/1.1
 	Content-Length: 0
 	Host: appb.dapenti.com
@@ -127,7 +127,7 @@ JSON数据格式：分为正常数据和广告内容
 	]
 
 
-请求4： 获取乐活页面, POST请求, 参数p=1&limit=10
+请求4： 获取乐活页面, GET请求也可以获取数据, 参数p=1&limit=10
 	POST http://appb.dapenti.com/index.php?s=/Home/api/lehuo HTTP/1.1
 	Content-Length: 12
 	Content-Type: application/x-www-form-urlencoded
@@ -179,7 +179,7 @@ JSON数据格式：
 	]
 
 
-请求5: 请求意图页面, POST请求, 参数p=1&limit=30
+请求5: 请求意图页面, GET请求也可以获取数据,, 参数p=1&limit=30
 	POST http://appb.dapenti.com/index.php?s=/Home/api/yitu HTTP/1.1
 	Content-Length: 12
 	Content-Type: application/x-www-form-urlencoded
@@ -233,7 +233,7 @@ JSON数据格式:
 	]
 
 
-请求6: 请求段子页面, POST请求, 参数p=1&limit=10
+请求6: 请求段子页面, GET请求也可以获取数据, 参数p=1&limit=10
 	POST http://appb.dapenti.com/index.php?s=/Home/api/duanzi HTTP/1.1
 	Content-Length: 12
 	Content-Type: application/x-www-form-urlencoded
@@ -283,7 +283,7 @@ JSON数据格式：
 	]
 
 总结:
-Http通讯协议格式：Json数据长度 + Json数据 + “0”
+Http通讯协议格式：Json数据长度 + Json数据 + “0”，所有请求都采用GET方式
 Json数据均为{msg, error, data}三个域,根据请求类型的不同, data域稍有变化。对于文章的请求, data域是数组的形式，每个item是对文章基本信息的描述。
 
 数据库设计

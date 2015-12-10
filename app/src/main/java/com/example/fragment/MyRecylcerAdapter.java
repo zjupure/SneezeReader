@@ -2,11 +2,11 @@ package com.example.fragment;
 
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.TextView;
 
 import com.example.datamodel.Article;
@@ -38,15 +38,19 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_item_layout,parent, false);
+        View v;
 
         if(type == Article.TUGUA){
-            ViewStub viewStub = (ViewStub) v.findViewById(R.id.image_holder);
-            viewStub.inflate();
+            //
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.tugua_item_layout, parent, false);
+        }else{
+            //
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.lehuo_item_layout, parent, false);
         }
 
         ViewHolder vh = new ViewHolder(v);
         v.setOnClickListener(vh);
+
         return vh;
     }
 
@@ -54,15 +58,19 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         if(type == Article.TUGUA){
+
             holder.mTextView.setText(mDataset.get(position).getTitle());
 
             Uri uri = Uri.parse(mDataset.get(position).getImgurl());
             holder.mImageView.setImageURI(uri);
             //Log.d("RecyclerView", mDataset.get(position).getImgurl());
         }else if(type == Article.LEHUO){
+
             holder.mTextView.setText(mDataset.get(position).getTitle());
         }else if(type == Article.DUANZI){
-            holder.mTextView.setText(mDataset.get(position).getDescription());
+
+            Spanned text = Html.fromHtml(mDataset.get(position).getDescription());
+            holder.mTextView.setText(text);
         }
 
     }
