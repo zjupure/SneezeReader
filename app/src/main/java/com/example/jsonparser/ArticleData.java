@@ -10,7 +10,6 @@ public class ArticleData {
     private String pubDate;
     private String description;
     private String imgurl;
-    private String top_pic;
 
     public String getTitle() {
         return title;
@@ -60,19 +59,12 @@ public class ArticleData {
         this.imgurl = imgurl;
     }
 
-    public String getTop_pic() {
-        return top_pic;
-    }
-
-    public void setTop_pic(String top_pic) {
-        this.top_pic = top_pic;
-    }
 
     @Override
     public String toString() {
 
         return "{\"title\":" + title + ", \"link\":" + link + ",\"author\":" + author +
                 ", \"pubDate\":" + pubDate + ",\"description\":" + description +
-                ", \"imgurl\":" + imgurl + ",\"top_pic\":" + top_pic;
+                ", \"imgurl\":" + imgurl;
     }
 }

@@ -5,20 +5,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <include layout="@layout/pull_to_refresh_header" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/tugua_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:cacheColorHint="@null" />
-
-    <TextView
-        android:id="@+id/load_more"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/tap_to_load_more"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"/>
+        android:layout_height="match_parent" />
 </LinearLayout>
 

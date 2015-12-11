@@ -28,12 +28,11 @@ public class ArticleDataDeserializer implements JsonDeserializer<ArticleData> {
             pubDate = jsonObject.get("pubDate").getAsString();
         }
         String description = jsonObject.get("description").getAsString();
+        description = description.trim();
         String imgurl = "";
         if(jsonObject.get("imgurl") != null){
             imgurl = jsonObject.get("imgurl").getAsString();
         }
-
-        String top_pic = null;  // always null
 
         // update article information
         article.setTitle(title);
@@ -42,7 +41,6 @@ public class ArticleDataDeserializer implements JsonDeserializer<ArticleData> {
         article.setPubDate(pubDate);
         article.setDescription(description);
         article.setImgurl(imgurl);
-        article.setTop_pic(top_pic);
 
         return article;
     }
