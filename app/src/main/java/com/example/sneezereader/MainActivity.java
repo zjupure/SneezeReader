@@ -30,6 +30,7 @@ import cz.msebera.android.httpclient.Header;
 
 
 public class MainActivity extends AppCompatActivity{
+    public static final int NEW_ARTICLE_ARRIVAL = 0;
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     //界面组件

@@ -1,5 +1,6 @@
 package com.example.storage;
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.File;
@@ -14,10 +15,25 @@ public class FileManager {
     public static final String DEFAULT_PAGE_DIR = "SneezeReader";
     private static FileManager instance = null;
 
-    private FileManager(){
-        File file = new File(Environment.getExternalStorageDirectory(), DEFAULT_PAGE_DIR);
-        if(isSDExist()){
-            file.mkdir();    //创建目录
+    private boolean sdExist = true;
+    private String storage_dir = "";
+
+    private FileManager(Context context){
+        sdExist = CheckSDState();
+        File file;
+
+        if(sdExist){
+            // sdcard is exsit
+            file = new File(context.getExternalFilesDir(null), DEFAULT_PAGE_DIR);
+        }else {
+            // save to internal storage
+            file = new File(context.getFilesDir(), DEFAULT_PAGE_DIR);
+        }
+
+        if(!file.exists()){
+            // create a directory
+            file.mkdir();
+            storage_dir = file.getAbsolutePath();
         }
     }
 
@@ -25,11 +41,11 @@ public class FileManager {
      * 单例模式
      * @return
      */
-    public static FileManager getInstance(){
+    public static FileManager getInstance(Context context){
         if(instance == null){
             synchronized (FileManager.class){
                 if(instance == null){
-                    instance = new FileManager();
+                    instance = new FileManager(context);
                 }
             }
         }
@@ -42,39 +58,41 @@ public class FileManager {
      * @param filename
      */
     public boolean writeHTML(String filename, String content){
-        File file = new File(getDefaultPageDir(), filename);
+        File file = new File(storage_dir, filename);
         boolean isOk = false;
-        if(isSDExist()){
-            try {
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(content.getBytes());
-                fos.flush();
-                fos.close();
 
-                isOk = true;   //写入成功
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(content.getBytes());
+            fos.flush();
+            fos.close();
+
+            isOk = true;   //写入成功
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return isOk;
     }
 
-    public String getDefaultPageDir(){
-        return Environment.getExternalStorageState() + File.separator + DEFAULT_PAGE_DIR;
-    }
-
+    /**
+     * 获取文件绝对路径
+     * @param filename
+     * @return
+     */
     public String getAbsolutPath(String filename){
-        return getDefaultPageDir() + File.separator + filename;
+        File file = new File(storage_dir, filename);
+
+        return file.getAbsolutePath();
     }
 
     /**
      * 判断SD卡是否存在
      * @return
      */
-    public boolean isSDExist(){
+    public boolean CheckSDState(){
         if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
             return true;
         }

@@ -1,6 +1,7 @@
 package com.example.network;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.database.DBManager;
@@ -23,18 +24,24 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
     }
     @Override
     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-        Toast.makeText(context, "Get Page Source Failed!", Toast.LENGTH_SHORT);
+        Log.d("PageResponse", "page source download failed!");
     }
 
     @Override
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
-        FileManager fileManager = FileManager.getInstance();
+        Log.d("PageResponse", "page source download success");
+
+        FileManager fileManager = FileManager.getInstance(context);
         DBManager dbManager = DBManager.getInstance(context);
 
         String[] paths = remote_link.split("?");
         String filename = paths[paths.length - 1];
+        filename += ".html";
 
         fileManager.writeHTML(filename, responseString);
-        dbManager.updateLocalLink(remote_link, fileManager.getAbsolutPath(filename));
+        String path = fileManager.getAbsolutPath(filename);
+        dbManager.updateLocalLink(remote_link, path);
+
+        Log.d("PageResponse", path);
     }
 }

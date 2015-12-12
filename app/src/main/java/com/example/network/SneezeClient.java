@@ -24,7 +24,7 @@ public class SneezeClient{
     public static final String[] APP_PARAMS = new String[]{TUGUA_PARAM, LEHUO_PARAM, YITU_PARAM, DUANZI_PARAM};
     // parameters: p=1&limit=10
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_LIMIT_NUMER = 100;  //一页最多50条
+    private static final int DEFAULT_LIMIT_NUMER = 30;  //一页最多50条
     //接口最大数目：图卦30条，乐活30条，意图50条，段子100条
     // singleton
     private static SneezeClient instance;
