@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.ViewHolder>{
     private List<Article> mDataset;
-    private ItemFragment.ItemClickListener mListener;
+    private OnItemClickListener mListener;
     private int type = 0;
 
     public MyRecylcerAdapter(List<Article> dataset){
@@ -32,7 +32,7 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
         this.type = type;
     }
 
-    public void setOnItemClickListener(ItemFragment.ItemClickListener listener){
+    public void setOnItemClickListener(OnItemClickListener listener){
         mListener = listener;
     }
 
@@ -49,7 +49,7 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
         }
 
         ViewHolder vh = new ViewHolder(v);
-        v.setOnClickListener(vh);
+        //v.setOnClickListener(vh);
 
         return vh;
     }
@@ -82,9 +82,16 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
 
 
     /**
+     * Item单击接口
+     */
+    public  interface OnItemClickListener {
+        public void onItemClick(View view, int position);
+    }
+
+    /**
      * 内部类,ViewHolder容器,对ViewHolder实现Item监听
      */
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView mTextView;
         public SimpleDraweeView mImageView;
 
@@ -93,14 +100,14 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
             mTextView = (TextView)rootView.findViewById(R.id.item_title);
             mImageView = (SimpleDraweeView) rootView.findViewById(R.id.item_photo);
 
-            rootView.setOnClickListener(ViewHolder.this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            if(mListener != null){
-                mListener.onItemClick(v, getAdapterPosition());
-            }
+            rootView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(mListener != null){
+                        mListener.onItemClick(v, getLayoutPosition());
+                    }
+                }
+            });
         }
     }
 }

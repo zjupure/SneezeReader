@@ -2,6 +2,7 @@ package com.example.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,12 +10,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-
+import com.example.fragment.MyRecylcerAdapter.OnItemClickListener;
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
 import com.example.sneezereader.DetailActivity;
 import com.example.sneezereader.R;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
 
 import java.util.List;
 
@@ -25,7 +29,7 @@ public class ItemFragment extends Fragment {
     // rootView
     private View rootView;  //缓存根View,防止重复渲染
     // compents
-    //private PullToRefreshRecyclerView mRefreshView;  // RecyclerView wrapper
+    private PullToRefreshRecyclerView mRefreshView;  // RecyclerView wrapper
     private RecyclerView mRecyclerView;  // 列表
     private LinearLayoutManager mLayoutManager;
     private MyRecylcerAdapter mAdapter;   //适配器
@@ -58,9 +62,8 @@ public class ItemFragment extends Fragment {
 
     public void initRecyclerView(){
 
-        //mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
-        //mRecyclerView = mRefreshView.getRefreshableView();
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.tugua_list);
+        mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
+        mRecyclerView = mRefreshView.getRefreshableView();
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -72,7 +75,7 @@ public class ItemFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
 
         //设置item点击事件
-        mAdapter.setOnItemClickListener(new ItemClickListener() {
+        mAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 // 图卦和乐活页面响应点击事件,段子页面无效
@@ -89,12 +92,22 @@ public class ItemFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        // 设置刷新
+        mRefreshView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<RecyclerView>() {
+            @Override
+            public void onRefresh(PullToRefreshBase<RecyclerView> refreshView) {
+                Toast.makeText(getActivity(), "refreshing", Toast.LENGTH_SHORT);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRefreshView.onRefreshComplete();
+                        Toast.makeText(getActivity(), "refresh finished", Toast.LENGTH_SHORT);
+                    }
+                }, 1000);
+            }
+        });
     }
 
-    /**
-     * Item单击接口
-     */
-    public  interface ItemClickListener {
-        public void onItemClick(View view, int position);
-    }
 }

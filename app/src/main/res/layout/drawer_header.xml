@@ -3,21 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="#6699ff"
     android:paddingTop="50dp"
     android:paddingBottom="20dp">
 
     <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_gravity="center"
-        android:src="@mipmap/logo"/>
+        android:src="@mipmap/logo" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="username"
+        android:text="user"
         android:textSize="30sp"/>
 
 </LinearLayout>
