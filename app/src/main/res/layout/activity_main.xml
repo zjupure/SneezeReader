@@ -37,7 +37,7 @@
                 android:id="@+id/tab_lehuo"
                 style="@style/tab_bottom"
                 android:drawableTop="@drawable/wenzhang"
-                android:text="@string/title_wenzhang"/>
+                android:text="@string/title_lehuo"/>
             <RadioButton
                 android:id="@+id/tab_yitu"
                 style="@style/tab_bottom"

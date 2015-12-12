@@ -38,3 +38,4 @@ app/build/
 build
 build/
 build/intermediates/
+build/intermediates/dex-cache/

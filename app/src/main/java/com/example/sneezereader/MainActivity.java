@@ -45,9 +45,6 @@ public class MainActivity extends AppCompatActivity{
     private SneezeClient client;
     //基本信息
     private int curpos = 0;
-    private int[] pagetitle = {R.string.title_tugua, R.string.title_wenzhang, R.string.title_yitu, R.string.title_duanzi};
-    //
-    //private  SneezeClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

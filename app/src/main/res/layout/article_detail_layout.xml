@@ -6,19 +6,9 @@
 
     <include layout="@layout/toolbar" />
 
-    <ProgressBar
-        android:id="@+id/loading_bar"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:progressDrawable="@drawable/loadingbar_background"
-        android:minHeight="15dp"
-        android:max="100"/>
-
-    <WebView
-        android:id="@+id/article_detail_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>
