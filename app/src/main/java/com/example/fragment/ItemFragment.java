@@ -13,8 +13,8 @@ import android.view.ViewGroup;
 
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
-import com.example.sneezereader.R;
 import com.example.sneezereader.DetailActivity;
+import com.example.sneezereader.R;
 
 import java.util.List;
 
@@ -22,9 +22,10 @@ import java.util.List;
  * Created by liuchun on 2015/7/16.
  */
 public class ItemFragment extends Fragment {
-
+    // rootView
     private View rootView;  //缓存根View,防止重复渲染
-
+    // compents
+    //private PullToRefreshRecyclerView mRefreshView;  // RecyclerView wrapper
     private RecyclerView mRecyclerView;  // 列表
     private LinearLayoutManager mLayoutManager;
     private MyRecylcerAdapter mAdapter;   //适配器
@@ -57,7 +58,9 @@ public class ItemFragment extends Fragment {
 
     public void initRecyclerView(){
 
-        mRecyclerView = (RecyclerView)rootView.findViewById(R.id.tugua_list);
+        //mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
+        //mRecyclerView = mRefreshView.getRefreshableView();
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.tugua_list);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);

@@ -11,6 +11,7 @@ public class Article implements Parcelable{
     public static final int LEHUO = 1;
     public static final int YITU = 2;
     public static final int DUANZI = 3;
+    public static final int[] TYPE = {TUGUA, LEHUO, YITU, DUANZI};
 
     private int id = 0;
     private int type;

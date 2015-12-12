@@ -22,12 +22,22 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.0.0'
-    compile 'com.android.support:design:23.0.0'    // material design support library
-    compile 'com.android.support:recyclerview-v7:23.0.0'  // recyclerview to replace listview
-    compile 'com.android.support:cardview-v7:23.0.0'  // cardview to show item
-    compile 'com.mcxiaoke.volley:library:1.0.19'  // google volley network library
-    compile 'com.facebook.fresco:fresco:0.5.3+'   // facebook image library
-    compile 'com.loopj.android:android-async-http:1.4.9' // android async http
-    compile 'com.google.code.gson:gson:2.5'  // google gson library to parse the json data
-    compile 'org.jsoup:jsoup:1.8.3'   // jsoup html parse library
+    // material design support library
+    compile 'com.android.support:design:23.0.0'
+    // recyclerview to replace listview
+    compile 'com.android.support:recyclerview-v7:23.0.0'
+    // cardview to show item
+    compile 'com.android.support:cardview-v7:23.0.0'
+    // google volley network library
+    compile 'com.mcxiaoke.volley:library:1.0.19'
+    // facebook image library
+    compile 'com.facebook.fresco:fresco:0.5.3+'
+    // android async http client
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    // google gson library to parse the json data
+    compile 'com.google.code.gson:gson:2.5'
+    // jsoup html parse library
+    compile 'org.jsoup:jsoup:1.8.3'
+    // android pull to refresh library
+    compile project(':pulltorefresh')
 }

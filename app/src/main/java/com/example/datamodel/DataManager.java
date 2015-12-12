@@ -71,6 +71,25 @@ public class DataManager {
         }
     }
 
+
+    public void setDataset(int type, List<Article> datainfos){
+        switch (type){
+            case Article.TUGUA:
+                mTugua = datainfos;
+                break;
+            case Article.LEHUO:
+                mLehuo = datainfos;
+                break;
+            case Article.YITU:
+                mYitu = datainfos;
+                break;
+            case Article.DUANZI:
+                mDuanzi = datainfos;
+                break;
+            default: break;
+        }
+    }
+
     /**
      * 根据数据的类型,获取数据集
      * @param type

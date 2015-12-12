@@ -9,13 +9,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+import com.example.database.DBManager;
 import com.example.datamodel.Article;
+import com.example.datamodel.DataManager;
 import com.example.jsonparser.JsonParserUtil;
 import com.example.network.SneezeClient;
 import com.example.network.SneezeJsonResponseHandler;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.loopj.android.http.TextHttpResponseHandler;
 
+
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -86,6 +90,12 @@ public class SplashActivity extends Activity {
         client.getArticle(Article.LEHUO, new SneezeJsonResponseHandler(this, Article.LEHUO));
         client.getArticle(Article.YITU, new SneezeJsonResponseHandler(this, Article.YITU));
         client.getArticle(Article.DUANZI, new SneezeJsonResponseHandler(this, Article.DUANZI));
+
+        List<Article> datainfos;
+        for(int i = 0; i < 4; i++){
+            datainfos = DBManager.getInstance(this).getData(i, 30);
+            DataManager.getInstance().setDataset(i, datainfos);
+        }
 
     }
 

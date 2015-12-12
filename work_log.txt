@@ -23,3 +23,8 @@
 2015.12.09
 	完成DetailActivity页面，成功获取Article详情页。
 	WebView的优化。
+
+
+2015.12.10
+	完成乐活、意图、段子页面的数据显示
+	SwipeLayout和Fragment冲突，去掉SwipeLayout，手动实现下拉刷新

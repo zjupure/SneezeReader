@@ -22,13 +22,19 @@ import cz.msebera.android.httpclient.Header;
 public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     private Context context;
     private int type;  // page indicator
+    private int limit;
     private List<Article> articles;
     private DBManager dbManager;
     private SneezeClient client;
 
     public SneezeJsonResponseHandler(Context context, int type){
+        this(context, type, 30);
+    }
+
+    public SneezeJsonResponseHandler(Context context, int type, int limit){
         this.context = context;
         this.type = type;
+        this.limit = limit;
 
         articles = new ArrayList<>();
         dbManager = DBManager.getInstance(context);
@@ -44,7 +50,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     @Override
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
 
-        Log.d("JsonResponse", responseString);
+        boolean isUpdated = false;
 
         ArticleData[] datas = JsonParserUtil.JsonArticleParser(responseString);
 
@@ -53,11 +59,12 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 continue;  // filter advertisement
             }
 
-            /*
             String remote_url = data.getLink();
             if(dbManager.isExist(remote_url)){
                 continue;  // exist in the database
-            }*/
+            }
+
+            isUpdated = true;
 
             Article article = new Article();
             article.setType(type);
@@ -72,8 +79,16 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
             articles.add(article);
         }
 
-        dbManager.insertMultiRecords(articles);
-        DataManager.getInstance().addDataset(articles);
+        if(isUpdated){
+            // insert the new record into database
+            dbManager.insertMultiRecords(articles);
+            // get the latest articles from database
+            List<Article> datainfos = dbManager.getData(type, limit);
+            // update the dataset
+            DataManager.getInstance().setDataset(type, datainfos);
+        }
+
+        //DataManager.getInstance().addDataset(articles);
 
         if(type != Article.DUANZI){
             downLoadPages(articles);
