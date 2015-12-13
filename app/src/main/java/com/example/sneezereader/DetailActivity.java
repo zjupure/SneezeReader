@@ -6,6 +6,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
@@ -63,5 +66,26 @@ public class DetailActivity extends AppCompatActivity{
         mViewPager.setAdapter(mAdapter);
         // 显示第position项
         mViewPager.setCurrentItem(position);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_detail, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.action_favorite:
+                break;
+            case R.id.action_share:
+                break;
+            default:break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

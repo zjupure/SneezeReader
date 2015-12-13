@@ -8,12 +8,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.database.DBManager;
 import com.example.datamodel.Article;
 import com.example.datamodel.DataManager;
+import com.example.fragment.ItemFragment;
 import com.example.jsonparser.ArticleData;
 import com.example.jsonparser.JsonParserUtil;
 import com.example.sneezereader.DetailActivity;
@@ -31,8 +33,8 @@ import cz.msebera.android.httpclient.Header;
  * Created by liuchun on 2015/12/6.
  */
 public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
-    private static final int NEW_ARTICLE_ARRIVAL = 1;
-
+    private static final int NEW_ARTICLE_ARRIVAL = 10; // notification id
+    //
     private Context context;
     private int type;  // page indicator
     private Handler handler;  // send message to main activity
@@ -56,6 +58,9 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
         Log.d("JsonResponse", "fetch data failed!");
+        if(handler != null){
+            handler.sendEmptyMessage(ItemFragment.NETWORK_ERROR);
+        }
     }
 
     @Override
@@ -101,14 +106,23 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
             if(handler != null){
                 Message message = handler.obtainMessage();
-                message.what = MainActivity.NEW_ARTICLE_ARRIVAL;
-                message.obj = article;
+                message.what = ItemFragment.NEW_ARTICLE_ARRIVAL;
+                message.arg1 = articles.size();
                 handler.sendMessage(message);
             }else{
                 // get the latest articles from database
                 List<Article> datainfos = dbManager.getData(type, 30);
                 // update the dataset
-                DataManager.getInstance().setDataset(type, datainfos);
+                DataManager.getInstance().updateDataset(type, datainfos);
+                // send broadcast
+                Intent intent = new Intent(ItemFragment.DATASET_UPDATED_ACTION);
+                LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
+                broadcastManager.sendBroadcast(intent);
+            }
+        }else{
+            if(handler != null){
+                // 没有新的数据
+                handler.sendEmptyMessage(ItemFragment.NO_NEW_ARTICLE);
             }
         }
 

@@ -8,12 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RadioGroup;
 
 import com.example.datamodel.Article;
@@ -30,7 +32,6 @@ import cz.msebera.android.httpclient.Header;
 
 
 public class MainActivity extends AppCompatActivity{
-    public static final int NEW_ARTICLE_ARRIVAL = 0;
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     //界面组件
@@ -64,8 +65,10 @@ public class MainActivity extends AppCompatActivity{
     private void initView(){
         // ToolBar
         mToolBar = (Toolbar)findViewById(R.id.toolbar);
+
         mToolBar.setTitle(R.string.app_title);
         setSupportActionBar(mToolBar);
+        // set up toolbar
         mToolBar.setNavigationIcon(R.drawable.user_logo);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -82,6 +85,7 @@ public class MainActivity extends AppCompatActivity{
                    }
                }
             );
+
         }
 
         //设置mToggle
@@ -154,30 +158,6 @@ public class MainActivity extends AppCompatActivity{
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();  //状态同步
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        super.onOptionsItemSelected(item);
-
-        switch (item.getItemId()){
-            case R.id.action_refresh:
-
-                break;
-            case R.id.action_settings:
-                break;
-            case R.id.action_share:
-                break;
-            default:break;
-        }
-
-        return true;
     }
 
     public void getUpdateArticles(){

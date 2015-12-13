@@ -9,7 +9,6 @@
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
-        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -44,7 +43,7 @@
                 <RadioButton
                     android:id="@+id/tab_lehuo"
                     style="@style/tab_bottom"
-                    android:drawableTop="@drawable/wenzhang"
+                    android:drawableTop="@drawable/lehuo"
                     android:text="@string/title_lehuo"/>
                 <RadioButton
                     android:id="@+id/tab_yitu"
@@ -63,11 +62,11 @@
         <!-- Navigation View -->
         <android.support.design.widget.NavigationView
             android:id="@+id/nav_view"
-            android:layout_width="120dp"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             app:headerLayout="@layout/drawer_header"
-            app:menu="@menu/drawer"/>
+            app:menu="@menu/menu_drawer"/>
     </android.support.v4.widget.DrawerLayout>
 
 

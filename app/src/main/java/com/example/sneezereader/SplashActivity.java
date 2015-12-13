@@ -119,7 +119,7 @@ public class SplashActivity extends Activity {
         List<Article> datainfos;
         for(int i = 0; i < 4; i++){
             datainfos = DBManager.getInstance(this).getData(i, 30);
-            DataManager.getInstance().setDataset(i, datainfos);
+            DataManager.getInstance().addDataset(datainfos);
         }
     }
 

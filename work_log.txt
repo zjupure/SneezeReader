@@ -28,3 +28,13 @@
 2015.12.10
 	完成乐活、意图、段子页面的数据显示
 	SwipeLayout和Fragment冲突，去掉SwipeLayout，手动实现下拉刷新
+
+
+2015.12.12
+	完成UI调整，增加下拉刷新功能
+	修复Fragment嵌套子Fragment的bug
+
+2015.12.13
+	调整Navigation View导航视图
+	增加底部加载更多选项，优化性能
+	实现Https页面源码的获取，过滤底部广告代码

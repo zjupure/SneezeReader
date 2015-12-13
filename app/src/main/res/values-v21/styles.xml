@@ -11,6 +11,9 @@
         <!-- text color
         <item name="android:textColorPrimary">#fffff0</item>
         -->
+        <!-- status bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        -->
         <!-- SearchView-->
         <item name="android:searchViewStyle">@android:style/Widget.Material.SearchView</item>
     </style>

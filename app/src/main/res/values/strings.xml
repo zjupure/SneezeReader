@@ -9,9 +9,13 @@
     <string name="title_duanzi">段子</string>
 
     <!-- 菜单 -->
-    <string name="app_refresh">刷新</string>
-    <string name="app_setting">设置</string>
-    <string name="app_share">分享</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_collection">收藏</string>
+    <string name="action_setting">设置</string>
+    <string name="action_share">分享</string>
+
+    <string name="user_login">登录</string>
+    <string name="user_register">注册</string>
 
     <!-- 下拉刷新 -->
     <string name="pull_to_refresh_pull_label">下拉刷新</string>

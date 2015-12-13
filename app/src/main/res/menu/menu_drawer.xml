@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:checkableBehavior="single" >
+        <item android:id="@+id/nav_collection"
+            android:icon="@mipmap/ic_bookmark"
+            android:title="@string/action_collection">
+            <menu>
+                <item android:id="@+id/nav_tugua"
+                    android:icon="@drawable/tugua"
+                    android:title="@string/title_tugua" />
+
+                <item android:id="@+id/nav_lehuo"
+                    android:icon="@drawable/lehuo"
+                    android:title="@string/title_lehuo" />
+
+                <item android:id="@+id/nav_yitu"
+                    android:icon="@drawable/yitu"
+                    android:title="@string/title_yitu" />
+            </menu>
+        </item>
+
+        <item android:id="@+id/nav_share"
+            android:icon="@mipmap/ic_share"
+            android:title="@string/action_share" />
+
+        <item android:id="@+id/nav_setting"
+            android:icon="@mipmap/ic_settings"
+            android:title="@string/action_setting" />
+    </group>
+</menu>

@@ -62,32 +62,36 @@ public class DataManager {
 
     /**
      * 添加集合到数据管理器
-     * @param datoinfos
+     * @param datainfos
      */
-    public void addDataset(List<Article> datoinfos){
+    public void addDataset(List<Article> datainfos){
         //添加到数据集
-        for(Article datainfo : datoinfos){
+        for(Article datainfo : datainfos){
             addData(datainfo);
         }
     }
 
-
-    public void setDataset(int type, List<Article> datainfos){
+    public void resetDataset(int type){
         switch (type){
             case Article.TUGUA:
-                mTugua = datainfos;
+                mTugua.clear();
                 break;
             case Article.LEHUO:
-                mLehuo = datainfos;
+                mLehuo.clear();
                 break;
             case Article.YITU:
-                mYitu = datainfos;
+                mYitu.clear();
                 break;
             case Article.DUANZI:
-                mDuanzi = datainfos;
+                mDuanzi.clear();
                 break;
-            default: break;
+            default:break;
         }
+    }
+
+    public void updateDataset(int type, List<Article> articles){
+        resetDataset(type);
+        addDataset(articles);
     }
 
     /**
