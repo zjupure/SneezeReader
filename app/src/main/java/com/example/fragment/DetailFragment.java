@@ -1,5 +1,6 @@
 package com.example.fragment;
 
+import android.content.Context;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,7 +17,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
+import com.example.database.DBManager;
 import com.example.datamodel.Article;
+import com.example.network.NetworkMonitor;
+import com.example.network.SneezeClient;
+import com.example.network.SneezePageResponseHandler;
 import com.example.sneezereader.R;
 
 /**
@@ -109,8 +114,30 @@ public class DetailFragment extends Fragment {
             }
         });
 
-        // description is the subscription url
-        String url = article.getDescription();
-        mWebView.loadUrl(url);
+        // 首先判断是否连接wifi，wifi条件下加载远程链接，无wifi条件下优先加载本地缓存资源
+        String local_url = article.getLocal_link();
+        String remote_url = article.getDescription();
+        Context context = getActivity();
+        int networkState = NetworkMonitor.getNetWorkState(context);
+        if(networkState == NetworkMonitor.WIFI){
+            //加载远程连接
+            mWebView.loadUrl(remote_url);
+            //wifi状态下获取页面源码,并缓存
+            SneezeClient client = SneezeClient.getInstance(context);
+            client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
+        }else if(networkState > NetworkMonitor.WIFI){
+            //
+            if(!local_url.isEmpty()){
+                // 本地文件存储非空
+                mWebView.loadUrl(local_url);
+            }else{
+                // 加载远程链接
+                mWebView.loadUrl(remote_url);
+            }
+        }else {
+            // 无网络链接，去数据库查询
+            local_url = DBManager.getInstance(getActivity()).getLocalUrl(remote_url);
+            mWebView.loadUrl(local_url);
+        }
     }
 }

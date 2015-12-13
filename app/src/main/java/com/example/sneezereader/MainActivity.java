@@ -1,5 +1,12 @@
 package com.example.sneezereader;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -11,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.fragment.ItemFragment;
 import com.example.fragment.YituFragment;
@@ -32,6 +40,10 @@ public class MainActivity extends AppCompatActivity{
     private FragmentManager fm;
     //基本信息
     private int curpos = 0;
+    //网络状态监听
+    private BroadcastReceiver connReceiver;
+    //
+    private boolean netWorkAvaible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +51,25 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         initView();
+
+        connReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+                if(networkInfo == null){
+                    // 无网络链接
+                    netWorkAvaible = false;
+                }else{
+                    netWorkAvaible = true;
+                    Toast.makeText(MainActivity.this, "网络连接已断开", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(connReceiver, filter);
     }
 
     /**
@@ -140,5 +171,13 @@ public class MainActivity extends AppCompatActivity{
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();  //状态同步
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(connReceiver != null){
+            unregisterReceiver(connReceiver);
+        }
     }
 }

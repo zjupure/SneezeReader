@@ -29,17 +29,20 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
 
     @Override
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
-        Log.d("PageResponse", "page source download success");
+        Log.d("PageResponse", "page source download success!");
 
         FileManager fileManager = FileManager.getInstance(context);
         DBManager dbManager = DBManager.getInstance(context);
 
-        String[] paths = remote_link.split("?");
+        String[] paths = remote_link.split("[?]");
         String filename = paths[paths.length - 1];
+        paths = filename.split("[&]");
+        filename = paths[paths.length - 1];
+        filename = filename.replace('=', '_');
         filename += ".html";
 
         fileManager.writeHTML(filename, responseString);
-        String path = fileManager.getAbsolutPath(filename);
+        String path = "file://" + fileManager.getAbsolutPath(filename);
         dbManager.updateLocalLink(remote_link, path);
 
         Log.d("PageResponse", path);

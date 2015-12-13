@@ -7,6 +7,12 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
 
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+
+import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory;
 
 /**
  * Created by liuchun on 2015/7/17.
@@ -41,6 +47,10 @@ public class SneezeClient{
 
         cookieStore = new PersistentCookieStore(context);
         client.setCookieStore(cookieStore);
+        // 信任所有的主机
+        client.setSSLSocketFactory(SSLSocketFactoryEx.getFixedSocketFactory());
+        // 使用assets目录下的特定证书
+        //client.setSSLSocketFactory(getSpecSocketFactory(context));
     }
 
     public static SneezeClient getInstance(Context context){
@@ -107,5 +117,25 @@ public class SneezeClient{
 
     public void setUpdated(boolean updated){
         isUpdated = updated;
+    }
+
+    public SSLSocketFactory getSpecSocketFactory(Context context){
+        SSLSocketFactory socketFactory;
+        InputStream is;
+        try{
+            is = context.getAssets().open("dapenti.crt");
+            CertificateFactory cerFactory = CertificateFactory.getInstance("X.509");
+            Certificate cert = cerFactory.generateCertificate(is);
+            KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("trust", cert);
+
+            socketFactory = new SSLSocketFactoryEx(keyStore);
+        }catch (Exception e){
+            e.printStackTrace();
+            socketFactory = SSLSocketFactory.getSocketFactory();
+        }
+
+        return socketFactory;
     }
 }

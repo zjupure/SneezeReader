@@ -119,19 +119,19 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
                 broadcastManager.sendBroadcast(intent);
             }
+
+            // 新的页面,加载页面源码
+            if(type != Article.DUANZI){
+                Log.d("PageResponse", "start to get page source");
+                // 放到子线程去处理
+                downLoadPages(articles);
+            }
         }else{
             if(handler != null){
                 // 没有新的数据
                 handler.sendEmptyMessage(ItemFragment.NO_NEW_ARTICLE);
             }
         }
-
-        if(type != Article.DUANZI){
-            Log.d("PageResponse", "start to get page source");
-            // 放到子线程去处理
-            downLoadPages(articles);
-        }
-
     }
 
     private void notifyNewArticle(Article article){

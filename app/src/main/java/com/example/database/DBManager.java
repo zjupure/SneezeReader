@@ -116,6 +116,20 @@ public class DBManager {
         db.update("articles", cv, "description=?", args);
     }
 
+    public String getLocalUrl(String description){
+        // 根据sql查询
+        String sql = "SELECT local_link FROM articles WHERE description = '%s'";
+
+        sql = String.format(sql, description);
+        Cursor cursor = db.rawQuery(sql, null);
+        String local_link = "";
+
+        if(cursor.moveToFirst()){
+            local_link = cursor.getString(cursor.getColumnIndex("local_link"));
+        }
+
+        return local_link;
+    }
     /**
      * 查询特定类型的数据填充到数据管理器
      * @param type
@@ -183,18 +197,5 @@ public class DBManager {
         cursor.close();
 
         return datainfos;
-    }
-
-    private static String sqliteEscape(String keyword){
-        keyword.replace("/", "//");
-        keyword.replace("'", "''");
-        keyword.replace("[", "/[");
-        keyword.replace("]", "/]");
-        keyword.replace("%", "/%");
-        keyword.replace("_", "/_");
-        keyword.replace("(", "/(");
-        keyword.replace(")", "/(");
-
-        return keyword;
     }
 }

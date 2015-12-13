@@ -84,6 +84,7 @@ public class ItemFragment extends Fragment {
 
         curpos = getArguments().getInt("pos");
         client = SneezeClient.getInstance(getActivity());
+        client.setUpdated(true);
         lastUpdated = restoreLastUpdated();
         //初始化界面View
         initRecyclerView();
@@ -199,6 +200,7 @@ public class ItemFragment extends Fragment {
                     mAdapter.notifyDataSetChanged();
                     break;
                 case NO_MORE_ARTICLE:
+                    mAdapter.notifyDataSetChanged();
                     break;
                 default:break;
             }
@@ -251,6 +253,7 @@ public class ItemFragment extends Fragment {
                 handler.sendMessage(message);
             }else{
                 // 没有更多数据了
+                DataManager.getInstance().updateDataset(curpos, articles);
                 handler.sendEmptyMessage(NO_MORE_ARTICLE);
             }
         }
