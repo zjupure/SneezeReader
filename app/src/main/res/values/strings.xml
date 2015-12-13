@@ -20,8 +20,13 @@
     <!-- 下拉刷新 -->
     <string name="pull_to_refresh_pull_label">下拉刷新</string>
     <string name="pull_to_refresh_release_label">放开以刷新</string>
-    <string name="pull_to_refresh_refreshing_label">载入中</string>
+    <string name="pull_to_refresh_refreshing_label">正在刷新中</string>
     <string name="pull_to_refresh_tap_label">点击这里刷新</string>
     <string name="pull_to_refresh_last_update">上次更新: 2015年12月10日 22:00</string>
-    <string name="tap_to_load_more">加载更多</string>
+    <!-- 上拉加载 -->
+    <string name="pull_to_load_pull_label">上拉加载更多</string>
+    <string name="pull_to_load_release_label">放开以加载</string>
+    <string name="pull_to_load_refreshing_label">奋力加载中</string>
+    <string name="pull_to_load_tap_label">点击这里加载更多</string>
+    <string name="pull_to_load_last_update">上次加载：2015年12月10日 22:00</string>
 </resources>

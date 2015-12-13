@@ -1,35 +1,22 @@
 package com.example.sneezereader;
 
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.RadioGroup;
 
-import com.example.datamodel.Article;
 import com.example.fragment.ItemFragment;
 import com.example.fragment.YituFragment;
-import com.example.network.SneezeClient;
-import com.example.network.SneezeJsonResponseHandler;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cz.msebera.android.httpclient.Header;
-
 
 public class MainActivity extends AppCompatActivity{
     //Fragment　Tag
@@ -43,8 +30,6 @@ public class MainActivity extends AppCompatActivity{
     // Fragment UI
     public List<Fragment> mFragments;
     private FragmentManager fm;
-
-    private SneezeClient client;
     //基本信息
     private int curpos = 0;
 
@@ -53,9 +38,6 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("MainActivity", "this is main screen");
-
-        client = SneezeClient.getInstance(this);
         initView();
     }
 
@@ -158,10 +140,5 @@ public class MainActivity extends AppCompatActivity{
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();  //状态同步
-    }
-
-    public void getUpdateArticles(){
-        int type = Article.TYPE[curpos];
-        client.getArticle(type, new SneezeJsonResponseHandler(this, type));
     }
 }

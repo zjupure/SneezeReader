@@ -282,6 +282,157 @@ JSON数据格式：
 	  }
 	]
 
+
+请求7: 请求特定日期的图卦，GET请求，参数time=20151010
+	GET http://dapenti.com/blog/searchtugua.asp?time=20151010 HTTP/1.1
+	Host: dapenti.com
+	Connection: keep-alive
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+	User-Agent: Mozilla/5.0 (Linux; Android 5.1; m2 Build/LMY47D) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/40.0.2214.114 Mobile Safari/537.36
+	Accept-Encoding: gzip, deflate
+	Accept-Language: zh-CN,en-US;q=0.8
+	X-Requested-With: com.seventc.sneeze
+
+响应7：302自动重定向，数据返回在header中的Location域
+	HTTP/1.1 302 Object moved
+	Server: nginx
+	Date: Sun, 13 Dec 2015 07:58:01 GMT
+	Content-Type: text/html; Charset=UTF-8
+	Content-Length: 187
+	Connection: keep-alive
+	Location: https://www.dapenti.com/blog/readapp2.asp?name=xilei&id=104409
+
+	<head><title>Object moved</title></head>
+	<body><h1>Object Moved</h1>This object may be found <a HREF="https://www.dapenti.com/blog/readapp2.asp?name=xilei&amp;id=104409">here</a>.</body>
+
+请求8： 登录请求，POST请求，参数nickname, username, md5
+	POST http://appb.dapenti.com/index.php?s=/Home/api/login HTTP/1.1
+	Content-Length: 73
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=1qv3i6e32gd0lvo8oppvrfeis6
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	nickname=zjupure&username=1659869543&md5=602c38d4f48ed9356aefa88eb7a022f2
+
+响应8：
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Sun, 13 Dec 2015 08:08:38 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	36
+	{"msg":"","error":0,"data":"MDAwMDAwMDAwMISbgt2Is21x"}
+	0
+
+JSON数据格式, data是用户唯一标识uid
+	msg: ""
+	error: 0
+	data: MDAwMDAwMDAwMISbgt2Is21x
+
+请求9：添加收藏, POST请求, 参数：uid是用户登录返回的标识， typeid类型，title文章标题，url链接地址
+	POST http://appb.dapenti.com/index.php?s=/Home/api/add_favorites HTTP/1.1
+	Content-Length: 341
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=1qv3i6e32gd0lvo8oppvrfeis6
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	uid=MDAwMDAwMDAwMISbgt2Is21x&typeid=2&title=%E4%BB%A5%E5%90%8E%E8%B0%81%E8%AF%B4%E6%88%91%E8%82%9A%E5%AD%90%E4%B8%8A%E9%83%BD%E6%98%AF%E8%82%89%EF%BC%8C%E6%88%91%E5%B0%B1%E6%8A%8A%E8%BF%99%E4%B8%AA%E8%A7%86%E9%A2%91%E7%BB%99%E4%BB%96%E4%BB%AC%E7%9C%8B%EF%BC%81&url=https%3A%2F%2Fdapenti.com%2Fblog%2Freadapp2.asp%3Fname%3Dxilei%26id%3D106736
+
+响应9：响应Json数据
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Sun, 13 Dec 2015 08:12:08 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	36
+	{"msg":"","error":0,"data":"\u6536\u85cf\u6210\u529f"}
+	0
+
+JSON数据
+	msg: ""
+	error: 0
+	data: 收藏成功
+
+请求10：查询收藏，POST请求，参数p, uid, typeid
+	POST http://appb.dapenti.com/index.php?s=/Home/api/favorites HTTP/1.1
+	Content-Length: 41
+	Content-Type: application/x-www-form-urlencoded
+	Host: appb.dapenti.com
+	Connection: Keep-Alive
+	User-Agent: android-async-http/1.4.4 (http://loopj.com/android-async-http)
+	Cookie: PHPSESSID=1qv3i6e32gd0lvo8oppvrfeis6
+	Cookie2: $Version=1
+	Accept-Encoding: gzip
+
+	p=1&uid=MDAwMDAwMDAwMISbgt2Is21x&typeid=1
+
+响应10：
+	HTTP/1.1 200 OK
+	Server: nginx
+	Date: Sun, 13 Dec 2015 08:32:03 GMT
+	Content-Type: application/json; charset=utf-8
+	Transfer-Encoding: chunked
+	Connection: keep-alive
+	X-Powered-By: PHP/5.3.3
+	Expires: Thu, 19 Nov 1981 08:52:00 GMT
+	Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+	Pragma: no-cache
+
+	304
+	{"msg":"","error":0,"data":{"list":[{"id":"1174","typeid":"1","uid":"2239","title":"\u3010\u55b7\u568f\u56fe\u536620151208\u3011\u7ea2\u8b66","url":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=106591","addtime":"1449994784","delete":"0","top_pic":"http:\/\/pic.yupoo.com\/dapenti\/Fa1yEWE2\/medium.jpg"},{"id":"1173","typeid":"1","uid":"2239","title":"\u3010\u55b7\u568f\u56fe\u536620151210\u3011\u4e0d\u8981\u9884\u671f\u90a3\u662f\u4e00\u4e2a\u7f8e\u5f0f\u4f53\u7cfb\uff0c\u8fd9\u5c06\u662f\u4e00\u4e2a\u5177\u6709\u4e2d\u56fd\u7279\u8272\u7684\u5236\u5ea6","url":"https:\/\/dapenti.com\/blog\/readapp2.asp?name=xilei&id=106658","addtime":"1449994674","delete":"0","top_pic":"http:\/\/pic.yupoo.com\/dapenti\/FakA7SSn\/medium.jpg"}],"count":"2","maxpage":1}}
+	0
+
+JSON数据格式：
+	msg: ""
+	error: 0
+	data:{
+	  list: [
+	  	{
+	  	  |--id: 1174
+	  	  |--typeid: 1
+	  	  |--uid: 2239
+	  	  |--title: 【喷嚏图卦20151208】红警
+	  	  |--url: https://dapenti.com/blog/readapp2.asp?name=xilei&id=106591
+	  	  |--addtime: 1449994784
+	  	  |--delete:0
+	  	  |--top_pic: http://pic.yupoo.com/dapenti/Fa1yEWE2/medium.jpg
+	  	}
+	  	{
+	  	  |--id: 1173
+	  	  |--typeid: 1
+	  	  |--uid: 2239
+	  	  |--title: 【喷嚏图卦20151210】不要预期那是一个美式体系，这将是一个具有中国特色的制
+	  	  |--url: https://dapenti.com/blog/readapp2.asp?name=xilei&id=106658
+	  	  |--addtime: 1449994674
+	  	  |--delete:0
+	  	  |--top_pic: http://pic.yupoo.com/dapenti/FakA7SSn/medium.jpg
+	  	}
+	  	count: 2
+	  	maxpage: 1
+	  ]
+	}
+
+
 总结:
 Http通讯协议格式：Json数据长度 + Json数据 + “0”，所有请求都采用GET方式
 Json数据均为{msg, error, data}三个域,根据请求类型的不同, data域稍有变化。对于文章的请求, data域是数组的形式，每个item是对文章基本信息的描述。

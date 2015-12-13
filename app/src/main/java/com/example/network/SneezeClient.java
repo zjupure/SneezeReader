@@ -24,14 +24,15 @@ public class SneezeClient{
     public static final String[] APP_PARAMS = new String[]{TUGUA_PARAM, LEHUO_PARAM, YITU_PARAM, DUANZI_PARAM};
     // parameters: p=1&limit=10
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_LIMIT_NUMER = 30;  //一页最多50条
+    private static final int DEFAULT_LIMIT_NUMER = 50;  //一页最多50条
     //接口最大数目：图卦30条，乐活30条，意图50条，段子100条
     // singleton
     private static SneezeClient instance;
 
     private int page_num = DEFAULT_PAGE_NUMBER;
     private int limit_num = DEFAULT_LIMIT_NUMER;
-
+    private int[] limits = {10, 30, 30, 30};
+    private boolean isUpdated = false;
     // httpclient
     private AsyncHttpClient client = new AsyncHttpClient();
     private PersistentCookieStore cookieStore;
@@ -71,7 +72,13 @@ public class SneezeClient{
         RequestParams params = new RequestParams();
         params.put("s", APP_PARAMS[type]);
         params.put("p", Integer.toString(page_num));
-        params.put("limit", Integer.toString(limit_num));
+
+        if(isUpdated){
+            // 进入了主界面
+            params.put("limit", Integer.toString(limits[type]));
+        }else{
+            params.put("limit", Integer.toString(limit_num));
+        }
 
         client.get(BASE_URL, params, handler);
     }
@@ -94,12 +101,11 @@ public class SneezeClient{
         client.get(url, responseHandler);
     }
 
-    public void setRequestParams(int page_num, int limit_num){
-        this.page_num = page_num;
-        this.limit_num = limit_num;
+    public void setLimitNum(int limit){
+        limit_num = limit;
     }
 
-    public void setLimitNum(int limit_num){
-        this.limit_num = limit_num;
+    public void setUpdated(boolean updated){
+        isUpdated = updated;
     }
 }

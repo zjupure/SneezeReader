@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,9 +26,12 @@ import com.example.network.SneezeClient;
 import com.example.network.SneezeJsonResponseHandler;
 import com.example.sneezereader.DetailActivity;
 import com.example.sneezereader.R;
+import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,10 +44,13 @@ public class ItemFragment extends Fragment {
     public static final int NO_MORE_ARTICLE = 4;
     public static final int NETWORK_ERROR = 5;
     public static final String DATASET_UPDATED_ACTION = "com.example.fragment";
+    private static final String TIME_FORMAT_REFRESH = "上次更新: yyyy年MM月dd日 HH:mm";
+    private static final String TIME_FORMAT_LOAD = "上次加载: yyyy年MM月dd日 HH:mm";
     // rootView
     private View rootView;  //缓存根View,防止重复渲染
     // compents
     private PullToRefreshRecyclerView mRefreshView;  // RecyclerView wrapper
+    private ILoadingLayout header, footer;
     private RecyclerView mRecyclerView;  // 列表
     private LinearLayoutManager mLayoutManager;
     private MyRecylcerAdapter mAdapter;   //适配器
@@ -51,6 +58,7 @@ public class ItemFragment extends Fragment {
     // RecycleView数据集
     private List<Article> mDataSet;
     private int limit = 30;
+    private String lastUpdated = "";
     //
     private SneezeClient client;
     private LocalBroadcastManager broadcastManager;
@@ -76,6 +84,7 @@ public class ItemFragment extends Fragment {
 
         curpos = getArguments().getInt("pos");
         client = SneezeClient.getInstance(getActivity());
+        lastUpdated = restoreLastUpdated();
         //初始化界面View
         initRecyclerView();
         // 注册广播接收器
@@ -117,13 +126,6 @@ public class ItemFragment extends Fragment {
         mAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                // 加载更多选项
-                if (position == mDataSet.size()) {
-                    // 从数据库中获取更多数据
-                    loadFromDatabase(limit + 10);
-                    return;
-                }
-
                 // 图卦和乐活页面响应点击事件,段子页面无效
                 if (curpos > 1) {
                     return;
@@ -139,12 +141,42 @@ public class ItemFragment extends Fragment {
             }
         });
 
+        // 基本配置
+        header = mRefreshView.getLoadingLayoutProxy(true, false);
+        header.setPullLabel(getString(R.string.pull_to_refresh_pull_label));
+        header.setReleaseLabel(getString(R.string.pull_to_refresh_release_label));
+        header.setRefreshingLabel(getString(R.string.pull_to_refresh_refreshing_label));
+        header.setLastUpdatedLabel(lastUpdated);
+        //header.setLastUpdatedLabel(getString(R.string.pull_to_refresh_last_update));
+        footer = mRefreshView.getLoadingLayoutProxy(false, true);
+        footer.setPullLabel(getString(R.string.pull_to_load_pull_label));
+        footer.setReleaseLabel(getString(R.string.pull_to_load_release_label));
+        footer.setRefreshingLabel(getString(R.string.pull_to_load_refreshing_label));
+        //footer.setLastUpdatedLabel(getString(R.string.pull_to_refresh_last_update));
         // 设置刷新
         mRefreshView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<RecyclerView>() {
             @Override
             public void onRefresh(PullToRefreshBase<RecyclerView> refreshView) {
-                // 执行网络请求
-                client.getArticle(curpos, new SneezeJsonResponseHandler(getActivity(), curpos, handler));
+
+                if (mRefreshView.isHeaderShown()) {
+                    // 执行网络请求
+                    client.getArticle(curpos, new SneezeJsonResponseHandler(getActivity(),
+                            curpos, handler));
+
+                    SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT_REFRESH);
+                    String last_refresh_time = sdf.format(new Date());
+                    header.setLastUpdatedLabel(last_refresh_time);
+                    saveLastUpdated(last_refresh_time);
+                } else if (mRefreshView.isFooterShown()) {
+                    // 从数据库加载数据
+                    loadFromDatabase(limit + 10);
+
+                    //SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT_LOAD);
+                    //String last_load_time = sdf.format(new Date());
+                    //footer.setLastUpdatedLabel(last_load_time);
+                } else {
+                    mRefreshView.onRefreshComplete();
+                }
             }
         });
     }
@@ -157,13 +189,10 @@ public class ItemFragment extends Fragment {
                 case NEW_ARTICLE_ARRIVAL:
                     int nums = msg.arg1;
                     loadFromDatabase(limit + nums);
-                    mRefreshView.onRefreshComplete();
                     break;
                 case NO_NEW_ARTICLE:
-                    mRefreshView.onRefreshComplete();
                     break;
                 case NETWORK_ERROR:
-                    mRefreshView.onRefreshComplete();
                     break;
                 case LOAD_MORE_ARTICLE:
                     limit = msg.arg1;
@@ -173,6 +202,7 @@ public class ItemFragment extends Fragment {
                     break;
                 default:break;
             }
+            mRefreshView.onRefreshComplete();
         }
     };
 
@@ -181,6 +211,25 @@ public class ItemFragment extends Fragment {
         loadTask.start();
     }
 
+    private void saveLastUpdated(String lastUpdated){
+        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString("lastUpdated", lastUpdated);
+        editor.commit();
+    }
+
+    private String restoreLastUpdated(){
+        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        String lastUpdated = preferences.getString("lastUpdated",
+                getString(R.string.pull_to_refresh_last_update));
+
+        return lastUpdated;
+    }
+    /**
+     * 数据库加载任务
+     */
     private class LoadMoreTask extends Thread{
         private int num = 0;
 

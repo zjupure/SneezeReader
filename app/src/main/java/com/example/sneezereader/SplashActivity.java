@@ -70,6 +70,7 @@ public class SplashActivity extends Activity {
                 // destroy itself
                 finish();
                 isFinished = true;
+                client.setUpdated(true);
             }
         }, SPLASH_SHORT);
     }

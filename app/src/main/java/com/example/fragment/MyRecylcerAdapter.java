@@ -57,24 +57,11 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
-        if(position == mDataset.size()){
-            holder.mTextView.setGravity(Gravity.CENTER);
-            holder.mTextView.setText(R.string.tap_to_load_more);
-
-            if(holder.mImageView != null){
-                holder.mImageView.setVisibility(View.GONE);
-            }
-
-            return;
-        }
-
         // 加载真实的数据内容
         if(type == Article.TUGUA){
 
             holder.mTextView.setText(mDataset.get(position).getTitle());
 
-            holder.mImageView.setVisibility(View.VISIBLE);
             Uri uri = Uri.parse(mDataset.get(position).getImgurl());
             holder.mImageView.setImageURI(uri);
             //Log.d("RecyclerView", mDataset.get(position).getImgurl());
@@ -92,7 +79,7 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
     @Override
     public int getItemCount() {
         // add footer in the bottom
-        return (mDataset == null) ? 0 : mDataset.size() + 1;
+        return (mDataset == null) ? 0 : mDataset.size();
     }
 
 
