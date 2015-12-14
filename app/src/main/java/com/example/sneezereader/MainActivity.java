@@ -1,11 +1,12 @@
 package com.example.sneezereader;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -16,10 +17,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.example.datamodel.Article;
 import com.example.fragment.ItemFragment;
 import com.example.fragment.YituFragment;
 
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity{
     private ActionBarDrawerToggle mToggle;
     private Toolbar mToolBar;
     private RadioGroup mTabMenu;
+    // Menu
+    private Menu topMenu;
     // Fragment UI
     public List<Fragment> mFragments;
     private FragmentManager fm;
@@ -61,9 +66,9 @@ public class MainActivity extends AppCompatActivity{
                 if(networkInfo == null){
                     // 无网络链接
                     netWorkAvaible = false;
+                    Toast.makeText(MainActivity.this, "网络连接已断开", Toast.LENGTH_SHORT).show();
                 }else{
                     netWorkAvaible = true;
-                    Toast.makeText(MainActivity.this, "网络连接已断开", Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -88,6 +93,7 @@ public class MainActivity extends AppCompatActivity{
         mNavView = (NavigationView)findViewById(R.id.nav_view);
 
         if(mNavView != null){
+
             mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
                    @Override
                    public  boolean onNavigationItemSelected(MenuItem menuItem){
@@ -117,16 +123,16 @@ public class MainActivity extends AppCompatActivity{
                 int precos = curpos;
                 switch (checkedId) {
                     case R.id.tab_tugua:
-                        curpos = 0;
+                        curpos = Article.TUGUA;
                         break;
                     case R.id.tab_lehuo:
-                        curpos = 1;
+                        curpos = Article.LEHUO;
                         break;
                     case R.id.tab_yitu:
-                        curpos = 2;
+                        curpos = Article.YITU;
                         break;
                     case R.id.tab_duanzi:
-                        curpos = 3;
+                        curpos = Article.DUANZI;
                         break;
                     default:
                         break;
@@ -136,6 +142,13 @@ public class MainActivity extends AppCompatActivity{
                     FragmentTransaction ft = fm.beginTransaction();
                     ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
                     ft.commit();
+                }
+
+                MenuItem item = topMenu.findItem(R.id.action_refresh);
+                if (curpos == Article.YITU) {
+                    item.setVisible(true);
+                } else {
+                    item.setVisible(false);
                 }
             }
         });
@@ -167,10 +180,57 @@ public class MainActivity extends AppCompatActivity{
         ft.commit();
     }
 
+    public static void saveLastUpdated(Activity activity, int curpos,  String lastUpdated){
+        SharedPreferences preferences = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString("lastUpdated" + curpos, lastUpdated);
+        editor.commit();
+    }
+
+    public static String restoreLastUpdated(Activity activity, int curpos){
+        SharedPreferences preferences = activity.getPreferences(Context.MODE_PRIVATE);
+
+        String lastUpdated = preferences.getString("lastUpdated" + curpos,
+                activity.getString(R.string.pull_to_refresh_last_update));
+
+        return lastUpdated;
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();  //状态同步
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        topMenu = menu;
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem item = menu.findItem(R.id.action_refresh);
+        if(curpos == Article.YITU){
+            item.setVisible(true);
+        }else {
+            item.setVisible(false);
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // 刷新事件,回调Fragment的函数
+        if(item.getItemId() == R.id.action_refresh){
+            FragmentManager fm = getSupportFragmentManager();
+            Fragment fragment = fm.findFragmentByTag(FRAG_TAG[curpos]);
+            if(fragment instanceof YituFragment){
+                YituFragment yituFragment = (YituFragment)fragment;
+                yituFragment.refreshCurrentWebView();
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

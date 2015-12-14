@@ -36,6 +36,8 @@ public class DetailFragment extends Fragment {
     private WebSettings webSettings;
     // article info
     private Article article;
+    // network state
+    private int networkState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class DetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         article = getArguments().getParcelable("article");
+        networkState = NetworkMonitor.getNetWorkState(getActivity());
         //初始化界面View
         initWebView();
     }
@@ -114,11 +117,23 @@ public class DetailFragment extends Fragment {
             }
         });
 
+        displayArticle();
+    }
+
+    /**
+     * 根据网络状态从不同路径加载文章
+     */
+    public void displayArticle(){
         // 首先判断是否连接wifi，wifi条件下加载远程链接，无wifi条件下优先加载本地缓存资源
-        String local_url = article.getLocal_link();
-        String remote_url = article.getDescription();
         Context context = getActivity();
-        int networkState = NetworkMonitor.getNetWorkState(context);
+        networkState = NetworkMonitor.getNetWorkState(context);
+        //
+        String remote_url = article.getDescription();
+        String local_url = article.getLocal_link();
+        if(local_url.isEmpty()){
+            local_url = DBManager.getInstance(getActivity()).getLocalUrl(remote_url);
+        }
+        //
         if(networkState == NetworkMonitor.WIFI){
             //加载远程连接
             mWebView.loadUrl(remote_url);
@@ -128,7 +143,7 @@ public class DetailFragment extends Fragment {
                 client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
             }
         }else if(networkState > NetworkMonitor.WIFI){
-            //
+            // 3g网络优先加载本地连接
             if(!local_url.isEmpty()){
                 // 本地文件存储非空
                 mWebView.loadUrl(local_url);
@@ -137,9 +152,10 @@ public class DetailFragment extends Fragment {
                 mWebView.loadUrl(remote_url);
             }
         }else {
-            // 无网络链接，去数据库查询
-            local_url = DBManager.getInstance(getActivity()).getLocalUrl(remote_url);
-            mWebView.loadUrl(local_url);
+            // 应该加载错误提示页面
+            mWebView.loadUrl(remote_url);
         }
+
+        Log.d("DetailFragment", "webview is loading data...");
     }
 }

@@ -9,13 +9,21 @@
     <string name="title_duanzi">段子</string>
 
     <!-- 菜单 -->
+    <string name="my_collection">我的收藏</string>
     <string name="action_refresh">刷新</string>
+    <string name="action_login">登录</string>
     <string name="action_collection">收藏</string>
     <string name="action_setting">设置</string>
     <string name="action_share">分享</string>
-
+    <string name="action_about">关于</string>
+    
+    <!-- 用户 -->
     <string name="user_login">登录</string>
     <string name="user_register">注册</string>
+    <string name="user_weibo_login">微博账号登录</string>
+    <string name="user_no_name">请点击登录</string>
+    <string name="user_name">用户名</string>
+    <string name="user_signature">用户签名</string>
 
     <!-- 下拉刷新 -->
     <string name="pull_to_refresh_pull_label">下拉刷新</string>
@@ -26,7 +34,19 @@
     <!-- 上拉加载 -->
     <string name="pull_to_load_pull_label">上拉加载更多</string>
     <string name="pull_to_load_release_label">放开以加载</string>
-    <string name="pull_to_load_refreshing_label">奋力加载中</string>
+    <string name="pull_to_load_refreshing_label">努力加载中</string>
     <string name="pull_to_load_tap_label">点击这里加载更多</string>
     <string name="pull_to_load_last_update">上次加载：2015年12月10日 22:00</string>
+    <!-- 右拉刷新 -->
+    <string name="pull_to_right_pull_label">右拉刷新</string>
+    <string name="pull_to_right_release_label">放开以刷新</string>
+    <string name="pull_to_right_refreshing_label">正在刷新中</string>
+    <string name="pull_to_right_tap_label">点击这里刷新</string>
+    <string name="pull_to_right_last_update">上次更新: 2015年12月10日 22:00</string>
+    <!-- 左拉加载 -->
+    <string name="pull_to_left_pull_label">右拉加载更多</string>
+    <string name="pull_to_left_release_label">放开以加载</string>
+    <string name="pull_to_left_refreshing_label">努力加载中</string>
+    <string name="pull_to_left_tap_label">点击这里加载更多</string>
+    <string name="pull_to_left_last_update">上次加载: 2015年12月10日 22:00</string>
 </resources>

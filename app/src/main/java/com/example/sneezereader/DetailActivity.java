@@ -68,7 +68,6 @@ public class DetailActivity extends AppCompatActivity{
         mViewPager.setCurrentItem(position);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_detail, menu);

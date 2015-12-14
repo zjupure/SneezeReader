@@ -116,6 +116,11 @@ public class DBManager {
         db.update("articles", cv, "description=?", args);
     }
 
+    /**
+     * 根据description获取本地连接
+     * @param description
+     * @return
+     */
     public String getLocalUrl(String description){
         // 根据sql查询
         String sql = "SELECT local_link FROM articles WHERE description = '%s'";
@@ -130,6 +135,23 @@ public class DBManager {
 
         return local_link;
     }
+
+    /**
+     * 根据description判断是否已经存在数据库中
+     * @param description
+     * @return
+     */
+    public boolean isExist(String description){
+
+        String sql = "SELECT id FROM articles WHERE description = '%s'";
+
+        sql = String.format(sql, description);
+        Cursor cursor = db.rawQuery(sql, null);
+
+
+        return cursor.moveToFirst() == true;
+    }
+
     /**
      * 查询特定类型的数据填充到数据管理器
      * @param type
@@ -150,22 +172,6 @@ public class DBManager {
         datainfos = query(sql);
 
         return datainfos;
-    }
-
-    /**
-     * 根据remote_link判断是否已经存在数据库中
-     * @param remote_link
-     * @return
-     */
-    public boolean isExist(String remote_link){
-
-        String sql = "SELECT id FROM articles WHERE remote_link = '%s'";
-
-        sql = String.format(sql, remote_link);
-        Cursor cursor = db.rawQuery(sql, null);
-
-
-        return cursor.moveToFirst() == true;
     }
 
     /**

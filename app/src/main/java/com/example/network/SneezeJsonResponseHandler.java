@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,6 +20,7 @@ import com.example.datamodel.DataManager;
 import com.example.fragment.ItemFragment;
 import com.example.jsonparser.ArticleData;
 import com.example.jsonparser.JsonParserUtil;
+import com.example.sneezereader.Config;
 import com.example.sneezereader.DetailActivity;
 import com.example.sneezereader.MainActivity;
 import com.example.sneezereader.R;
@@ -59,7 +62,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
         Log.d("JsonResponse", "fetch data failed!");
         if(handler != null){
-            handler.sendEmptyMessage(ItemFragment.NETWORK_ERROR);
+            handler.sendEmptyMessage(Config.NETWORK_ERROR);
         }
     }
 
@@ -76,8 +79,16 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 continue;  // filter advertisement
             }
 
-            String remote_url = data.getLink();
-            if(dbManager.isExist(remote_url)){
+            String description = data.getDescription();
+            if(dbManager.isExist(description)){
+                String local_url = dbManager.getLocalUrl(description);
+                // 虽然在数据库中存在, 但是页面源码还未获取
+                int networkState = NetworkMonitor.getNetWorkState(context);
+                if(type != Article.DUANZI && local_url.isEmpty()
+                         && networkState == NetworkMonitor.WIFI){
+                    // 去请求获取页面源码
+                    downLoadPages(articles);
+                }
                 continue;  // exist in the database
             }
 
@@ -106,7 +117,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
             if(handler != null){
                 Message message = handler.obtainMessage();
-                message.what = ItemFragment.NEW_ARTICLE_ARRIVAL;
+                message.what = Config.NEW_ARTICLE_ARRIVAL;
                 message.arg1 = articles.size();
                 handler.sendMessage(message);
             }else{
@@ -115,21 +126,22 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 // update the dataset
                 DataManager.getInstance().updateDataset(type, datainfos);
                 // send broadcast
-                Intent intent = new Intent(ItemFragment.DATASET_UPDATED_ACTION);
+                Intent intent = new Intent(Config.DATASET_UPDATED_ACTION);
                 LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
                 broadcastManager.sendBroadcast(intent);
             }
 
-            // 新的页面,加载页面源码
-            if(type != Article.DUANZI){
+            // 新的页面,加载页面源码,只有wifi状态下才加载源码
+            int networkState = NetworkMonitor.getNetWorkState(context);
+            if(type != Article.DUANZI && networkState == NetworkMonitor.WIFI){
                 Log.d("PageResponse", "start to get page source");
-                // 放到子线程去处理
+                // 去请求获取页面源码
                 downLoadPages(articles);
             }
         }else{
             if(handler != null){
                 // 没有新的数据
-                handler.sendEmptyMessage(ItemFragment.NO_NEW_ARTICLE);
+                handler.sendEmptyMessage(Config.NO_NEW_ARTICLE);
             }
         }
     }
@@ -138,7 +150,6 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         Context app = context.getApplicationContext();
         NotificationManager nm = (NotificationManager) app.getSystemService(Context.NOTIFICATION_SERVICE);
         // init notification
-        int icon = R.mipmap.logo;
         CharSequence tickerText = article.getTitle();
         long when = System.currentTimeMillis();
 
@@ -151,16 +162,32 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         intent.putExtra("position", 0);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-        Notification.Builder builder = new Notification.Builder(context);
-        builder.setSmallIcon(R.mipmap.logo)
-                .setContentTitle(contentTitle)
-                .setContentText(contentText)
-                .setContentIntent(pendingIntent)
-                .setTicker(tickerText)
-                .setWhen(when)
-                .setAutoCancel(true);
+        Notification notification;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+            Notification.Builder builder = new Notification.Builder(context);
+            builder.setSmallIcon(R.mipmap.logo)
+                    .setContentTitle(contentTitle)
+                    .setContentText(contentText)
+                    .setContentIntent(pendingIntent)
+                    .setTicker(tickerText)
+                    .setWhen(when)
+                    .setAutoCancel(true);
 
-        Notification notification = builder.build();
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+                notification = builder.build();
+            }else {
+                notification = builder.getNotification();
+            }
+
+        }else{
+            notification = new Notification();
+            notification.icon = R.mipmap.logo;
+            notification.tickerText = tickerText;
+            notification.when = when;
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+            notification.contentIntent = pendingIntent;
+
+        }
         nm.notify(NEW_ARTICLE_ARRIVAL, notification);
     }
 
