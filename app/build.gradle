@@ -1,20 +1,41 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'key'
+            keyPassword '0618pure'
+            storeFile file('E:/Projects/Android/keystore.jks')
+            storePassword '0618pure'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.0"
-
     defaultConfig {
         applicationId "com.example.sneezereader"
-        minSdkVersion 16
+        minSdkVersion 9
         targetSdkVersion 23
         versionCode 2
-        versionName "2.0.5"
+        versionName "2.0.6"
     }
     buildTypes {
-        release {
+        debug {
+            versionNameSuffix "-debug"
             minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // 混淆
+            minifyEnabled false
+            // Zipalign优化
+            zipAlignEnabled false
+            //移除无用的resource文件
+            shrinkResources false
+            //加载默认混淆配置文件
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -29,7 +50,7 @@ dependencies {
     // cardview to show item
     compile 'com.android.support:cardview-v7:23.0.0'
     // google volley network library
-    compile 'com.mcxiaoke.volley:library:1.0.19'
+    //compile 'com.mcxiaoke.volley:library:1.0.19'
     // facebook image library
     compile 'com.facebook.fresco:fresco:0.5.3+'
     // android async http client
@@ -37,7 +58,7 @@ dependencies {
     // google gson library to parse the json data
     compile 'com.google.code.gson:gson:2.5'
     // jsoup html parse library
-    compile 'org.jsoup:jsoup:1.8.3'
+    //compile 'org.jsoup:jsoup:1.8.3'
     // android pull to refresh library
     compile project(':pulltorefresh')
 }

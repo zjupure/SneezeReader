@@ -122,9 +122,11 @@ public class DetailFragment extends Fragment {
         if(networkState == NetworkMonitor.WIFI){
             //加载远程连接
             mWebView.loadUrl(remote_url);
-            //wifi状态下获取页面源码,并缓存
-            SneezeClient client = SneezeClient.getInstance(context);
-            client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
+            //wifi状态下获取页面源码,如果还没有本地缓存, 则缓存该页面
+            if(local_url.isEmpty()){
+                SneezeClient client = SneezeClient.getInstance(context);
+                client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
+            }
         }else if(networkState > NetworkMonitor.WIFI){
             //
             if(!local_url.isEmpty()){
