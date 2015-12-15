@@ -37,8 +37,7 @@ public class SplashActivity extends Activity {
     //
     private SimpleDraweeView splash;
     private String imgUrl = "";
-
-    private int appStartNum = 0;     // app启动次数
+    // 当前Activity是否结束
     private boolean isFinished;
 
     private SneezeClient client;
@@ -77,14 +76,7 @@ public class SplashActivity extends Activity {
     private void execNetworkRequest(){
         // request for the new picture
         client = SneezeClient.getInstance(this);
-        //
-        appStartNum = loadAppStartNum();
-        if(appStartNum == 0){
-            // 首次启动,请求100条数据
-            client.setLimitNum(100);
-        }
-        // appStartNum increase
-        saveAppStartNum(appStartNum + 1);
+
         // 请求文章
         client.getArticle(Article.TUGUA, new SneezeJsonResponseHandler(this, Article.TUGUA));
         client.getArticle(Article.LEHUO, new SneezeJsonResponseHandler(this, Article.LEHUO));
@@ -137,21 +129,5 @@ public class SplashActivity extends Activity {
         String imgUrl = preference.getString("imgUrl", "");
 
         return imgUrl;
-    }
-
-    private void saveAppStartNum(int appStartNum){
-        SharedPreferences preference = getSharedPreferences("config", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preference.edit();
-
-        editor.putInt("appStartNum", appStartNum);
-        editor.commit();
-    }
-
-    private int loadAppStartNum(){
-        SharedPreferences preference = getSharedPreferences("config", Context.MODE_PRIVATE);
-
-        int appStartNum = preference.getInt("appStartNum", 0);
-
-        return appStartNum;
     }
 }

@@ -9,6 +9,8 @@ import com.simit.datamodel.DataManager;
 import com.simit.storage.FileManager;
 import com.loopj.android.http.TextHttpResponseHandler;
 
+import java.io.File;
+
 import cz.msebera.android.httpclient.Header;
 
 /**
@@ -41,12 +43,12 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
         filename = filename.replace('=', '_');
         filename += ".html";
 
-        boolean isValid = fileManager.writeHTML(filename, responseString);
-        if(isValid){
-            String path = "file://" + fileManager.getAbsolutPath(filename);
-            dbManager.updateLocalLink(remote_link, path);
+        String filePath = fileManager.writeHTML(filename, responseString);
+        if(!filePath.isEmpty()){
+            String uriPath = "file://" + filePath;
+            dbManager.updateLocalLink(remote_link, uriPath);
 
-            Log.d("PageResponse", path);
+            Log.d("PageResponse", uriPath);
         }else {
             Log.d("PageResponse", "write file failed");
         }

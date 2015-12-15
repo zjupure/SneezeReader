@@ -27,7 +27,6 @@ import com.simit.fragment.ItemFragment;
 import com.simit.fragment.YituFragment;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
@@ -99,16 +98,29 @@ public class MainActivity extends AppCompatActivity{
         mToolBar.setNavigationIcon(R.drawable.user_logo);
         mToolBar.setTitle(R.string.app_title);
         mDrawerLayout.setDrawerListener(mToggle);
-
         //
         if(mNavView != null){
 
-            mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
+            mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                    @Override
-                   public  boolean onNavigationItemSelected(MenuItem menuItem){
+                   public boolean onNavigationItemSelected(MenuItem menuItem) {
                        //切换对应的Fragment操作
                        menuItem.setCheckable(true);
                        mDrawerLayout.closeDrawers();
+
+                       switch (menuItem.getItemId()) {
+                           case R.id.nav_setting:
+                               break;
+                           case R.id.nav_share:
+                               break;
+                           case R.id.nav_about:
+                               Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                               startActivity(intent);
+                               break;
+                           default:
+                               break;
+                       }
+
                        return false;
                    }
                }

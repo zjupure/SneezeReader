@@ -18,6 +18,9 @@
     <string name="action_about">关于</string>
 
     <string name="toast_back">再按一次返回桌面</string>
+
+    <string name="app_about">软件声明</string>
+    <string name="app_about_info">阅读、发现和分享：8小时外的健康生活！</string>
     <!-- 用户 -->
     <string name="user_login">登录</string>
     <string name="user_register">注册</string>

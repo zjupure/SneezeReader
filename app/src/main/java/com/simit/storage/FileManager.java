@@ -13,16 +13,15 @@ import java.io.IOException;
  * Created by liuchun on 2015/7/17.
  */
 public class FileManager {
-    public static final String DEFAULT_PAGE_DIR = "SneezeReader";
+    public static final String DEFAULT_PAGE_DIR = "Articles";
     private static FileManager instance = null;
+    private static Context context;
 
-    private boolean sdExist = true;
-    private String storage_dir = "";
-
-    private FileManager(Context context){
-        sdExist = CheckSDState();
+    private FileManager(Context ctx){
+        boolean sdExist = CheckSDState();
         File file;
 
+        context = ctx;
         if(sdExist){
             // sdcard is exsit
             file = new File(context.getExternalFilesDir(null), DEFAULT_PAGE_DIR);
@@ -34,9 +33,7 @@ public class FileManager {
         if(!file.exists()){
             // create a directory
             file.mkdir();
-            storage_dir = file.getAbsolutePath();
         }
-        Log.d("PageResponse", storage_dir);
     }
 
     /**
@@ -55,39 +52,34 @@ public class FileManager {
         return instance;
     }
 
-    /**
-     * 把网页内容写到外部SD卡,保存为html文件
-     * @param filename
-     */
-    public boolean writeHTML(String filename, String content){
-        File file = new File(storage_dir, filename);
-        boolean isOk = false;
+    public String writeHTML(String filename, String content){
+        // 文件路径
+        String storePath = DEFAULT_PAGE_DIR + File.separator + filename;
+        String absolutePath = "";
+        boolean sdExist = CheckSDState();
+        File file;
+
+        // 时刻都要检测SD卡是否存在
+        if(sdExist){
+            file = new File(context.getExternalFilesDir(null), storePath);
+        }else {
+            file = new File(context.getFilesDir(), storePath);
+        }
 
         try {
             FileOutputStream fos = new FileOutputStream(file);
             fos.write(content.getBytes());
             fos.flush();
             fos.close();
-
-            isOk = true;   //写入成功
+            // 写入成功
+            absolutePath = file.getAbsolutePath();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return isOk;
-    }
-
-    /**
-     * 获取文件绝对路径
-     * @param filename
-     * @return
-     */
-    public String getAbsolutPath(String filename){
-        File file = new File(storage_dir, filename);
-
-        return file.getAbsolutePath();
+        return absolutePath;
     }
 
     /**
