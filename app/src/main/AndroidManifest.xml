@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.sneezereader" >
+    package="com.simit.sneezereader" >
 
     <!-- 权限声明 -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -11,13 +11,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name="com.example.sneezereader.SneezeApplication"
+        android:name="com.simit.sneezereader.SneezeApplication"
         android:allowBackup="true"
         android:icon="@mipmap/logo"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.sneezereader.SplashActivity"
+            android:name="com.simit.sneezereader.SplashActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,16 +26,16 @@
         </activity>
 
         <activity
-            android:name="com.example.sneezereader.MainActivity">
+            android:name="com.simit.sneezereader.MainActivity">
         </activity>
 
         <activity
-            android:name="com.example.sneezereader.DetailActivity"
-            android:parentActivityName="com.example.sneezereader.MainActivity">
+            android:name="com.simit.sneezereader.DetailActivity"
+            android:parentActivityName="com.simit.sneezereader.MainActivity">
             <!-- meta-data 用于支持support 4.0以及以下指明上级活动 -->
             <meta-data
                 android:name="android:support.PARENT_ACTIVITY"
-                android:value="com.example.sneezereader.MainActivity" />
+                android:value="com.simit.sneezereader.MainActivity" />
         </activity>
 
     </application>

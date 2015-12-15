@@ -34,8 +34,9 @@ captures/
 *iml
 *.properties
 .idea/
-app/build/
+app/build
 build
-build/
-build/intermediates/
-build/intermediates/dex-cache/
+build/*
+
+# others
+*.db
