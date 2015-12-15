@@ -29,6 +29,8 @@ import com.loopj.android.http.TextHttpResponseHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -94,12 +96,29 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
             isUpdated = true;
 
+            // fix the pubDate bug
+            String title = data.getTitle();
+            String pubDate = data.getPubDate(); // 2015-11-26 14:27:00
+            String date = pubDate.substring(0, 10);
+            date = date.replace("-", "");
+            Pattern pattern = Pattern.compile("\\d{8}"); // ^[\u3010].*\d{8}[\u3011]$ 匹配图卦标题
+            Matcher matcher = pattern.matcher(title);
+            if(matcher.find()){
+                String realDate = matcher.group();
+                if(!realDate.equals(date)){
+                    pubDate = realDate.substring(0, 4) + "-" + realDate.substring(4, 6) +
+                            "-" + realDate.substring(6, 8) + pubDate.substring(10, pubDate.length());
+
+                    Log.d("JsonResponse", pubDate);
+                }
+            }
+
             Article article = new Article();
             article.setType(type);
             article.setTitle(data.getTitle());
             article.setRemote_link(data.getLink());
             article.setAuthor(data.getAuthor());
-            article.setPubDate(data.getPubDate());
+            article.setPubDate(pubDate);
             article.setDescription(data.getDescription());
             article.setImgurl(data.getImgurl());
             article.setLocal_link("");

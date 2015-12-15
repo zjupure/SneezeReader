@@ -41,10 +41,15 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
         filename = filename.replace('=', '_');
         filename += ".html";
 
-        fileManager.writeHTML(filename, responseString);
-        String path = "file://" + fileManager.getAbsolutPath(filename);
-        dbManager.updateLocalLink(remote_link, path);
+        boolean isValid = fileManager.writeHTML(filename, responseString);
+        if(isValid){
+            String path = "file://" + fileManager.getAbsolutPath(filename);
+            dbManager.updateLocalLink(remote_link, path);
 
-        Log.d("PageResponse", path);
+            Log.d("PageResponse", path);
+        }else {
+            Log.d("PageResponse", "write file failed");
+        }
+
     }
 }

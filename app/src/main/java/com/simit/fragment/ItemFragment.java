@@ -42,6 +42,7 @@ import java.util.List;
  * Created by liuchun on 2015/7/16.
  */
 public class ItemFragment extends Fragment {
+    private static final int[] THRESHOLD = {5, 15, 10, 10};
     // rootView
     private View rootView;  //缓存根View,防止重复渲染
     // compents
@@ -156,7 +157,7 @@ public class ItemFragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
-                if(firstVisibleItem > 15){
+                if(firstVisibleItem > THRESHOLD[curpos]){
                     mGoTopBtn.setVisibility(View.VISIBLE);
                 }else {
                     mGoTopBtn.setVisibility(View.GONE);
@@ -166,7 +167,7 @@ public class ItemFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
-                if(firstVisibleItem > 15){
+                if(firstVisibleItem > THRESHOLD[curpos]){
                     mGoTopBtn.setVisibility(View.VISIBLE);
                 }else {
                     mGoTopBtn.setVisibility(View.GONE);
