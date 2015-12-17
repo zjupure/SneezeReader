@@ -44,6 +44,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     private int type;  // page indicator
     private Handler handler;  // send message to main activity
     private DBManager dbManager;
+    private DataManager dataManager;
     private SneezeClient client;
 
     public SneezeJsonResponseHandler(Context context, int type){
@@ -56,6 +57,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         this.handler = handler;
 
         dbManager = DBManager.getInstance(context);
+        dataManager = DataManager.getInstance();
         client = SneezeClient.getInstance(context);
     }
 
@@ -89,7 +91,9 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 if(type != Article.DUANZI && local_url.isEmpty()
                          && networkState == NetworkMonitor.WIFI){
                     // 去请求获取页面源码
-                    downLoadPages(articles);
+                    //downLoadPages(articles);
+                    // 把连接加入待请求队列
+                    dataManager.putLink(description);
                 }
                 continue;  // exist in the database
             }
@@ -155,7 +159,8 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
             if(type != Article.DUANZI && networkState == NetworkMonitor.WIFI){
                 Log.d("PageResponse", "start to get page source");
                 // 去请求获取页面源码
-                downLoadPages(articles);
+                //downLoadPages(articles);
+                putLinks(articles);
             }
         }else{
             if(handler != null){
@@ -209,6 +214,16 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         }
         notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS;
         nm.notify(NEW_ARTICLE_ARRIVAL, notification);
+    }
+
+
+    private void putLinks(List<Article> articles){
+        //
+        String remote_url;
+        for(Article article : articles){
+            remote_url = article.getDescription();
+            dataManager.putLink(remote_url);
+        }
     }
 
     /**

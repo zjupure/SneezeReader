@@ -45,6 +45,10 @@
                 android:name="android:support.PARENT_ACTIVITY"
                 android:value="com.simit.sneezereader.MainActivity" />
         </activity>
+
+        <service android:name=".UpdateService">
+
+        </service>
     </application>
 
 </manifest>

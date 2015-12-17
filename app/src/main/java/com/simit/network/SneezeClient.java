@@ -94,6 +94,19 @@ public class SneezeClient{
     }
 
     /**
+     * 获取图卦页面更新
+     * @param handler
+     */
+    public void getTugua(AsyncHttpResponseHandler handler){
+        RequestParams params = new RequestParams();
+        params.put("s", TUGUA_PARAM);
+        params.put("p", Integer.toString(page_num));
+        params.put("limit", Integer.toString(5));
+
+        client.get(BASE_URL, params, handler);
+    }
+
+    /**
      * 获取Splash图片
      * @param handler
      */

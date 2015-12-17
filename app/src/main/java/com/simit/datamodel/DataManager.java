@@ -2,16 +2,23 @@ package com.simit.datamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 /**
  * Created by liuchun on 2015/7/17.
  */
 public class DataManager {
+    private static final int DEFAULT_QUEUE_SIZE = 1024;
+    //
     private List<Article> mTugua;       //图卦的数据集
     private List<Article> mLehuo;       //乐活的数据集
     private List<Article> mYitu;        //意图的数据集
     private List<Article> mDuanzi;      //段子的数据集
+    // 请求队列
+    private BlockingQueue<String> links;
 
     private static DataManager instance = null;
 
@@ -20,6 +27,8 @@ public class DataManager {
         mLehuo = new ArrayList<>();
         mYitu = new ArrayList<>();
         mDuanzi = new ArrayList<>();
+
+        links = new ArrayBlockingQueue<String>(DEFAULT_QUEUE_SIZE);
     }
 
     /**
@@ -113,5 +122,26 @@ public class DataManager {
         }
     }
 
+    public String getLink(){
+        String url = "";
+        try{
+            url = links.poll(50, TimeUnit.MILLISECONDS);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
 
+        return url;
+    }
+
+    public void putLink(String url){
+        try{
+            links.put(url);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
+    public int getQueueSize(){
+        return links.size();
+    }
 }

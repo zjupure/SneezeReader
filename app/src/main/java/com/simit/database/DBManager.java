@@ -157,6 +157,27 @@ public class DBManager {
         return cursor.moveToFirst() == true;
     }
 
+    public List<String> getRemoteLinks(int type, int limit){
+        //按照type查询所有列,根据发表时间降序排列,取前LIMIT项
+        String sql = "SELECT description, local_link FROM articles WHERE type = %d ORDER BY pubDate DESC LIMIT %d";
+        List<String> links = new ArrayList<>();
+        String description, local_link;
+
+        sql = String.format(sql, type, limit);
+        Cursor cursor = db.rawQuery(sql, null);
+
+        while(cursor.moveToNext()){
+            description = cursor.getString(cursor.getColumnIndex("description"));
+            local_link = cursor.getString(cursor.getColumnIndex("local_link"));
+
+            if(local_link.isEmpty()){
+                links.add(description);
+            }
+        }
+
+        return links;
+    }
+
     /**
      * 查询特定类型的数据填充到数据管理器
      * @param type

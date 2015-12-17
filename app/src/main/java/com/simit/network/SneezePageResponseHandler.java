@@ -1,11 +1,13 @@
 package com.simit.network;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.simit.database.DBManager;
 import com.simit.datamodel.DataManager;
+import com.simit.sneezereader.Config;
 import com.simit.storage.FileManager;
 import com.loopj.android.http.TextHttpResponseHandler;
 
@@ -24,6 +26,7 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
         this.context = context;
         this.remote_link = remote_link;
     }
+
     @Override
     public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
         Log.d("PageResponse", "page source download failed!");
@@ -52,6 +55,5 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
         }else {
             Log.d("PageResponse", "write file failed");
         }
-
     }
 }

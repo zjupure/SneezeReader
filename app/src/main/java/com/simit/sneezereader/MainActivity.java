@@ -32,6 +32,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity{
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
+    public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
+                                R.string.title_yitu, R.string.title_duanzi};
     //界面组件
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
@@ -45,11 +47,7 @@ public class MainActivity extends AppCompatActivity{
     private FragmentManager fm;
     //基本信息
     private int curpos = 0;
-    //网络状态监听
-    private BroadcastReceiver connReceiver;
-    //
-    private boolean netWorkAvaible;
-    //
+    // Back按键时间
     private long lastBackPress;
 
     @Override
@@ -60,25 +58,9 @@ public class MainActivity extends AppCompatActivity{
         //lastBackPress = System.currentTimeMillis();
         // 初始化界面
         initView();
-        // 注册广播接收器
-        connReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-
-                if(networkInfo == null){
-                    // 无网络链接
-                    netWorkAvaible = false;
-                    Toast.makeText(MainActivity.this, "网络连接已断开", Toast.LENGTH_SHORT).show();
-                }else{
-                    netWorkAvaible = true;
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(connReceiver, filter);
+        // start service
+        Intent intent = new Intent(this, UpdateService.class);
+        startService(intent);
     }
 
     /**
@@ -96,7 +78,8 @@ public class MainActivity extends AppCompatActivity{
         mToggle.syncState();
         // set up toolbar
         mToolBar.setNavigationIcon(R.drawable.user_logo);
-        mToolBar.setTitle(R.string.app_title);
+        //mToolBar.setTitle(R.string.app_title);
+        mToolBar.setTitle(APP_TITLE[curpos]);
         mDrawerLayout.setDrawerListener(mToggle);
         //
         if(mNavView != null){
@@ -127,9 +110,7 @@ public class MainActivity extends AppCompatActivity{
             );
 
         }
-
-
-
+        //
         initFragments();
 
         //RadioButton
@@ -162,11 +143,15 @@ public class MainActivity extends AppCompatActivity{
                     ft.commit();
                 }
 
-                MenuItem item = topMenu.findItem(R.id.action_refresh);
+                mToolBar.setTitle(APP_TITLE[curpos]);
+                MenuItem refresh = topMenu.findItem(R.id.action_refresh);
+                MenuItem favorite = topMenu.findItem(R.id.action_favorite);
                 if (curpos == Article.YITU) {
-                    item.setVisible(true);
+                    refresh.setVisible(true);
+                    favorite.setVisible(true);
                 } else {
-                    item.setVisible(false);
+                    refresh.setVisible(false);
+                    favorite.setVisible(false);
                 }
             }
         });
@@ -226,11 +211,14 @@ public class MainActivity extends AppCompatActivity{
         topMenu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem item = menu.findItem(R.id.action_refresh);
-        if(curpos == Article.YITU){
-            item.setVisible(true);
-        }else {
-            item.setVisible(false);
+        MenuItem refresh = topMenu.findItem(R.id.action_refresh);
+        MenuItem favorite = topMenu.findItem(R.id.action_favorite);
+        if (curpos == Article.YITU) {
+            refresh.setVisible(true);
+            favorite.setVisible(true);
+        } else {
+            refresh.setVisible(false);
+            favorite.setVisible(false);
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -268,13 +256,5 @@ public class MainActivity extends AppCompatActivity{
             super.onBackPressed();
         }
         lastBackPress = curBackPress;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(connReceiver != null){
-            unregisterReceiver(connReceiver);
-        }
     }
 }

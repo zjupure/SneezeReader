@@ -23,10 +23,12 @@ import android.widget.ProgressBar;
 
 import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
+import com.simit.datamodel.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezePageResponseHandler;
 import com.simit.sneezereader.R;
+import com.simit.sneezereader.UpdateService;
 
 /**
  * Created by liuchun on 2015/12/12.
@@ -99,7 +101,7 @@ public class DetailFragment extends Fragment {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 //
                 Uri uri = Uri.parse(url);
-                if(uri.getHost().equals(DAPENTI_HOST)){
+                if (uri.getHost().equals(DAPENTI_HOST)) {
                     // dapenti
                     return false;
                 }
@@ -115,11 +117,11 @@ public class DetailFragment extends Fragment {
                 super.onReceivedError(view, request, error);
 
                 Context context = getActivity();
-                if(context != null){
+                if (context != null) {
                     networkState = NetworkMonitor.getNetWorkState(context);
                 }
                 // 3g条件下,本地加载失败,重新加载远程数据,可能本地缓存被删除了
-                if(networkState >= NetworkMonitor.WIFI && location == false){
+                if (networkState >= NetworkMonitor.WIFI && location == false) {
                     String remote_url = article.getDescription();
                     mWebView.loadUrl(remote_url);
                     location = true;
@@ -187,7 +189,8 @@ public class DetailFragment extends Fragment {
             //wifi状态下获取页面源码,如果还没有本地缓存, 则缓存该页面
             if(local_url.isEmpty()){
                 SneezeClient client = SneezeClient.getInstance(context);
-                client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
+                //client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
+                DataManager.getInstance().putLink(remote_url);
             }
         }else if(networkState > NetworkMonitor.WIFI){
             // 3g网络优先加载本地连接
