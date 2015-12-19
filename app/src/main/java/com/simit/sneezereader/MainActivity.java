@@ -1,13 +1,9 @@
 package com.simit.sneezereader;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -69,17 +65,17 @@ public class MainActivity extends AppCompatActivity{
     private void initView(){
         // ToolBar
         mToolBar = (Toolbar)findViewById(R.id.toolbar);
+        //mToolBar.setTitle(R.string.app_title);
+        mToolBar.setTitle(APP_TITLE[curpos]);
         setSupportActionBar(mToolBar);
+        // set up toolbar
+        mToolBar.setNavigationIcon(R.drawable.user_logo);
         // DrawerLayout, Navigation View
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mNavView = (NavigationView)findViewById(R.id.nav_view);
         //设置mToggle
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolBar, R.string.app_name, R.string.app_name);
         mToggle.syncState();
-        // set up toolbar
-        mToolBar.setNavigationIcon(R.drawable.user_logo);
-        //mToolBar.setTitle(R.string.app_title);
-        mToolBar.setTitle(APP_TITLE[curpos]);
         mDrawerLayout.setDrawerListener(mToggle);
         //
         if(mNavView != null){
@@ -91,13 +87,17 @@ public class MainActivity extends AppCompatActivity{
                        menuItem.setCheckable(true);
                        mDrawerLayout.closeDrawers();
 
+                       //根据菜单项跳转
+                       Intent intent;
                        switch (menuItem.getItemId()) {
-                           case R.id.nav_setting:
+                           case R.id.nav_theme:
                                break;
-                           case R.id.nav_share:
+                           case R.id.nav_setting:
+                               intent = new Intent(MainActivity.this, SettingActivity.class);
+                               startActivity(intent);
                                break;
                            case R.id.nav_about:
-                               Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                               intent = new Intent(MainActivity.this, AboutActivity.class);
                                startActivity(intent);
                                break;
                            default:
@@ -144,15 +144,7 @@ public class MainActivity extends AppCompatActivity{
                 }
 
                 mToolBar.setTitle(APP_TITLE[curpos]);
-                MenuItem refresh = topMenu.findItem(R.id.action_refresh);
-                MenuItem favorite = topMenu.findItem(R.id.action_favorite);
-                if (curpos == Article.YITU) {
-                    refresh.setVisible(true);
-                    favorite.setVisible(true);
-                } else {
-                    refresh.setVisible(false);
-                    favorite.setVisible(false);
-                }
+                setUpMenu();
             }
         });
     }
@@ -211,17 +203,25 @@ public class MainActivity extends AppCompatActivity{
         topMenu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
+        setUpMenu();
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setUpMenu(){
+        // 根据当前状态显示或隐藏菜单
         MenuItem refresh = topMenu.findItem(R.id.action_refresh);
         MenuItem favorite = topMenu.findItem(R.id.action_favorite);
+        MenuItem share = topMenu.findItem(R.id.action_share);
         if (curpos == Article.YITU) {
             refresh.setVisible(true);
             favorite.setVisible(true);
+            share.setVisible(true);
         } else {
             refresh.setVisible(false);
             favorite.setVisible(false);
+            share.setVisible(false);
         }
-
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

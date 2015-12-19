@@ -28,6 +28,7 @@ import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezePageResponseHandler;
 import com.simit.sneezereader.R;
+import com.simit.sneezereader.SneezeApplication;
 import com.simit.sneezereader.UpdateService;
 
 /**
@@ -82,7 +83,13 @@ public class DetailFragment extends Fragment {
         //
         mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
-        //webSettings.setJavaScriptEnabled(true);   // 通过禁用js来禁用广告
+        SneezeApplication app = (SneezeApplication) getActivity().getApplication();
+        boolean ad_mode = app.getAdMode();
+        if(ad_mode == true){
+            webSettings.setJavaScriptEnabled(true);  // 开启评论,同时会出现广告
+        }else{
+            webSettings.setJavaScriptEnabled(false);  // 通过禁用js来禁用广告
+        }
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setUseWideViewPort(true);

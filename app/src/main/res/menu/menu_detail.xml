@@ -10,5 +10,6 @@
     <item android:id="@+id/action_share"
         android:icon="@mipmap/ic_share"
         android:title="@string/action_share"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:actionProviderClass="android.widget.ShareActionProvider"/>
 </menu>

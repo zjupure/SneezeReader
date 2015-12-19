@@ -14,6 +14,7 @@
     <string name="action_login">登录</string>
     <string name="action_collection">收藏</string>
     <string name="action_setting">设置</string>
+    <string name="action_change_theme">切换主题</string>
     <string name="action_share">分享</string>
     <string name="action_about">关于</string>
 
@@ -29,6 +30,19 @@
     <string name="user_name">用户名</string>
     <string name="user_signature">用户签名</string>
 
+    <!-- 设置 -->
+    <string name="setting_basic">基本设置</string>
+    <string name="setting_night">夜间模式</string>
+    <string name="setting_advertise">开启评论</string>
+    <string name="setting_more">更多</string>
+    <string name="setting_cache">清除缓存</string>
+    <string name="setting_version">检测更新</string>
+    <string name="setting_feedback">反馈</string>
+    <string name="setting_rank">给我们评分</string>
+    <string name="setting_share">分享给朋友</string>
+
+    <string name="dialog_warning">注意</string>
+    <string name="dialog_msg">开启评论将会加载页面内的广告，确定开启吗？</string>
     <!-- 下拉刷新 -->
     <string name="pull_to_refresh_pull_label">下拉刷新</string>
     <string name="pull_to_refresh_release_label">放开以刷新</string>

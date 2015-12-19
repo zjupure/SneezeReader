@@ -46,6 +46,14 @@
                 android:value="com.simit.sneezereader.MainActivity" />
         </activity>
 
+        <activity android:name=".SettingActivity"
+            android:parentActivityName=".MainActivity" >
+
+            <meta-data
+                android:name="android:support.PARENT_ACTIVITY"
+                android:value="com.simit.sneezereader.MainActivity" />
+        </activity>
+
         <service android:name=".UpdateService">
 
         </service>

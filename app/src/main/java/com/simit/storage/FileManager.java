@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Created by liuchun on 2015/7/17.
@@ -80,6 +81,59 @@ public class FileManager {
         }
 
         return absolutePath;
+    }
+
+    public String getStoreDirSize(){
+        // 文件夹路径
+        String storePath = DEFAULT_PAGE_DIR;
+        boolean sdExist = CheckSDState();
+        File file;
+
+        // 时刻都要检测SD卡是否存在
+        if(sdExist){
+            file = new File(context.getExternalFilesDir(null), storePath);
+        }else {
+            file = new File(context.getFilesDir(), storePath);
+        }
+
+        long size = getFileSize(file);
+        return FormetFileSize(size);
+    }
+
+    // 递归求解文件夹大小
+    public long getFileSize(File file){
+        long size = 0;
+        File flist[] = file.listFiles();
+
+        for(int i = 0; i < flist.length; i++){
+            if(flist[i].isDirectory()){
+                size += getFileSize(flist[i]);
+            }
+            else{
+                size += flist[i].length();
+            }
+        }
+
+        return size;
+    }
+
+    private static String FormetFileSize(long fileSize) {
+        DecimalFormat df = new DecimalFormat("#.00");
+        String fileSizeString = "";
+        String wrongSize = "0B";
+        if (fileSize == 0) {
+            return wrongSize;
+        }
+        if (fileSize < 1024) {
+            fileSizeString = df.format((double) fileSize) + "B";
+        } else if (fileSize < 1048576) {
+            fileSizeString = df.format((double) fileSize / 1024) + "KB";
+        } else if (fileSize < 1073741824) {
+            fileSizeString = df.format((double) fileSize / 1048576) + "MB";
+        } else {
+            fileSizeString = df.format((double) fileSize / 1073741824) + "GB";
+        }
+        return fileSizeString;
     }
 
     /**
