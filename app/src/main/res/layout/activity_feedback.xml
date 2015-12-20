@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="20dp">
+        <TextView
+            android:id="@+id/feedback_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feedback_title"/>
+        <EditText
+            android:id="@+id/feedback_title_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/feedback_title"
+            android:layout_marginLeft="10dp"
+            android:singleLine="true"
+            android:hint="@string/feedback_title_hint"
+            android:textColorHint="#eaeaea"
+            android:background="@drawable/edittext_background"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="20dp">
+        <TextView
+            android:id="@+id/feedback_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feedback_description"
+            android:layout_gravity="top"/>
+        <EditText
+            android:id="@+id/feedback_des_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/feedback_description"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/edittext_background"
+            android:inputType="textMultiLine"
+            android:hint="@string/feedback_des_hint"
+            android:textColorHint="#eaeaea"
+            android:lines="10"
+            android:scrollbars="vertical"
+            android:gravity="top"/>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/feedback_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/btn_background"
+        android:text="@string/feedback_submit"/>
+</LinearLayout>

@@ -178,6 +178,15 @@ public class DBManager {
         return links;
     }
 
+    // 清除所有的本地缓存连接
+    public void clearLocalLink(){
+        ContentValues cv = new ContentValues();
+        cv.put("local_link", "");
+
+        String[] args = {""};
+        db.update("articles", cv, "local_link!=?", args);
+    }
+
     /**
      * 查询特定类型的数据填充到数据管理器
      * @param type

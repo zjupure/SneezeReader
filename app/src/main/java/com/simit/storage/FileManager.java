@@ -19,22 +19,26 @@ public class FileManager {
     private static Context context;
 
     private FileManager(Context ctx){
-        boolean sdExist = CheckSDState();
         File file;
-
         context = ctx;
-        if(sdExist){
-            // sdcard is exsit
-            file = new File(context.getExternalFilesDir(null), DEFAULT_PAGE_DIR);
-        }else {
-            // save to internal storage
-            file = new File(context.getFilesDir(), DEFAULT_PAGE_DIR);
-        }
-
+        // save to internal storage
+        file = new File(context.getFilesDir(), DEFAULT_PAGE_DIR);
         if(!file.exists()){
             // create a directory
             file.mkdir();
         }
+
+        boolean sdExist = CheckSDState();
+        if(sdExist){
+            // sdcard is exsit
+            file = new File(context.getExternalFilesDir(null), DEFAULT_PAGE_DIR);
+            if(!file.exists()){
+                // create a directory
+                file.mkdir();
+            }
+        }
+
+
     }
 
     /**
@@ -60,7 +64,7 @@ public class FileManager {
         boolean sdExist = CheckSDState();
         File file;
 
-        // 时刻都要检测SD卡是否存在
+        // 时刻都要检测SD卡是否存在,优先存储到外部存储
         if(sdExist){
             file = new File(context.getExternalFilesDir(null), storePath);
         }else {
@@ -86,17 +90,18 @@ public class FileManager {
     public String getStoreDirSize(){
         // 文件夹路径
         String storePath = DEFAULT_PAGE_DIR;
-        boolean sdExist = CheckSDState();
         File file;
+        long size = 0L;
 
+        file = new File(context.getFilesDir(), storePath);
+        size += getFileSize(file);
         // 时刻都要检测SD卡是否存在
+        boolean sdExist = CheckSDState();
         if(sdExist){
             file = new File(context.getExternalFilesDir(null), storePath);
-        }else {
-            file = new File(context.getFilesDir(), storePath);
+            size += getFileSize(file);
         }
 
-        long size = getFileSize(file);
         return FormetFileSize(size);
     }
 
@@ -134,6 +139,33 @@ public class FileManager {
             fileSizeString = df.format((double) fileSize / 1073741824) + "GB";
         }
         return fileSizeString;
+    }
+
+    public void clearStoreDir(){
+        // 文件夹路径
+        String storePath = DEFAULT_PAGE_DIR;
+        File file;
+
+        file = new File(context.getFilesDir(), storePath);
+        deleteFile(file);
+        // 时刻都要检测SD卡是否存在
+        boolean sdExist = CheckSDState();
+        if(sdExist){
+            file = new File(context.getExternalFilesDir(null), storePath);
+            deleteFile(file);
+        }
+    }
+
+    public void deleteFile(File file){
+        File flist[] = file.listFiles();
+
+        for(int i = 0; i < flist.length; i++){
+            if(flist[i].isDirectory()){
+                deleteFile(flist[i]);
+            }else {
+                flist[i].delete();
+            }
+        }
     }
 
     /**

@@ -19,6 +19,7 @@ import java.util.Date;
 public class SneezeApplication extends Application {
     // basic settings
     private boolean night_mode;
+    private boolean notify_mode;
     private boolean advertise_mode;
 
     @Override
@@ -29,12 +30,17 @@ public class SneezeApplication extends Application {
         SneezeClient.getInstance(this);
         DBManager.getInstance(this);
 
-        night_mode = restoreConfigBoolean("night_mode");
-        advertise_mode = restoreConfigBoolean("ad_mode");
+        night_mode = restoreConfigBoolean("night_mode", false);
+        notify_mode = restoreConfigBoolean("notify_mode", true);
+        advertise_mode = restoreConfigBoolean("ad_mode", false);
     }
 
     public boolean getNightMode(){
         return night_mode;
+    }
+
+    public boolean getNotifyMode(){
+        return notify_mode;
     }
 
     public boolean getAdMode(){
@@ -44,6 +50,11 @@ public class SneezeApplication extends Application {
     public void setNightMode(boolean value){
         night_mode = value;
         saveConfigBoolean("night_mode", value);
+    }
+
+    public void setNotifyMode(boolean value){
+        notify_mode = value;
+        saveConfigBoolean("notify_mode", value);
     }
 
     public void setAdMode(boolean value){
@@ -74,10 +85,10 @@ public class SneezeApplication extends Application {
         editor.commit();
     }
 
-    public boolean restoreConfigBoolean(String key){
+    public boolean restoreConfigBoolean(String key, boolean defValue){
         SharedPreferences preferences = getSharedPreferences("config", Context.MODE_PRIVATE);
 
-        boolean value = preferences.getBoolean(key, false);
+        boolean value = preferences.getBoolean(key, defValue);
         return value;
     }
 }

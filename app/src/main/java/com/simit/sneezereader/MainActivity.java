@@ -200,19 +200,21 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        topMenu = menu;
+        // 渲染菜单
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
+        topMenu = menu;
         setUpMenu();
 
         return super.onCreateOptionsMenu(menu);
     }
 
     private void setUpMenu(){
+
         // 根据当前状态显示或隐藏菜单
         MenuItem refresh = topMenu.findItem(R.id.action_refresh);
         MenuItem favorite = topMenu.findItem(R.id.action_favorite);
         MenuItem share = topMenu.findItem(R.id.action_share);
+
         if (curpos == Article.YITU) {
             refresh.setVisible(true);
             favorite.setVisible(true);

@@ -30,6 +30,24 @@
                 android:layout_centerVertical="true"
                 android:textSize="18sp"
                 android:textColor="#c7c7c7"
+                android:text="@string/setting_notify"/>
+            <CheckBox
+                android:id="@+id/notify_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            style="@style/setting_item">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textSize="18sp"
+                android:textColor="#c7c7c7"
                 android:text="@string/setting_night"/>
             <CheckBox
                 android:id="@+id/night_mode"
@@ -60,14 +78,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
+            android:layout_marginTop="40dp"
             android:paddingBottom="6dp"
             android:text="@string/setting_more"
             android:textSize="18sp"
             android:background="@drawable/item_background"/>
         <RelativeLayout
             android:id="@+id/clear_cache"
-            style="@style/setting_item">
+            style="@style/setting_item_more">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -89,7 +107,7 @@
 
         <RelativeLayout
             android:id="@+id/check_update"
-            style="@style/setting_item">
+            style="@style/setting_item_more">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -111,7 +129,7 @@
 
         <RelativeLayout
             android:id="@+id/go_feedback"
-            style="@style/setting_item">
+            style="@style/setting_item_more">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -130,7 +148,7 @@
 
         <RelativeLayout
             android:id="@+id/go_rank"
-            style="@style/setting_item">
+            style="@style/setting_item_more">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -149,7 +167,7 @@
 
         <RelativeLayout
             android:id="@+id/go_share"
-            style="@style/setting_item">
+            style="@style/setting_item_more">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

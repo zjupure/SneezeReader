@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.simit.database.DBManager;
 import com.simit.storage.FileManager;
 
 /**
@@ -23,7 +24,7 @@ import com.simit.storage.FileManager;
 public class SettingActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
     // Component
     private Toolbar mToolBar;
-    private CheckBox mNight, mAdvertise;
+    private CheckBox mNight, mNotify, mAdvertise;
     private View mClearCache, mCheckUpdate, mFeedBack;
     private View mGoRank, mGoShare;
     private TextView mCacheSize, mVersion;
@@ -46,6 +47,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mNight = (CheckBox) findViewById(R.id.night_mode);
+        mNotify = (CheckBox) findViewById(R.id.notify_mode);
         mAdvertise = (CheckBox) findViewById(R.id.advertise_mode);
         mClearCache = findViewById(R.id.clear_cache);
         mCheckUpdate = findViewById(R.id.check_update);
@@ -56,6 +58,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         // 监听checkbox
         mNight.setChecked(app.getNightMode());
         mNight.setOnCheckedChangeListener(this);
+        mNotify.setChecked(app.getNotifyMode());
+        mNotify.setOnCheckedChangeListener(this);
         mAdvertise.setChecked(app.getAdMode());
         mAdvertise.setOnCheckedChangeListener(this);
         // 监听其他设置按键
@@ -82,6 +86,9 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.night_mode:
                 app.setNightMode(isChecked);
                 break;
+            case R.id.notify_mode:
+                app.setNotifyMode(isChecked);
+                break;
             case R.id.advertise_mode:
                 if(isChecked == true){
                     displayWarning(buttonView);
@@ -94,17 +101,23 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
+        Intent intent;
         switch (v.getId()){
             case R.id.clear_cache:
+                FileManager.getInstance(this).clearStoreDir();
+                DBManager.getInstance(this).clearLocalLink();
+                mCacheSize.setText("0KB");
                 break;
             case R.id.check_update:
                 break;
             case R.id.go_feedback:
+                intent = new Intent(this, FeedBackActivity.class);
+                startActivity(intent);
                 break;
             case R.id.go_rank:
                 try{
                     Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    intent = new Intent(Intent.ACTION_VIEW, uri);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }catch (ActivityNotFoundException e){
@@ -112,9 +125,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 break;
             case R.id.go_share:
-                Uri uri = Uri.parse("www.baidu.com");
-                Intent intent = new Intent(Intent.ACTION_SEND, uri);
+                //Uri uri = Uri.parse("www.baidu.com");
+                intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, "www.baidu.com");
                 startActivity(intent);
                 break;
             default:break;
