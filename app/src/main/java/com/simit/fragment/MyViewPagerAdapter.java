@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.simit.datamodel.Article;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -14,20 +15,30 @@ import java.util.List;
  */
 public class MyViewPagerAdapter extends FragmentPagerAdapter {
     private List<Article> articles;
+    private HashMap<Article, DetailFragment>  fragMaps;
 
     public MyViewPagerAdapter(FragmentManager fm, List<Article> articles){
         super(fm);
         this.articles = articles;
+        fragMaps = new HashMap<>();
     }
 
     @Override
     public Fragment getItem(int position) {
-        DetailFragment fragment = new DetailFragment();
         Article article = articles.get(position);
+        DetailFragment fragment;
 
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("article", article);
-        fragment.setArguments(bundle);
+        if(fragMaps.containsKey(article)){
+            // cache in the map
+            fragment = fragMaps.get(article);
+        }else{
+            fragment = new DetailFragment();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("article", article);
+            fragment.setArguments(bundle);
+            // add to the cache
+            fragMaps.put(article, fragment);
+        }
 
         return fragment;
     }

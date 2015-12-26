@@ -215,12 +215,10 @@ public class YituFragment extends Fragment {
         loadTask.start();
     }
 
-
     @Override
     public void onPause() {
-        //
-        position = mViewPager.getCurrentItem();
         super.onPause();
+        position = mViewPager.getCurrentItem();
     }
 
     @Override

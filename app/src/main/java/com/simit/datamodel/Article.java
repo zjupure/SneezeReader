@@ -96,6 +96,12 @@ public class Article implements Parcelable{
     }
 
     @Override
+    public int hashCode() {
+        // remote_link is unique
+        return remote_link.hashCode();
+    }
+
+    @Override
     public int describeContents() {
         return type;
     }

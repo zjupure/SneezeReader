@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity{
         mTabMenu.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                int precos = curpos;
+                int prepos = curpos;
                 switch (checkedId) {
                     case R.id.tab_tugua:
                         curpos = Article.TUGUA;
@@ -137,9 +137,12 @@ public class MainActivity extends AppCompatActivity{
                         break;
                 }
                 //开始事务替换
-                if (curpos != precos) {
+                if (curpos != prepos) {
                     FragmentTransaction ft = fm.beginTransaction();
-                    ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
+                    // hide/show to save the fragment state
+                    ft.hide(mFragments.get(prepos));  // hide previous fragment
+                    ft.show(mFragments.get(curpos));  // show current fragment
+                    //ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
                     ft.commit();
                 }
 
@@ -171,7 +174,11 @@ public class MainActivity extends AppCompatActivity{
         //添加第0个页面到frag_container中
         fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        ft.add(R.id.content_container, mFragments.get(0), FRAG_TAG[0]);  //打Tag
+        for(int i = 0; i < 4; i++){
+            ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);  //打Tag
+            ft.hide(mFragments.get(i));  // hide all fragments
+        }
+        ft.show(mFragments.get(0));  // show first fragments
         ft.commit();
     }
 
