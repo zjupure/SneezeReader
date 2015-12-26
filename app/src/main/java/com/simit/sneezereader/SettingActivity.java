@@ -16,12 +16,14 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.simit.database.DBManager;
+import com.simit.network.SneezeClient;
 import com.simit.storage.FileManager;
 
 /**
  * Created by liuchun on 2015/12/18.
  */
 public class SettingActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
+    private static final String UPDATE_URL = "";
     // Component
     private Toolbar mToolBar;
     private CheckBox mNight, mNotify, mAdvertise;
@@ -29,12 +31,16 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private View mGoRank, mGoShare;
     private TextView mCacheSize, mVersion;
     //
+    private FileManager fileManager;
+    private DBManager dbManager;
     SneezeApplication app;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         //
+        fileManager = FileManager.getInstance(this);
+        dbManager = DBManager.getInstance(this);
         app = (SneezeApplication) getApplication();
         initView();
     }
@@ -91,7 +97,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.advertise_mode:
                 if(isChecked == true){
-                    displayWarning(buttonView);
+                    displayWarning();
                 }
                 app.setAdMode(isChecked);
                 break;
@@ -104,11 +110,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         Intent intent;
         switch (v.getId()){
             case R.id.clear_cache:
-                FileManager.getInstance(this).clearStoreDir();
-                DBManager.getInstance(this).clearLocalLink();
-                mCacheSize.setText("0KB");
+                displayCacheWarning();
                 break;
             case R.id.check_update:
+                checkUpdate();
                 break;
             case R.id.go_feedback:
                 intent = new Intent(this, FeedBackActivity.class);
@@ -135,10 +140,33 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void displayWarning(final CompoundButton button){
+    private void displayCacheWarning(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialog_warning);
+        builder.setMessage(R.string.dialog_cache_msg);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                fileManager.clearStoreDir();
+                dbManager.clearLocalLink();
+                mCacheSize.setText("0KB");
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.create().show();
+    }
+
+    private void displayWarning(){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_warning);
-        builder.setMessage(R.string.dialog_msg);
+        builder.setMessage(R.string.dialog_comments_msg);
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -149,7 +177,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                button.setChecked(false);
+                mAdvertise.setChecked(false);
             }
         });
 
@@ -171,5 +199,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         return version;
+    }
+
+    private void checkUpdate(){
+        //SneezeClient client = SneezeClient.getInstance(this);
+        //client.get(UPDATE_URL, null, hander);
     }
 }

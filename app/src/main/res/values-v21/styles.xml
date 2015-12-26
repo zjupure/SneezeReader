@@ -3,17 +3,20 @@
     <!-- Base application theme. -->
     <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- toolbar color -->
-        <item name="android:colorPrimary">#66ccff</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
         <!-- statusbar color -->
-        <item name="android:colorPrimaryDark">#66ccff</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!-- UI style -->
+        <item name="android:colorAccent">@color/colorAccent</item>
         <!-- window background color -->
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/background</item>
         <!-- text color
         <item name="android:textColorPrimary">#fffff0</item>
         -->
         <!-- status bar -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        -->
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <!-- navigation bar -->
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
         <!-- SearchView-->
         <item name="android:searchViewStyle">@android:style/Widget.Material.SearchView</item>
     </style>

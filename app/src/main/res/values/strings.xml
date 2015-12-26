@@ -42,8 +42,10 @@
     <string name="setting_rank">给我们评分</string>
     <string name="setting_share">分享给朋友</string>
 
+    <!-- 对话框警告 -->
     <string name="dialog_warning">注意</string>
-    <string name="dialog_msg">开启评论将会加载页面内的广告，确定开启吗？</string>
+    <string name="dialog_comments_msg">开启评论将会加载页面内的广告，确定开启吗？</string>
+    <string name="dialog_cache_msg">清除缓存将会导致离线数据不可用，确定清除吗？</string>
 
     <!-- 反馈 -->
     <string name="feedback_title">标题</string>

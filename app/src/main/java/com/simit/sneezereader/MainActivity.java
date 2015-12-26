@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity{
         //mToolBar.setTitle(R.string.app_title);
         mToolBar.setTitle(APP_TITLE[curpos]);
         setSupportActionBar(mToolBar);
-        // set up toolbar
-        mToolBar.setNavigationIcon(R.drawable.user_logo);
         // DrawerLayout, Navigation View
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mNavView = (NavigationView)findViewById(R.id.nav_view);
@@ -77,6 +75,8 @@ public class MainActivity extends AppCompatActivity{
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolBar, R.string.app_name, R.string.app_name);
         mToggle.syncState();
         mDrawerLayout.setDrawerListener(mToggle);
+        // set up toolbar
+        //mToolBar.setNavigationIcon(R.drawable.user_logo);
         //
         if(mNavView != null){
 
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity{
                    @Override
                    public boolean onNavigationItemSelected(MenuItem menuItem) {
                        //切换对应的Fragment操作
-                       menuItem.setCheckable(true);
+                       menuItem.setChecked(true);
                        mDrawerLayout.closeDrawers();
 
                        //根据菜单项跳转
@@ -196,6 +196,8 @@ public class MainActivity extends AppCompatActivity{
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mToggle.syncState();  //状态同步
+        // set up toolbar
+        //mToolBar.setNavigationIcon(R.drawable.user_logo);
     }
 
     @Override

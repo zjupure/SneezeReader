@@ -3,8 +3,14 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
+        <!-- toolbar color -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!-- statusbar color -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!-- UI style -->
+        <item name="colorAccent">@color/colorAccent</item>
         <!-- window background color -->
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
 
