@@ -5,14 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RadioGroup;
@@ -25,7 +24,7 @@ import com.simit.fragment.YituFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends BaseActivity{
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
@@ -34,7 +33,6 @@ public class MainActivity extends AppCompatActivity{
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
     private ActionBarDrawerToggle mToggle;
-    private Toolbar mToolBar;
     private RadioGroup mTabMenu;
     // Menu
     private Menu topMenu;
@@ -45,13 +43,17 @@ public class MainActivity extends AppCompatActivity{
     private int curpos = 0;
     // Back按键时间
     private long lastBackPress;
+    //
+    private SneezeApplication app;
+    private boolean nightMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //lastBackPress = System.currentTimeMillis();
+        app = (SneezeApplication) getApplication();
+        nightMode = app.getNightMode();
         // 初始化界面
         initView();
         // start service
@@ -59,20 +61,16 @@ public class MainActivity extends AppCompatActivity{
         startService(intent);
     }
 
-    /**
-     * 初始化界面
-     */
-    private void initView(){
-        // ToolBar
-        mToolBar = (Toolbar)findViewById(R.id.toolbar);
-        //mToolBar.setTitle(R.string.app_title);
-        mToolBar.setTitle(APP_TITLE[curpos]);
-        setSupportActionBar(mToolBar);
+    @Override
+    protected void initView(){
+        // init the toolbar
+        super.initView();
+        setToolBarTitle(APP_TITLE[curpos]);
         // DrawerLayout, Navigation View
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mNavView = (NavigationView)findViewById(R.id.nav_view);
         //设置mToggle
-        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolBar, R.string.app_name, R.string.app_name);
+        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, getToolBar(), R.string.app_name, R.string.app_name);
         mToggle.syncState();
         mDrawerLayout.setDrawerListener(mToggle);
         // set up toolbar
@@ -91,6 +89,15 @@ public class MainActivity extends AppCompatActivity{
                        Intent intent;
                        switch (menuItem.getItemId()) {
                            case R.id.nav_theme:
+                               nightMode = !nightMode;
+                               app.setNightMode(nightMode);
+                               Handler handler = new Handler();
+                               handler.postDelayed(new Runnable() {
+                                   @Override
+                                   public void run() {
+                                       updateTheme();
+                                   }
+                               }, 100);
                                break;
                            case R.id.nav_setting:
                                intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity{
                     ft.commit();
                 }
 
-                mToolBar.setTitle(APP_TITLE[curpos]);
+                setToolBarTitle(APP_TITLE[curpos]);
                 setUpMenu();
             }
         });

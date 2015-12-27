@@ -6,4 +6,8 @@
         <attr name="civ_border_overlay" format="boolean" />
         <attr name="civ_fill_color" format="color" />
     </declare-styleable>
+
+    <attr name="global_background" format="color" />
+    <attr name="global_textColor"  format="color" />
+    <attr name="toolbar_background" format="color" />
 </resources>

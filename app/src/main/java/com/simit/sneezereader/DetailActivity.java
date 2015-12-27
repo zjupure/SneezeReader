@@ -25,9 +25,8 @@ import java.util.List;
 /**
  * Created by liuchun on 2015/12/6.
  */
-public class DetailActivity extends AppCompatActivity{
+public class DetailActivity extends BaseActivity{
     // Component
-    private Toolbar mToolBar;
     private ViewPager mViewPager;
     private MyViewPagerAdapter mAdapter;
     // article info
@@ -49,17 +48,14 @@ public class DetailActivity extends AppCompatActivity{
         initView();
     }
 
-
-    private void initView(){
-        // ToolBar
-        mToolBar = (Toolbar)findViewById(R.id.toolbar);
+    @Override
+    protected void initView() {
+        super.initView();
         if(type == Article.TUGUA){
-            mToolBar.setTitle(R.string.title_tugua);
+            setToolBarTitle(R.string.title_tugua);
         }else if(type == Article.LEHUO){
-            mToolBar.setTitle(R.string.title_lehuo);
+            setToolBarTitle(R.string.title_lehuo);
         }
-        setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // ViewPager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -72,6 +68,7 @@ public class DetailActivity extends AppCompatActivity{
         // 显示第position项
         mViewPager.setCurrentItem(position);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

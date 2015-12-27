@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme.Light" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- toolbar color -->
         <item name="android:colorPrimary">@color/colorPrimary</item>
         <!-- statusbar color -->
@@ -10,18 +10,42 @@
         <item name="android:colorAccent">@color/colorAccent</item>
         <!-- window background color -->
         <item name="android:windowBackground">@color/background</item>
-        <!-- text color
-        <item name="android:textColorPrimary">#fffff0</item>
-        -->
+
+        <!-- text color -->
+        <item name="android:textColorPrimary">@color/textDark</item>
+
         <!-- status bar -->
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <!-- navigation bar -->
         <item name="android:navigationBarColor">@color/colorPrimary</item>
-        <!-- SearchView-->
-        <item name="android:searchViewStyle">@android:style/Widget.Material.SearchView</item>
+
+        <!-- Custom Theme -->
+        <item name="global_background">@color/background</item>
+        <item name="global_textColor">@color/textDark</item>
+        <item name="toolbar_background">@color/colorPrimary</item>
     </style>
 
+    <style name="AppTheme.Dark" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- toolbar color -->
+        <item name="android:colorPrimary">@color/nightColorPrimary</item>
+        <!-- statusbar color -->
+        <item name="android:colorPrimaryDark">@color/nightColorPrimaryDark</item>
+        <!-- UI style -->
+        <item name="android:colorAccent">@color/nightColorAccent</item>
+        <!-- window background color -->
+        <item name="android:windowBackground">@color/nightBackground</item>
+        <!-- text color -->
+        <item name="android:textColorPrimary">@color/textLight</item>
 
-    <style name="AppTheme" parent="@style/AppBaseTheme"></style>
+        <!-- status bar -->
+        <item name="android:statusBarColor">@color/nightColorPrimaryDark</item>
+        <!-- navigation bar -->
+        <item name="android:navigationBarColor">@color/nightColorPrimary</item>
+
+        <!-- Custom Theme -->
+        <item name="global_background">@color/nightBackground</item>
+        <item name="global_textColor">@color/textLight</item>
+        <item name="toolbar_background">@color/nightColorPrimary</item>
+    </style>
 
 </resources>

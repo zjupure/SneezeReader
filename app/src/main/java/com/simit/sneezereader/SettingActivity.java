@@ -22,10 +22,9 @@ import com.simit.storage.FileManager;
 /**
  * Created by liuchun on 2015/12/18.
  */
-public class SettingActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
+public class SettingActivity extends BaseActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
     private static final String UPDATE_URL = "";
     // Component
-    private Toolbar mToolBar;
     private CheckBox mNight, mNotify, mAdvertise;
     private View mClearCache, mCheckUpdate, mFeedBack;
     private View mGoRank, mGoShare;
@@ -45,13 +44,11 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         initView();
     }
 
-    private void initView(){
-        // ToolBar
-        mToolBar = (Toolbar)findViewById(R.id.toolbar);
-        mToolBar.setTitle(R.string.action_setting);
-        setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+    @Override
+    protected void initView(){
+        super.initView();
+        setToolBarTitle(R.string.action_setting);
+        //
         mNight = (CheckBox) findViewById(R.id.night_mode);
         mNotify = (CheckBox) findViewById(R.id.notify_mode);
         mAdvertise = (CheckBox) findViewById(R.id.advertise_mode);
@@ -91,6 +88,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         switch (buttonView.getId()){
             case R.id.night_mode:
                 app.setNightMode(isChecked);
+                updateTheme();
                 break;
             case R.id.notify_mode:
                 app.setNotifyMode(isChecked);
@@ -139,6 +137,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             default:break;
         }
     }
+
+
 
     private void displayCacheWarning(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

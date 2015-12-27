@@ -11,9 +11,8 @@ import android.widget.Toast;
 /**
  * Created by liuchun on 2015/12/20.
  */
-public class FeedBackActivity extends AppCompatActivity {
+public class FeedBackActivity extends BaseActivity {
     // Component
-    private Toolbar mToolBar;
     private EditText mTitle;
     private EditText mDescription;
     private Button mSubmit;
@@ -26,12 +25,11 @@ public class FeedBackActivity extends AppCompatActivity {
         initView();
     }
 
-    private void initView(){
+    @Override
+    protected void initView(){
         // ToolBar
-        mToolBar = (Toolbar)findViewById(R.id.toolbar);
-        mToolBar.setTitle(R.string.setting_feedback);
-        setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        super.initView();
+        setToolBarTitle(R.string.setting_feedback);
         // EditText
         mTitle = (EditText) findViewById(R.id.feedback_title_input);
         mDescription = (EditText) findViewById(R.id.feedback_des_input);

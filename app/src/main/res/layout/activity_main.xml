@@ -32,22 +32,26 @@
                 style="@style/tab_bottom"
                 android:checked="true"
                 android:drawableTop="@drawable/tugua"
-                android:text="@string/title_tugua"/>
+                android:text="@string/title_tugua"
+                android:textColor="?attr/global_textColor"/>
             <RadioButton
                 android:id="@+id/tab_lehuo"
                 style="@style/tab_bottom"
                 android:drawableTop="@drawable/lehuo"
-                android:text="@string/title_lehuo"/>
+                android:text="@string/title_lehuo"
+                android:textColor="?attr/global_textColor"/>
             <RadioButton
                 android:id="@+id/tab_yitu"
                 style="@style/tab_bottom"
                 android:drawableTop="@drawable/yitu"
-                android:text="@string/title_yitu"/>
+                android:text="@string/title_yitu"
+                android:textColor="?attr/global_textColor"/>
             <RadioButton
                 android:id="@+id/tab_duanzi"
                 style="@style/tab_bottom"
                 android:drawableTop="@drawable/duanzi"
-                android:text="@string/title_duanzi"/>
+                android:text="@string/title_duanzi"
+                android:textColor="?attr/global_textColor"/>
         </RadioGroup>
     </LinearLayout>
 
@@ -56,10 +60,10 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:background="#ffffff"
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/menu_drawer"
-        app:itemIconTint="#ee9a00" />
+        app:itemIconTint="#ee9a00"
+        app:itemTextColor="?attr/global_textColor" />
 </android.support.v4.widget.DrawerLayout>
 
 

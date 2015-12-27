@@ -18,8 +18,8 @@
         android:paddingBottom="8dp"
         android:background="@null"
         android:ellipsize="none"
-        android:textColor="@color/title"
         android:textSize="18sp"
+        android:textColor="?attr/global_textColor"
         android:text="@string/app_name"/>
 
 </LinearLayout>

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#66ccff</color>
-    <color name="colorPrimaryDark">#cc66ccff</color>
+    <color name="colorPrimaryDark">#33ccff</color>
     <color name="colorAccent">#3399cc</color>
     <color name="background">#ffffff</color>
-    <color name="title">#000000</color>
+    <color name="textDark">#000000</color>
+
+    <color name="nightColorPrimary">#363636</color>
+    <color name="nightColorPrimaryDark">#0f0f0f</color>
+    <color name="nightColorAccent">#4f4f4f</color>
+    <color name="nightBackground">#383838</color>
+    <color name="textLight">#ffffff</color>
 </resources>

@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme.Light" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <!-- toolbar color -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -11,8 +11,33 @@
         <item name="colorAccent">@color/colorAccent</item>
         <!-- window background color -->
         <item name="android:windowBackground">@color/background</item>
+        <!-- text color
+        <item name="textColorPrimary">@color/textDark</item>
+        -->
+        <!-- Custom Theme -->
+        <item name="global_background">@color/background</item>
+        <item name="global_textColor">@color/textDark</item>
+        <item name="toolbar_background">@color/colorPrimary</item>
     </style>
 
+    <style name="AppTheme.Dark" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <!-- toolbar color -->
+        <item name="colorPrimary">@color/nightColorPrimary</item>
+        <!-- statusbar color -->
+        <item name="colorPrimaryDark">@color/nightColorPrimaryDark</item>
+        <!-- UI style -->
+        <item name="colorAccent">@color/nightColorAccent</item>
+        <!-- window background color -->
+        <item name="android:windowBackground">@color/nightBackground</item>
+        <!-- text color
+        <item name="textColorPrimary">@color/textLight</item>
+        -->
+        <!-- Custom Theme -->
+        <item name="global_background">@color/nightBackground</item>
+        <item name="global_textColor">@color/textLight</item>
+        <item name="toolbar_background">@color/nightColorPrimary</item>
+    </style>
 
     <!-- RadioButton Style -->
     <style name="tab_bottom" >

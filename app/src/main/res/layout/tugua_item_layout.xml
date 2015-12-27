@@ -17,7 +17,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:ellipsize="none"
-        android:textColor="@color/title"
+        android:textColor="?attr/global_textColor"
         android:textSize="18sp" />
 
     <com.facebook.drawee.view.SimpleDraweeView

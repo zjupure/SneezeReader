@@ -24,7 +24,6 @@ app:cardElevation="10dp">
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:ellipsize="none"
-            android:textColor="@color/title"
             android:textSize="18sp" />
 
         <com.facebook.drawee.view.SimpleDraweeView

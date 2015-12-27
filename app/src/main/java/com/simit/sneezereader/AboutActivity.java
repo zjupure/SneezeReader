@@ -13,22 +13,23 @@ import java.io.InputStream;
 /**
  * Created by liuchun on 2015/12/15.
  */
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
     // Component
-    private Toolbar mToolBar;
     private TextView mAboutText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_about);
-        // ToolBar
-        mToolBar = (Toolbar)findViewById(R.id.toolbar);
-        mToolBar.setTitle(R.string.app_about);
-        setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //
+        initView();
+    }
 
+    @Override
+    protected void initView() {
+        super.initView();
+        setToolBarTitle(R.string.app_about);
+        //
         mAboutText = (TextView) findViewById(R.id.app_about);
         try{
             InputStream is = getAssets().open("about.html");
@@ -45,6 +46,5 @@ public class AboutActivity extends AppCompatActivity {
         }catch (IOException e){
             e.printStackTrace();
         }
-
     }
 }
