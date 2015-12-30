@@ -1,17 +1,11 @@
 package com.simit.network;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.simit.database.DBManager;
-import com.simit.datamodel.DataManager;
-import com.simit.sneezereader.Config;
 import com.simit.storage.FileManager;
 import com.loopj.android.http.TextHttpResponseHandler;
-
-import java.io.File;
 
 import cz.msebera.android.httpclient.Header;
 

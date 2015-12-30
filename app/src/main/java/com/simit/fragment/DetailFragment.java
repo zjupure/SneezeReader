@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,10 +25,8 @@ import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
-import com.simit.network.SneezePageResponseHandler;
 import com.simit.sneezereader.R;
 import com.simit.sneezereader.SneezeApplication;
-import com.simit.sneezereader.UpdateService;
 
 /**
  * Created by liuchun on 2015/12/12.
@@ -89,6 +86,10 @@ public class DetailFragment extends Fragment {
             webSettings.setJavaScriptEnabled(true);  // 开启评论,同时会出现广告
         }else{
             webSettings.setJavaScriptEnabled(false);  // 通过禁用js来禁用广告
+        }
+        boolean night_mode = app.getNightMode();
+        if(night_mode){
+            mWebView.setBackgroundColor(getResources().getColor(R.color.nightBackground));
         }
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);

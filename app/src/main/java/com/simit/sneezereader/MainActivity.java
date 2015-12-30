@@ -12,8 +12,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -29,6 +31,7 @@ public class MainActivity extends BaseActivity{
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
                                 R.string.title_yitu, R.string.title_duanzi};
+    private static final int[] RADIO_BUTTON_ID = {R.id.tab_tugua, R.id.tab_lehuo, R.id.tab_yitu, R.id.tab_duanzi};
     //界面组件
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
@@ -40,7 +43,7 @@ public class MainActivity extends BaseActivity{
     public List<Fragment> mFragments;
     private FragmentManager fm;
     //基本信息
-    private int curpos = 0;
+    private int curpos;
     // Back按键时间
     private long lastBackPress;
     //
@@ -52,12 +55,14 @@ public class MainActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = getIntent();
+        curpos = intent.getIntExtra("pos", 0);
         app = (SneezeApplication) getApplication();
         nightMode = app.getNightMode();
         // 初始化界面
         initView();
         // start service
-        Intent intent = new Intent(this, UpdateService.class);
+        intent = new Intent(this, UpdateService.class);
         startService(intent);
     }
 
@@ -84,20 +89,12 @@ public class MainActivity extends BaseActivity{
                        //切换对应的Fragment操作
                        menuItem.setChecked(true);
                        mDrawerLayout.closeDrawers();
-
                        //根据菜单项跳转
                        Intent intent;
                        switch (menuItem.getItemId()) {
                            case R.id.nav_theme:
-                               nightMode = !nightMode;
-                               app.setNightMode(nightMode);
-                               Handler handler = new Handler();
-                               handler.postDelayed(new Runnable() {
-                                   @Override
-                                   public void run() {
-                                       updateTheme();
-                                   }
-                               }, 100);
+                               app.setNightMode(!nightMode);
+                               updateTheme();
                                break;
                            case R.id.nav_setting:
                                intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -157,7 +154,11 @@ public class MainActivity extends BaseActivity{
                 setUpMenu();
             }
         });
+        //选中当前项
+        RadioButton button = (RadioButton) findViewById(RADIO_BUTTON_ID[curpos]);
+        button.setChecked(true);
     }
+
 
     /**
      * 初始化ViewPager中的Fragments
@@ -185,8 +186,29 @@ public class MainActivity extends BaseActivity{
             ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);  //打Tag
             ft.hide(mFragments.get(i));  // hide all fragments
         }
-        ft.show(mFragments.get(0));  // show first fragments
+        ft.show(mFragments.get(curpos));  // show first fragments
         ft.commit();
+    }
+
+
+    @Override
+    protected void updateTheme() {
+        //
+        Handler handler =  new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // finish itself
+                overridePendingTransition(0, 0);
+                finish();
+                // restart itself
+                Intent intent = getIntent();
+                intent.putExtra("pos", curpos);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                overridePendingTransition(0, 0);
+                startActivity(intent);
+            }
+        }, 200);
     }
 
     public static void saveLastUpdated(Activity activity, int curpos,  String lastUpdated){
@@ -220,12 +242,14 @@ public class MainActivity extends BaseActivity{
         getMenuInflater().inflate(R.menu.menu_main, menu);
         topMenu = menu;
         setUpMenu();
-
+        Log.d("MainActivity", "OptionMenu created");
         return super.onCreateOptionsMenu(menu);
     }
 
     private void setUpMenu(){
-
+        if(topMenu == null){
+            return;  // Menu has not be loaded
+        }
         // 根据当前状态显示或隐藏菜单
         MenuItem refresh = topMenu.findItem(R.id.action_refresh);
         MenuItem favorite = topMenu.findItem(R.id.action_favorite);

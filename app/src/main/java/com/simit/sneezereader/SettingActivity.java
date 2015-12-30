@@ -8,15 +8,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.simit.database.DBManager;
-import com.simit.network.SneezeClient;
 import com.simit.storage.FileManager;
 
 /**
@@ -95,7 +92,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 break;
             case R.id.advertise_mode:
                 if(isChecked == true){
-                    displayWarning();
+                    displayCommentsWarning();
                 }
                 app.setAdMode(isChecked);
                 break;
@@ -163,7 +160,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         builder.create().show();
     }
 
-    private void displayWarning(){
+    private void displayCommentsWarning(){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_warning);
         builder.setMessage(R.string.dialog_comments_msg);

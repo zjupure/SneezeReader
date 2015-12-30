@@ -1,18 +1,13 @@
 package com.simit.sneezereader;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;

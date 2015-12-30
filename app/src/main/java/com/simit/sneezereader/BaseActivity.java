@@ -16,15 +16,16 @@ public class BaseActivity extends AppCompatActivity {
     private Toolbar mToolBar;
     private boolean mNightMode;
 
+    private SneezeApplication app;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 设置主题
         setupTheme();
     }
 
-
     protected void setupTheme(){
-        SneezeApplication app = (SneezeApplication) getApplication();
+        app = (SneezeApplication) getApplication();
         mNightMode = app.getNightMode();
 
         if(mNightMode){
@@ -59,38 +60,6 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private void setStatusBarColor(int resid){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            int color = getResources().getColor(resid);
-            getWindow().setStatusBarColor(color);
-        }
-    }
-
-    private void setNavigationBarColor(int resid){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            int color = getResources().getColor(resid);
-            getWindow().setNavigationBarColor(color);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SneezeApplication app = (SneezeApplication) getApplication();
-        boolean nightMode = app.getNightMode();
-        // 主题已经被设置过了
-        if(nightMode != mNightMode){
-            mNightMode = nightMode;
-            // 重启Activity
-            Intent intent = getIntent();
-            overridePendingTransition(0, 0); // 不设置进入退出动画
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            finish();
-            overridePendingTransition(0, 0);
-            startActivity(intent);
-        }
-    }
-
     /**
      * 初始化界面
      */
@@ -113,10 +82,12 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void updateTheme(){
-        Intent intent = getIntent();
+        // 重启Activity
         overridePendingTransition(0, 0); // 不设置进入退出动画
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         finish();
+        Intent intent = getIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         overridePendingTransition(0, 0);
         startActivity(intent);
     }

@@ -15,7 +15,6 @@ import com.simit.datamodel.DataManager;
 import com.simit.jsonparser.JsonParserUtil;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
-import com.simit.network.SneezePageResponseHandler;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.loopj.android.http.TextHttpResponseHandler;
 

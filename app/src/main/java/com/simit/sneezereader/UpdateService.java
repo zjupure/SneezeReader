@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 
-import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;
 import com.simit.network.NetworkMonitor;

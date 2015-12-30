@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

@@ -3,15 +3,11 @@ package com.simit.sneezereader;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 
 import com.simit.database.DBManager;
 import com.simit.network.SneezeClient;
 import com.facebook.drawee.backends.pipeline.Fresco;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by liuchun on 2015/7/18.
@@ -21,7 +17,6 @@ public class SneezeApplication extends Application {
     private boolean night_mode;
     private boolean notify_mode;
     private boolean advertise_mode;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -33,6 +28,7 @@ public class SneezeApplication extends Application {
         night_mode = restoreConfigBoolean("night_mode", false);
         notify_mode = restoreConfigBoolean("notify_mode", true);
         advertise_mode = restoreConfigBoolean("ad_mode", false);
+
     }
 
     public boolean getNightMode(){
