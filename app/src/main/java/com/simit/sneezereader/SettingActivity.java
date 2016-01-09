@@ -91,9 +91,10 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 app.setNotifyMode(isChecked);
                 break;
             case R.id.advertise_mode:
+                /*
                 if(isChecked == true){
                     displayCommentsWarning();
-                }
+                }*/
                 app.setAdMode(isChecked);
                 break;
             default:break;
