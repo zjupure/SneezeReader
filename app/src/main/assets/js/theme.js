@@ -1,9 +1,9 @@
 function setTheme(theme){
 	var style = document.createElement("style");
-	style.setAttribute("type", "text/css")
+	style.setAttribute("type", "text/css");
 
-	var dayCss = "body{background-color:#ffffff;color:#000000}";
-	var nightCss = "body{background-color:#3b3b3b;color:#ffffff}";
+	var dayCss = "body{background-color:#ffffff;color:#000000}\na:link{color:#0000ff;}";
+	var nightCss = "body{background-color:#3b3b3b;color:#ffffff}\na:link{color:#0066ff;}";
 	var cssText = nightCss;
 
 	if(theme == 'day'){
@@ -28,7 +28,6 @@ function setTheme(theme){
 
 
 function changeTheme(cssPath){
-	// body...
 	var fileref = document.createElement("link");
 	fileref.setAttribute("rel", "stylesheet");
 	fileref.setAttribute("type", "text/css");

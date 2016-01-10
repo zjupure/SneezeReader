@@ -1,7 +1,9 @@
 package com.simit.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -20,6 +22,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.simit.database.DBManager;
@@ -54,7 +57,7 @@ public class DetailFragment extends Fragment {
     private int networkState;
     // 加载的是本地文件还是远程文件
     private boolean location;
-    //
+    private boolean night_mode;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,7 +78,10 @@ public class DetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         article = getArguments().getParcelable("article");
-        networkState = NetworkMonitor.getNetWorkState(getActivity());
+        Activity context = getActivity();
+        networkState = NetworkMonitor.getNetWorkState(context);
+        SneezeApplication app = (SneezeApplication) context.getApplication();
+        night_mode = app.getNightMode();
         //初始化界面View
         initWebView();
     }
@@ -98,9 +104,14 @@ public class DetailFragment extends Fragment {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setBlockNetworkImage(true);
-
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
             webSettings.setDisplayZoomControls(false);
+        }
+        // 设置webView的背景色
+        if(night_mode){
+            mWebView.setBackgroundColor(getResources().getColor(R.color.nightBackground));
+        }else{
+            mWebView.setBackgroundColor(getResources().getColor(R.color.background));
         }
 
         mWebView.setWebViewClient(new WebViewClient() {
@@ -118,7 +129,6 @@ public class DetailFragment extends Fragment {
                 startActivity(intent);
                 return true;
             }
-
 
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
@@ -174,27 +184,22 @@ public class DetailFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                // 开始加载图片
+                webSettings.setBlockNetworkImage(false);
                 // 注入js代码
                 String wholeJS = loadThemeJs();
                 if(!wholeJS.isEmpty()){
                     // js文件非空
-                    Log.d("webview", wholeJS);
+                    Log.d("webview", "javascript:" + wholeJS);
                     mWebView.loadUrl("javascript:" + wholeJS);
                 }
-                // 开始加载图片
-                webSettings.setBlockNetworkImage(false);
-                // 页面加载完成,延迟设置css主题
-                SneezeApplication app = (SneezeApplication) getActivity().getApplication();
-                boolean night_mode = app.getNightMode();
-                String jscmd;
+                String jsCmd;
                 if(night_mode){
-                    //jscmd = "javascript:changeTheme('" + NIGHT_THEME_CSS + "')";
-                    jscmd = "javascript:setTheme('night')";
-                    mWebView.loadUrl(jscmd);
+                    jsCmd = "javascript:setTheme('night')";
+                    mWebView.loadUrl(jsCmd);
                 }else{
-                    //jscmd = "javascript:changeTheme('" + DAY_THEME_CSS + "')";
-                    jscmd = "javascript:setTheme('day')";
-                    mWebView.loadUrl(jscmd);
+                    jsCmd = "javascript:setTheme('day')";
+                    mWebView.loadUrl(jsCmd);
                 }
             }
         });
