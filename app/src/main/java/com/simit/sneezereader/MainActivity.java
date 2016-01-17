@@ -104,6 +104,15 @@ public class MainActivity extends BaseActivity{
                                intent = new Intent(MainActivity.this, AboutActivity.class);
                                startActivity(intent);
                                break;
+                           case R.id.nav_tugua:
+                               goFavorite(Article.TUGUA);
+                               break;
+                           case R.id.nav_lehuo:
+                               goFavorite(Article.LEHUO);
+                               break;
+                           case R.id.nav_yitu:
+                               goFavorite(Article.YITU);
+                               break;
                            default:
                                break;
                        }
@@ -159,7 +168,15 @@ public class MainActivity extends BaseActivity{
         button.setChecked(true);
     }
 
-
+    /**
+     * 进入收藏页面
+     * @param type
+     */
+    private void goFavorite(int type){
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        intent.putExtra("curpos", type);
+        startActivity(intent);
+    }
     /**
      * 初始化ViewPager中的Fragments
      */
@@ -266,10 +283,31 @@ public class MainActivity extends BaseActivity{
         }
     }
 
+    /**
+     * 根据id查找item
+     * @return
+     */
+    public MenuItem findMenuItem(int resId){
+        MenuItem item = null;
+        if(topMenu != null){
+            item = topMenu.findItem(resId);
+        }
+        return item;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // 刷新事件,回调Fragment的函数
-        if(item.getItemId() == R.id.action_refresh){
+        int resId = item.getItemId();
+        switch (item.getItemId()){
+            case R.id.action_refresh:
+            case R.id.action_favorite:
+            case R.id.action_share:
+                updateYitu(resId);
+                break;
+            default:break;
+        }
+        if(item.getItemId() == R.id.action_refresh ){
             FragmentManager fm = getSupportFragmentManager();
             Fragment fragment = fm.findFragmentByTag(FRAG_TAG[curpos]);
             if(fragment instanceof YituFragment){
@@ -279,6 +317,22 @@ public class MainActivity extends BaseActivity{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateYitu(int resId){
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentByTag(FRAG_TAG[curpos]);
+        if(fragment instanceof YituFragment){
+            YituFragment yituFragment = (YituFragment)fragment;
+            // 根据不同的id回调不同的响应函数
+            if(resId == R.id.action_refresh){
+                yituFragment.refreshCurrentWebView();
+            }else if(resId == R.id.action_favorite){
+                yituFragment.favoriteCurrentPage();
+            }else if(resId == R.id.action_share){
+                yituFragment.shareCurrentPage();
+            }
+        }
     }
 
     @Override

@@ -150,7 +150,6 @@ public class DBManager {
         sql = String.format(sql, description);
         Cursor cursor = db.rawQuery(sql, null);
 
-
         return cursor.moveToFirst() == true;
     }
 
@@ -191,17 +190,32 @@ public class DBManager {
      */
     public List<Article> getData(int type, int limit){
         //按照type查询所有列,根据发表时间降序排列,取前LIMIT项
-        String sql = "SELECT * FROM articles WHERE type = %d ORDER BY pubDate DESC";
-        List<Article> datainfos;
+        String sql_art = "SELECT * FROM articles WHERE type = %d ORDER BY pubDate DESC ";
+        String sql_fav_format = "SELECT article_id FROM favorites where article_id = %d";
+        List<Article> datainfos = new ArrayList<>();
 
         if(limit == 0){
             //查询出所有符合条件的数据
-            sql = String.format(sql, type);
+            sql_art = String.format(sql_art, type);
         }else{
-            sql = String.format(sql, type) + " LIMIT " + limit;   //格式化
+            sql_art = String.format(sql_art, type) + " LIMIT " + limit;   //格式化
         }
 
-        datainfos = query(sql);
+        List<Article> articles = query(sql_art);
+        // 去收藏列表查询
+        for(Article article : articles){
+            int article_id = article.getId();
+            String sql_fav = String.format(sql_fav_format, article_id);
+            Cursor cursor = db.rawQuery(sql_fav, null);
+            if(cursor.moveToFirst()){
+                article.setIsFavorite(true);
+            }else {
+                article.setIsFavorite(false);
+            }
+            cursor.close();
+            //
+            datainfos.add(article);
+        }
 
         return datainfos;
     }
@@ -229,8 +243,85 @@ public class DBManager {
             data.setDescription(cursor.getString(cursor.getColumnIndex("description")));
             data.setImgurl(cursor.getString(cursor.getColumnIndex("imgurl")));
             data.setLocal_link(cursor.getString(cursor.getColumnIndex("local_link")));
-
+            // 查询到的数据集
             datainfos.add(data);
+        }
+        cursor.close();
+
+        return datainfos;
+    }
+
+    /**
+     * 向收藏列表插入一条记录
+     * @param article
+     * @param username
+     * @param addtime
+     */
+    public void insertFavorite(Article article, String username, String addtime){
+        String sql = "SELECT article_id FROM favorites WHERE article_id = %d AND user = '%s'";
+
+        sql = String.format(sql, article.getId(), username);
+
+        Cursor cursor = db.rawQuery(sql, null);
+
+        boolean exist = cursor.moveToFirst();
+
+        // 收藏列表已经存在
+        if(exist == true){
+            return;
+        }
+        // 收藏列表不存在则插入
+        ContentValues cv = new ContentValues();
+        cv.put("article_id", article.getId());
+        cv.put("type", article.getType());
+        cv.put("user", username);
+        cv.put("add_time", addtime);
+
+        synchronized (LOCK) {
+            db.insert("favorites", null, cv);   //插入一条数据
+        }
+    }
+
+    /**
+     * 从收藏列表删除一条记录
+     * @param article_id
+     * @param username
+     */
+    public void deleteFavorite(int article_id, String username){
+        String whereClause = "article_id = ? AND user = ?";
+        String[] whereArgs = {Integer.toString(article_id), username};
+        db.delete("favorites", whereClause, whereArgs);
+    }
+
+    /**
+     * 根据类型获取收藏文章信息
+     * @param type
+     * @param limit
+     * @return
+     */
+    public List<Article> getFavorites(int type, int limit){
+        //按照type查询所有列,根据添加时间降序排列,取前LIMIT项
+        String sql_fav = "SELECT article_id FROM favorites WHERE type = %d ORDER BY add_time DESC ";
+        String sql_art = "SELECT * FROM articles WHERE id = %d ";
+        List<Article> datainfos = new ArrayList<>();
+
+        if(limit == 0){
+            //查询出所有符合条件的数据
+            sql_fav = String.format(sql_fav, type);
+        }else{
+            sql_fav = String.format(sql_fav, type) + " LIMIT " + limit;   //格式化
+        }
+        // 从收藏列表查询到article_id
+        Cursor cursor = db.rawQuery(sql_fav, null);
+        //处理返回数据
+        while (cursor.moveToNext()){
+            int article_id = cursor.getInt(cursor.getColumnIndex("article_id"));
+            String sql = String.format(sql_art, article_id);
+            List<Article> articles = query(sql);
+            for(Article article : articles){
+                article.setIsFavorite(true);
+                datainfos.add(article);
+            }
         }
         cursor.close();
 

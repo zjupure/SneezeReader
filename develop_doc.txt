@@ -443,4 +443,6 @@ articles：字段，并在type+pubDate上建索引，方便查询最近的文章
 |  id  |  type  |  title  |  remote_link  |  author  | pubDate  |  description  |  imgurl  |  local_link  |
 | 主键 |  类型  |  标题   |   远程链接    |   作者   | 发表日期 |      描述     | 图片链接 |   本地链接   |
 
-
+favorites: 字段
+|  id  |  article_id  |  type  |  user  |  add_time  |
+| 主键 | 文章id(外键) |  类型  |  用户  |  收藏时间  |

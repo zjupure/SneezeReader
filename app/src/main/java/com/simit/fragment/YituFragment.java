@@ -1,5 +1,6 @@
 package com.simit.fragment;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -21,6 +23,7 @@ import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
+import com.simit.sneezereader.BaseActivity;
 import com.simit.sneezereader.Config;
 import com.simit.sneezereader.MainActivity;
 import com.simit.sneezereader.R;
@@ -117,6 +120,25 @@ public class YituFragment extends Fragment {
         //设置适配器
         mViewPager.setAdapter(mAdapter);
         mViewPager.setCurrentItem(position);
+        updateMenuState();
+        // 设置监听
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int pos) {
+                position = pos;
+                updateMenuState();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         // 基本配置
         header = mRefreshView.getLoadingLayoutProxy(true, false);
@@ -196,6 +218,20 @@ public class YituFragment extends Fragment {
     }
 
     /**
+     * 更新Menu的状态
+     */
+    public void updateMenuState(){
+        Article article = mDataSet.get(position);
+        // 更新操作
+        Activity activity = getActivity();
+        if(activity != null && activity instanceof MainActivity){
+            MainActivity parent = (MainActivity)activity;
+            MenuItem item = parent.findMenuItem(R.id.action_favorite);
+            parent.setFavoriteIcon(item, article.isFavorite());
+        }
+    }
+
+    /**
      * 刷新当前页面,重新加载WebView
      */
     public void refreshCurrentWebView(){
@@ -206,6 +242,35 @@ public class YituFragment extends Fragment {
             ((DetailFragment)fragement).displayArticle();
         }
 
+    }
+
+    /**
+     * 收藏当前页面
+     */
+    public void favoriteCurrentPage(){
+        position = mViewPager.getCurrentItem();
+        Article article = mDataSet.get(position);
+        // 收藏操作
+        Activity activity = getActivity();
+        if(activity != null && activity instanceof MainActivity){
+            MainActivity parent = (MainActivity)activity;
+            MenuItem item = parent.findMenuItem(R.id.action_favorite);
+            parent.changeFavoriteState(item, article);
+        }
+    }
+
+    /**
+     * 分享当前页面
+     */
+    public void shareCurrentPage(){
+        position = mViewPager.getCurrentItem();
+        Article article = mDataSet.get(position);
+        // 分享操作
+        Activity activity = getActivity();
+        if(activity != null && activity instanceof MainActivity){
+            MainActivity parent = (MainActivity)activity;
+            parent.shareArticle(article);
+        }
     }
 
     private void loadFromDatabase(int limit){

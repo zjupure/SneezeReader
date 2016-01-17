@@ -190,7 +190,6 @@ public class DetailFragment extends Fragment {
                 String wholeJS = loadThemeJs();
                 if(!wholeJS.isEmpty()){
                     // js文件非空
-                    Log.d("webview", "javascript:" + wholeJS);
                     mWebView.loadUrl("javascript:" + wholeJS);
                 }
                 String jsCmd;
@@ -239,7 +238,6 @@ public class DetailFragment extends Fragment {
                 }
                 String content = sb.toString();
 
-                Log.d("webview", "load theme js file success!");
                 return content;
             }
         }catch (IOException e){

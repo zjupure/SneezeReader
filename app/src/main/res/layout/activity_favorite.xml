@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/toolbar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <com.handmark.pulltorefresh.library.PullToRefreshRecyclerView
+            android:id="@+id/favorite_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:ptrAnimationStyle="rotate"
+            app:ptrMode="pullFromEnd" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/go_top_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone"
+            android:src="@mipmap/go_top"
+            android:tint="#fffff0"
+            app:backgroundTint="#ff0033"
+            app:rippleColor="#aacc0033"
+            app:elevation="8dp" />
+    </FrameLayout>
+
+</LinearLayout>

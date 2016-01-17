@@ -54,6 +54,10 @@
     <string name="feedback_des_hint">请输入问题的详情</string>
     <string name="feedback_submit">提交</string>
 
+    <!-- 收藏 -->
+    <string name="favorite_tugua">图卦收藏</string>
+    <string name="favorite_lehuo">乐活收藏</string>
+    <string name="favorite_yitu">意图收藏</string>
 
     <!-- 下拉刷新 -->
     <string name="pull_to_refresh_pull_label">下拉刷新</string>

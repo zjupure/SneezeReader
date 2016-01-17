@@ -22,6 +22,7 @@ public class Article implements Parcelable{
     private String description;
     private String imgurl = "";
     private String local_link = "";
+    private boolean isFavorite;
 
     public int getId() {
         return id;
@@ -95,6 +96,14 @@ public class Article implements Parcelable{
         this.local_link = local_link;
     }
 
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
+
     @Override
     public int hashCode() {
         // remote_link is unique
@@ -117,6 +126,8 @@ public class Article implements Parcelable{
         dest.writeString(description);
         dest.writeString(imgurl);
         dest.writeString(local_link);
+        byte fav = (byte)(isFavorite ? 1 : 0);
+        dest.writeInt(fav);
     }
 
     public Article(){}
@@ -131,6 +142,7 @@ public class Article implements Parcelable{
         description = src.readString();
         imgurl = src.readString();
         local_link = src.readString();
+        isFavorite = (src.readByte() != 0);
     }
 
     public static final Parcelable.Creator<Article> CREATOR = new Creator<Article>() {

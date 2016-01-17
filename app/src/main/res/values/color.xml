@@ -11,4 +11,7 @@
     <color name="nightColorAccent">#4f4f4f</color>
     <color name="nightBackground">#3b3b3b</color>
     <color name="textLight">#ffffff</color>
+
+    <color name="favorite_color">#ff0000</color>
+    <color name="favorite_color_nor">#ffffff</color>
 </resources>
