@@ -41,8 +41,8 @@ import java.io.InputStream;
  */
 public class DetailFragment extends Fragment {
     private static final String DAPENTI_HOST = "dapenti.com";
-    private static final String[] AD_KEYWORDS = {"google", "taobao", "tmall", "tianmao",
-            "jd", "weidian"};
+    private static final String[] AD_KEYWORDS = {"google", "show_ads", "adsbygoogle", "taobao", 
+            "tmall", "tianmao", "jd", "jingdong", "mougujie", "weidian"};
     private static final String DAY_THEME_CSS = "file:///android_asset/css/day.css";
     private static final String NIGHT_THEME_CSS = "file:///android_asset/css/night.css";
     // rootView
@@ -200,6 +200,9 @@ public class DetailFragment extends Fragment {
                     jsCmd = "javascript:setTheme('day')";
                     mWebView.loadUrl(jsCmd);
                 }
+                // 加载过滤广告js
+                jsCmd = "javascript:filterAD()";
+                mWebView.loadUrl(jsCmd);
             }
         });
         // 设置进度条
