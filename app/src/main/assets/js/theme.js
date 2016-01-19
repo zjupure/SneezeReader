@@ -43,3 +43,55 @@ function changeTheme(cssPath){
 		document.appendChild(fileref);
 	}
 }
+
+
+function filterAD(){		
+	var content = "友情提示：请各位河蟹评论。道理你懂的";
+	var target = -1;
+	var reg = "<hr>广告<br><script.*>.*</script><hr><br>";
+	var pattern = new RegExp(reg, "g");
+	
+	var html = document.html || document.getElementsByTagName("html")[0];
+	var result = null;
+	do{
+		result = pattern.exec(html.innerHTML);
+		if(result != null){
+			var res = html.innerHTML.replace(result, "");
+			html.innerHTML = res;
+		}
+	}while(result != null);
+	
+	var paragraph = document.getElementsByTagName("p");
+	for(var n = paragraph.length, i = 0; i < n; i++){
+		var p = paragraph[i];
+
+		if(p.childNodes.length == 1 && p.firstChild.nodeValue.match(content)){
+			target = i - 2;
+			if(target >= 1 && paragraph[target].getElementsByTagName("a") != null){
+				paragraph[target].innerHTML = "";
+			}
+		}
+		
+		var link = p.getElementsByTagName("a");
+		if(link == null || link.length != 1){
+			continue;
+		}
+		var href = link[0].getAttribute("href");
+		if(href != null && ContainKeywords(href)){
+			p.innerHTML = "";
+		}		
+	}
+}
+
+
+function ContainKeywords(str){
+	var keywords = new Array("sale", "product", "jd", "3mmr", "google", "show_ads", 
+		"taobao", "tmall", "mogujie", "weidian");
+	for(var i = 0, n = keywords.length; i < n; i++){
+		if(str.match(keywords[i])){
+			return true;
+		}
+	}
+
+	return false;
+}
