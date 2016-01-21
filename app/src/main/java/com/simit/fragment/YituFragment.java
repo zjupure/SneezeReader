@@ -23,8 +23,7 @@ import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
-import com.simit.sneezereader.BaseActivity;
-import com.simit.sneezereader.Config;
+import com.simit.sneezereader.Constant;
 import com.simit.sneezereader.MainActivity;
 import com.simit.sneezereader.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
@@ -95,7 +94,7 @@ public class YituFragment extends Fragment {
         // 注册广播接收器
         broadcastManager = LocalBroadcastManager.getInstance(getActivity());
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Config.DATASET_UPDATED_ACTION);
+        intentFilter.addAction(Constant.DATASET_UPDATED_ACTION);
         //
         receiver = new BroadcastReceiver() {
             @Override
@@ -321,14 +320,14 @@ public class YituFragment extends Fragment {
                 // 查询到更多的数据,更新数据
                 DataManager.getInstance().updateDataset(curpos, articles);
                 Message message = handler.obtainMessage();
-                message.what = Config.LOAD_MORE_ARTICLE;
+                message.what = Constant.LOAD_MORE_ARTICLE;
                 message.arg1 = articles.size();
 
                 handler.sendMessage(message);
             }else{
                 // 没有更多数据了
                 DataManager.getInstance().updateDataset(curpos, articles);
-                handler.sendEmptyMessage(Config.NO_MORE_ARTICLE);
+                handler.sendEmptyMessage(Constant.NO_MORE_ARTICLE);
             }
         }
     }

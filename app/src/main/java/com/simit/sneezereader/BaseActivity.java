@@ -2,6 +2,7 @@ package com.simit.sneezereader;
 
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -15,6 +16,17 @@ import android.widget.Toast;
 
 import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
+import com.simit.network.SneezeClient;
+import com.sina.weibo.sdk.api.ImageObject;
+import com.sina.weibo.sdk.api.TextObject;
+import com.sina.weibo.sdk.api.WeiboMessage;
+import com.sina.weibo.sdk.api.WeiboMultiMessage;
+import com.sina.weibo.sdk.api.share.BaseResponse;
+import com.sina.weibo.sdk.api.share.IWeiboHandler;
+import com.sina.weibo.sdk.api.share.IWeiboShareAPI;
+import com.sina.weibo.sdk.api.share.SendMessageToWeiboRequest;
+import com.sina.weibo.sdk.api.share.SendMultiMessageToWeiboRequest;
+import com.sina.weibo.sdk.api.share.WeiboShareSDK;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,14 +37,25 @@ import java.util.Locale;
  */
 public class BaseActivity extends AppCompatActivity {
     private Toolbar mToolBar;
-    //private boolean mNightMode;
-    //
-    //private SneezeApplication app;
+    // weibo share component
+    private IWeiboShareAPI mWeiboShareAPI;
+    // weibo share response
+    private IWeiboHandler.Response mWeiboResponse;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 设置主题
         setupTheme();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if(mWeiboShareAPI != null){
+            mWeiboShareAPI.handleWeiboResponse(intent, mWeiboResponse);
+        }
     }
 
     protected void setupTheme(){
@@ -93,6 +116,29 @@ public class BaseActivity extends AppCompatActivity {
                 }
             }
 
+        }
+    }
+
+    /**
+     * 初始化分享组件
+     */
+    protected void initShareConponents(Bundle bundle){
+        // 先注册,后分享
+        mWeiboShareAPI = WeiboShareSDK.createWeiboAPI(this, Constant.WEIBO_APP_KEY);
+        mWeiboShareAPI.registerApp();
+        // 初始化Response接口
+        mWeiboResponse = new IWeiboHandler.Response() {
+            @Override
+            public void onResponse(BaseResponse baseResponse) {
+                //接收微博分享后的返回数据
+                switch (baseResponse.errCode){
+                    default:break;
+                }
+            }
+        };
+
+        if(bundle != null){
+            mWeiboShareAPI.handleWeiboResponse(getIntent(), mWeiboResponse);
         }
     }
 
@@ -175,7 +221,29 @@ public class BaseActivity extends AppCompatActivity {
      * @param article
      */
     public void shareArticle(Article article){
-        //Intent intent = new Intent(Intent.ACTION_VIEW);
-        //startActivity(intent);
+        // 发起分享
+        shareToWeibo(article);
+    }
+
+    /**
+     * 分享到微博
+     * @param article
+     */
+    public void shareToWeibo(Article article){
+        if(mWeiboShareAPI != null){
+            // 分享文章的链接
+            WeiboMultiMessage message = new WeiboMultiMessage();
+            TextObject textObject = new TextObject();
+            // 文本内容
+            String content = article.getTitle() + article.getDescription();
+            textObject.text = content;
+            message.textObject = textObject;
+            // 初始化Request
+            SendMultiMessageToWeiboRequest request = new SendMultiMessageToWeiboRequest();
+            request.transaction = String.valueOf(System.currentTimeMillis());
+            request.multiMessage = message;
+            // 发起分享Request
+            mWeiboShareAPI.sendRequest(this, request);
+        }
     }
 }

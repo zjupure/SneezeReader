@@ -17,6 +17,9 @@ public class SneezeApplication extends Application {
     private boolean night_mode;
     private boolean notify_mode;
     private boolean advertise_mode;
+    // user state
+    private String username = "annoymous";
+    private boolean loginState = false;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -56,6 +59,22 @@ public class SneezeApplication extends Application {
     public void setAdMode(boolean value){
         advertise_mode = value;
         saveConfigBoolean("ad_mode", value);
+    }
+
+    public boolean getUserLogin(){
+        return loginState;
+    }
+
+    public void setLoginState(boolean value){
+        loginState = value;
+    }
+
+    public void setUsername(String user){
+        username = user;
+    }
+
+    public String getUsername(){
+        return username;
     }
 
     public void saveConfigString(String key, String value){

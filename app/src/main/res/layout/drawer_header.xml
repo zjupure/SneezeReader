@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingLeft="16dp"
     android:paddingTop="35dp"
     android:paddingBottom="10dp"
     android:background="#6699ff">
 
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/user_photo"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="8dp"
+        fresco:placeholderImage="@drawable/weibo_photo"
+        fresco:roundAsCircle="true"
+        fresco:roundingBorderWidth="2dp"
+        fresco:roundingBorderColor="@android:color/white"/>
+    <!--
     <com.simit.widget.CircleImageView
         android:id="@+id/user_photo"
         android:layout_width="60dp"
@@ -16,6 +27,7 @@
         android:layout_marginBottom="10dp"
         app:civ_border_width="2dp"
         app:civ_border_color="@android:color/white"/>
+    -->
 
     <TextView
         android:id="@+id/user_name"
@@ -31,10 +43,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/user_name"
+        android:layout_marginTop="4dp"
         android:text="@string/user_signature"
         android:textColor="#aaffffff"
         android:visibility="gone"
-        android:textSize="16sp"/>
+        android:textSize="14sp"/>
 </RelativeLayout>
 
 

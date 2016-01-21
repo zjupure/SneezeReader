@@ -17,7 +17,7 @@ import com.simit.datamodel.Article;
 import com.simit.datamodel.DataManager;
 import com.simit.jsonparser.ArticleData;
 import com.simit.jsonparser.JsonParserUtil;
-import com.simit.sneezereader.Config;
+import com.simit.sneezereader.Constant;
 import com.simit.sneezereader.DetailActivity;
 import com.simit.sneezereader.R;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -62,7 +62,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
         Log.d("JsonResponse", "fetch data failed!");
         if(handler != null){
-            handler.sendEmptyMessage(Config.NETWORK_ERROR);
+            handler.sendEmptyMessage(Constant.NETWORK_ERROR);
         }
     }
 
@@ -138,7 +138,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
 
             if(handler != null){
                 Message message = handler.obtainMessage();
-                message.what = Config.NEW_ARTICLE_ARRIVAL;
+                message.what = Constant.NEW_ARTICLE_ARRIVAL;
                 message.arg1 = articles.size();
                 handler.sendMessage(message);
             }else{
@@ -147,7 +147,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 // update the dataset
                 DataManager.getInstance().updateDataset(type, datainfos);
                 // send broadcast
-                Intent intent = new Intent(Config.DATASET_UPDATED_ACTION);
+                Intent intent = new Intent(Constant.DATASET_UPDATED_ACTION);
                 LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
                 broadcastManager.sendBroadcast(intent);
             }
@@ -163,7 +163,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         }else{
             if(handler != null){
                 // 没有新的数据
-                handler.sendEmptyMessage(Config.NO_NEW_ARTICLE);
+                handler.sendEmptyMessage(Constant.NO_NEW_ARTICLE);
             }
         }
     }
