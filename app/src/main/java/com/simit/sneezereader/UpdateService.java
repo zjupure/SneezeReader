@@ -63,9 +63,9 @@ public class UpdateService extends Service {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(connReceiver, filter);
         // service一启动,就发送更新的消息
-        handler.sendEmptyMessageDelayed(Config.GET_TUGUA_UPDATE, Config.UPDATE_INTERVAL);
-        handler.sendEmptyMessage(Config.GET_PAGE_SOURCE);
-        //handler.sendEmptyMessageDelayed(Config.CHECK_DATABASE, Config.CHECK_DATABASE_INTERVAL);
+        handler.sendEmptyMessageDelayed(Constant.GET_TUGUA_UPDATE, Constant.UPDATE_INTERVAL);
+        handler.sendEmptyMessage(Constant.GET_PAGE_SOURCE);
+        //handler.sendEmptyMessageDelayed(Constant.CHECK_DATABASE, Constant.CHECK_DATABASE_INTERVAL);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class UpdateService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                case Config.GET_PAGE_SOURCE:
+                case Constant.GET_PAGE_SOURCE:
                     String url = dataManager.getLink();
                     if(url != null && !url.isEmpty()){
                         // check network is availble
@@ -90,15 +90,15 @@ public class UpdateService extends Service {
                         }
                     }
                     // 每5s检测一次队列,下载一个页面
-                    sendEmptyMessageDelayed(Config.GET_PAGE_SOURCE, Config.SOURCE_INTERVAL);
+                    sendEmptyMessageDelayed(Constant.GET_PAGE_SOURCE, Constant.SOURCE_INTERVAL);
                     break;
-                case Config.GET_TUGUA_UPDATE:
+                case Constant.GET_TUGUA_UPDATE:
                     if(netWorkAvaible){
                         // 有网络就更新
                         client.getTugua(new SneezeJsonResponseHandler(context, Article.TUGUA));
                     }
                     // 10 min检测一次更新, 消息需要一直发送, 防止网络断开时消息中止
-                    sendEmptyMessageDelayed(Config.GET_TUGUA_UPDATE, Config.UPDATE_INTERVAL);
+                    sendEmptyMessageDelayed(Constant.GET_TUGUA_UPDATE, Constant.UPDATE_INTERVAL);
                     break;
                 default:break;
             }

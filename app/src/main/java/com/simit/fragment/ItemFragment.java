@@ -25,7 +25,7 @@ import com.simit.datamodel.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
-import com.simit.sneezereader.Config;
+import com.simit.sneezereader.Constant;
 import com.simit.sneezereader.DetailActivity;
 import com.simit.sneezereader.MainActivity;
 import com.simit.sneezereader.R;
@@ -88,7 +88,7 @@ public class ItemFragment extends Fragment {
         // 注册广播接收器
         broadcastManager = LocalBroadcastManager.getInstance(getActivity());
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Config.DATASET_UPDATED_ACTION);
+        intentFilter.addAction(Constant.DATASET_UPDATED_ACTION);
         //
        receiver = new BroadcastReceiver() {
             @Override
@@ -199,7 +199,7 @@ public class ItemFragment extends Fragment {
                         client.getArticle(curpos, new SneezeJsonResponseHandler(getActivity(),
                                 curpos, handler));
 
-                        SimpleDateFormat sdf = new SimpleDateFormat(Config.TIME_FORMAT_REFRESH);
+                        SimpleDateFormat sdf = new SimpleDateFormat(Constant.TIME_FORMAT_REFRESH);
                         String last_refresh_time = sdf.format(new Date());
                         header.setLastUpdatedLabel(last_refresh_time);
                         MainActivity.saveLastUpdated(getActivity(), curpos, last_refresh_time);
@@ -226,21 +226,21 @@ public class ItemFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                case Config.NEW_ARTICLE_ARRIVAL:
+                case Constant.NEW_ARTICLE_ARRIVAL:
                     int nums = msg.arg1;
                     loadFromDatabase(limit + nums);
                     break;
-                case Config.NO_NEW_ARTICLE:
+                case Constant.NO_NEW_ARTICLE:
                     showToast("没有新的数据了");
                     break;
-                case Config.NETWORK_ERROR:
+                case Constant.NETWORK_ERROR:
                     showToast("网络连接出错,请稍后重试");
                     break;
-                case Config.LOAD_MORE_ARTICLE:
+                case Constant.LOAD_MORE_ARTICLE:
                     limit = msg.arg1;
                     mAdapter.notifyDataSetChanged();
                     break;
-                case Config.NO_MORE_ARTICLE:
+                case Constant.NO_MORE_ARTICLE:
                     showToast("没有更多的数据了");
                     mAdapter.notifyDataSetChanged();
                     break;
@@ -280,14 +280,14 @@ public class ItemFragment extends Fragment {
                 // 查询到更多的数据,更新数据
                 DataManager.getInstance().updateDataset(curpos, articles);
                 Message message = handler.obtainMessage();
-                message.what = Config.LOAD_MORE_ARTICLE;
+                message.what = Constant.LOAD_MORE_ARTICLE;
                 message.arg1 = articles.size();
 
                 handler.sendMessage(message);
             }else{
                 // 没有更多数据了
                 DataManager.getInstance().updateDataset(curpos, articles);
-                handler.sendEmptyMessage(Config.NO_MORE_ARTICLE);
+                handler.sendEmptyMessage(Constant.NO_MORE_ARTICLE);
             }
         }
     }

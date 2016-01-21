@@ -10,13 +10,13 @@ android {
         }
     }
     compileSdkVersion 23
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "com.simit.sneezereader"
         minSdkVersion 9
         targetSdkVersion 21
         versionCode 2
-        versionName "2.0.13"
+        versionName "2.0.14"
     }
     buildTypes {
         debug {
@@ -42,17 +42,17 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
     // material design support library
-    compile 'com.android.support:design:23.0.0'
+    compile 'com.android.support:design:23.1.1'
     // recyclerview to replace listview
-    compile 'com.android.support:recyclerview-v7:23.0.0'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
     // cardview to show item
-    compile 'com.android.support:cardview-v7:23.0.0'
+    compile 'com.android.support:cardview-v7:23.1.1'
     // google volley network library
     //compile 'com.mcxiaoke.volley:library:1.0.19'
     // facebook image library
-    compile 'com.facebook.fresco:fresco:0.5.3+'
+    compile 'com.facebook.fresco:fresco:0.9.0'
     // android async http client
     compile 'com.loopj.android:android-async-http:1.4.9'
     // google gson library to parse the json data
@@ -61,4 +61,6 @@ dependencies {
     //compile 'org.jsoup:jsoup:1.8.3'
     // android pull to refresh library
     compile project(':pulltorefresh')
+    // android weibo sdk
+    compile project(':weibosdk')
 }

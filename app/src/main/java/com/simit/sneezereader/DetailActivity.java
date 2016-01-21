@@ -36,8 +36,6 @@ public class DetailActivity extends BaseActivity{
     private int type;
     // Menu
     private Menu topMenu;
-    // DBManager
-    private DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +47,11 @@ public class DetailActivity extends BaseActivity{
         article = bundle.getParcelable("article");
         position = intent.getIntExtra("position", 0);
         type = article.getType();
-        //
-        dbManager = DBManager.getInstance(this);
+
         // 初始化界面
         initView();
+        // 注册分享组件
+        initShareConponents(savedInstanceState);
     }
 
     @Override
@@ -137,10 +136,8 @@ public class DetailActivity extends BaseActivity{
         {
             DetailFragment frag = (DetailFragment)fragement;
             if(frag.goBack()){
-                Log.d("DetailActivity", "Back Pressed");
                 return;
             }
-            Log.d("DetailActivity", "WebView can not go back");
         }
 
         super.onBackPressed();

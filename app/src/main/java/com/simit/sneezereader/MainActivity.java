@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -12,21 +13,35 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.simit.datamodel.Article;
 import com.simit.fragment.ItemFragment;
 import com.simit.fragment.YituFragment;
+import com.sina.weibo.sdk.AccessTokenKeeper;
+import com.sina.weibo.sdk.auth.AuthInfo;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
+import com.sina.weibo.sdk.auth.WeiboAuthListener;
+import com.sina.weibo.sdk.auth.sso.SsoHandler;
+import com.sina.weibo.sdk.exception.WeiboException;
+import com.sina.weibo.sdk.net.RequestListener;
+import com.sina.weibo.sdk.openapi.UsersAPI;
+import com.sina.weibo.sdk.openapi.models.User;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity{
+public class MainActivity extends BaseActivity implements View.OnClickListener{
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
@@ -37,6 +52,10 @@ public class MainActivity extends BaseActivity{
     private NavigationView mNavView;
     private ActionBarDrawerToggle mToggle;
     private RadioGroup mTabMenu;
+    // Drawer Components
+    private SimpleDraweeView mUserPhoto;
+    private TextView mUserName;
+    private TextView mUserSignature;
     // Menu
     private Menu topMenu;
     // Fragment UI
@@ -46,9 +65,14 @@ public class MainActivity extends BaseActivity{
     private int curpos;
     // Back按键时间
     private long lastBackPress;
-    //
+    // application context
     private SneezeApplication app;
     private boolean nightMode;
+    // weibo sdk
+    private AuthInfo mAuthInfo;
+    private SsoHandler mSsoHandler;
+    private Oauth2AccessToken mAccessToken;
+    private UsersAPI mUsersAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +85,8 @@ public class MainActivity extends BaseActivity{
         nightMode = app.getNightMode();
         // 初始化界面
         initView();
+        // 注册分享组件
+        initShareConponents(savedInstanceState);
         // start service
         intent = new Intent(this, UpdateService.class);
         startService(intent);
@@ -80,87 +106,46 @@ public class MainActivity extends BaseActivity{
         mDrawerLayout.setDrawerListener(mToggle);
         // set up toolbar
         //mToolBar.setNavigationIcon(R.drawable.user_logo);
-        //
         if(mNavView != null){
-
+            //为Navigation设置点击事件
             mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                    @Override
                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                       //切换对应的Fragment操作
-                       menuItem.setChecked(true);
-                       mDrawerLayout.closeDrawers();
-                       //根据菜单项跳转
-                       Intent intent;
-                       switch (menuItem.getItemId()) {
-                           case R.id.nav_theme:
-                               app.setNightMode(!nightMode);
-                               updateTheme();
-                               break;
-                           case R.id.nav_setting:
-                               intent = new Intent(MainActivity.this, SettingActivity.class);
-                               startActivity(intent);
-                               break;
-                           case R.id.nav_about:
-                               intent = new Intent(MainActivity.this, AboutActivity.class);
-                               startActivity(intent);
-                               break;
-                           case R.id.nav_tugua:
-                               goFavorite(Article.TUGUA);
-                               break;
-                           case R.id.nav_lehuo:
-                               goFavorite(Article.LEHUO);
-                               break;
-                           case R.id.nav_yitu:
-                               goFavorite(Article.YITU);
-                               break;
-                           default:
-                               break;
-                       }
-
+                        // 菜单单击操作
+                       navigationMenuChecked(menuItem);
                        return false;
                    }
                }
             );
-
+            //查找Drawer header中的控件
+            View headerView = mNavView.getHeaderView(0);
+            mUserPhoto = (SimpleDraweeView) headerView.findViewById(R.id.user_photo);
+            mUserName = (TextView) headerView.findViewById(R.id.user_name);
+            mUserSignature = (TextView) headerView.findViewById(R.id.user_signature);
+            //恢复mAccessToken
+            mAccessToken = AccessTokenKeeper.readAccessToken(this);
+            if(mAccessToken.isSessionValid()){
+                //app.setLoginState(true);
+                // Token有效,获取用户信息并显示
+                mUsersAPI = new UsersAPI(this, Constant.WEIBO_APP_KEY, mAccessToken);
+                long uid = Long.parseLong(mAccessToken.getUid());
+                mUsersAPI.show(uid, mWeiboListener);
+            }else {
+                app.setLoginState(false);
+                mUserPhoto.setOnClickListener(this);
+                mUserName.setOnClickListener(this);
+            }
         }
-        //
+        //初始化Fragment
         initFragments();
-
         //RadioButton
         mTabMenu = (RadioGroup)findViewById(R.id.tab_menu);
         //设置Tab监听
         mTabMenu.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                int prepos = curpos;
-                switch (checkedId) {
-                    case R.id.tab_tugua:
-                        curpos = Article.TUGUA;
-                        break;
-                    case R.id.tab_lehuo:
-                        curpos = Article.LEHUO;
-                        break;
-                    case R.id.tab_yitu:
-                        curpos = Article.YITU;
-                        break;
-                    case R.id.tab_duanzi:
-                        curpos = Article.DUANZI;
-                        break;
-                    default:
-                        break;
-                }
-                //开始事务替换
-                if (curpos != prepos) {
-                    FragmentTransaction ft = fm.beginTransaction();
-                    // hide/show to save the fragment state
-                    ft.hide(mFragments.get(prepos));  // hide previous fragment
-                    ft.show(mFragments.get(curpos));  // show current fragment
-                    //ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
-                    ft.commit();
-                }
-
-                setToolBarTitle(APP_TITLE[curpos]);
-                setUpMenu();
+                //底部菜单栏点击操作
+                tabMenuChecked(checkedId);
             }
         });
         //选中当前项
@@ -168,15 +153,7 @@ public class MainActivity extends BaseActivity{
         button.setChecked(true);
     }
 
-    /**
-     * 进入收藏页面
-     * @param type
-     */
-    private void goFavorite(int type){
-        Intent intent = new Intent(this, FavoriteActivity.class);
-        intent.putExtra("curpos", type);
-        startActivity(intent);
-    }
+
     /**
      * 初始化ViewPager中的Fragments
      */
@@ -205,6 +182,89 @@ public class MainActivity extends BaseActivity{
         }
         ft.show(mFragments.get(curpos));  // show first fragments
         ft.commit();
+    }
+
+    /**
+     * 导航栏菜单点击操作
+     * @param menuItem
+     */
+    private void navigationMenuChecked(MenuItem menuItem){
+        //切换对应的Fragment操作
+        menuItem.setChecked(true);
+        mDrawerLayout.closeDrawers();
+        //根据菜单项跳转
+        Intent intent;
+        switch (menuItem.getItemId()) {
+            case R.id.nav_theme:
+                app.setNightMode(!nightMode);
+                updateTheme();
+                break;
+            case R.id.nav_setting:
+                intent = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.nav_about:
+                intent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.nav_tugua:
+                goFavorite(Article.TUGUA);
+                break;
+            case R.id.nav_lehuo:
+                goFavorite(Article.LEHUO);
+                break;
+            case R.id.nav_yitu:
+                goFavorite(Article.YITU);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 底部Tab按钮点击操作
+     * @param checkedId
+     */
+    private void tabMenuChecked(int checkedId){
+        int prepos = curpos;
+        switch (checkedId) {
+            case R.id.tab_tugua:
+                curpos = Article.TUGUA;
+                break;
+            case R.id.tab_lehuo:
+                curpos = Article.LEHUO;
+                break;
+            case R.id.tab_yitu:
+                curpos = Article.YITU;
+                break;
+            case R.id.tab_duanzi:
+                curpos = Article.DUANZI;
+                break;
+            default:
+                break;
+        }
+        //开始事务替换
+        if (curpos != prepos) {
+            FragmentTransaction ft = fm.beginTransaction();
+            // hide/show to save the fragment state
+            ft.hide(mFragments.get(prepos));  // hide previous fragment
+            ft.show(mFragments.get(curpos));  // show current fragment
+            //ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
+            ft.commit();
+        }
+
+        setToolBarTitle(APP_TITLE[curpos]);
+        setUpMenu();
+    }
+
+    /**
+     * 进入收藏页面
+     * @param type
+     */
+    private void goFavorite(int type){
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        intent.putExtra("curpos", type);
+        startActivity(intent);
     }
 
 
@@ -352,5 +412,101 @@ public class MainActivity extends BaseActivity{
             super.onBackPressed();
         }
         lastBackPress = curBackPress;
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.user_photo:
+            case R.id.user_name:
+                if(!app.getUserLogin()){
+                    weiboLogin();
+                }
+                break;
+            default:break;
+        }
+    }
+
+    /**
+     * 微博登陆
+     */
+    private void weiboLogin(){
+        mAuthInfo = new AuthInfo(this, Constant.WEIBO_APP_KEY, Constant.WEIBO_REDIRECT_URL, Constant.WEIBO_SCOPE);
+        mSsoHandler = new SsoHandler(this, mAuthInfo);
+        // Web授权
+        //mSsoHandler.authorizeWeb(new MyWeiboAuthListener());
+        // SSO授权
+        //mSsoHandler.authorizeClientSso(new MyWeiboAuthListener());
+        // All in one
+        //此种授权方式会根据手机是否安装微博客户端来决定使用sso授权还是网页授权，
+        // 如果安装有微博客户端 则调用微博客户端授权，否则调用Web页面方式授权
+        mSsoHandler.authorize(new MyWeiboAuthListener());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (mSsoHandler != null) {
+            mSsoHandler.authorizeCallBack(requestCode, resultCode, data);
+        }
+    }
+
+    /**
+     * 异步回调接口,处理用户信息
+     */
+    private RequestListener mWeiboListener = new RequestListener() {
+        @Override
+        public void onComplete(String response) {
+            if(!TextUtils.isEmpty(response)){
+                // 调用User#parse将JSON串解析成User对象
+                User user = User.parse(response);
+                // 设置信息
+                mUserName.setText(user.screen_name);
+                mUserSignature.setVisibility(View.VISIBLE);
+                mUserSignature.setText(user.description);
+                Uri uri = Uri.parse(user.avatar_large);
+                mUserPhoto.setImageURI(uri);
+                //
+                app.setUsername(user.screen_name);
+                app.setLoginState(true);
+            }
+        }
+
+        @Override
+        public void onWeiboException(WeiboException e) {
+
+        }
+    };
+
+    /**
+     * 实现微博授权接口
+     */
+    class MyWeiboAuthListener implements WeiboAuthListener {
+        @Override
+        public void onComplete(Bundle bundle) {
+            // 从Bundle中解析Token
+            mAccessToken = Oauth2AccessToken.parseAccessToken(bundle);
+            if(mAccessToken.isSessionValid()){
+                // 保存Token到SharePreferences
+                AccessTokenKeeper.writeAccessToken(MainActivity.this, mAccessToken);
+                // 获取用户信息
+                mUsersAPI = new UsersAPI(MainActivity.this, Constant.WEIBO_APP_KEY, mAccessToken);
+                long uid = Long.parseLong(mAccessToken.getUid());
+                mUsersAPI.show(uid, mWeiboListener);
+            }else{
+                //
+            }
+        }
+
+        @Override
+        public void onWeiboException(WeiboException e) {
+
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
     }
 }
