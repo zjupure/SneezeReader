@@ -1,5 +1,7 @@
 package com.simit.datamodel;
 
+import com.simit.database.DBManager;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -28,7 +30,7 @@ public class DataManager {
         mYitu = new ArrayList<>();
         mDuanzi = new ArrayList<>();
 
-        links = new ArrayBlockingQueue<String>(DEFAULT_QUEUE_SIZE);
+        links = new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE);
     }
 
     /**
@@ -141,7 +143,4 @@ public class DataManager {
         }
     }
 
-    public int getQueueSize(){
-        return links.size();
-    }
 }

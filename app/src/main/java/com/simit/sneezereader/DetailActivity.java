@@ -72,11 +72,6 @@ public class DetailActivity extends BaseActivity{
         // 显示第position项
         mViewPager.setCurrentItem(position);
         article = datainfos.get(position);
-        // 查询文章的收藏状态
-        DBManager dbManager = DBManager.getInstance(DetailActivity.this);
-        SneezeApplication app = (SneezeApplication) getApplication();
-        boolean isFavorite = dbManager.getFavoriteState(article.getId(),app.getUsername());
-        article.setIsFavorite(isFavorite);
         //
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -91,11 +86,7 @@ public class DetailActivity extends BaseActivity{
                 // 更新图标
                 if(topMenu != null){
                     MenuItem item = topMenu.findItem(R.id.action_favorite);
-                    DBManager dbManager = DBManager.getInstance(DetailActivity.this);
-                    SneezeApplication app = (SneezeApplication) getApplication();
-                    boolean isFavorite = dbManager.getFavoriteState(article.getId(),app.getUsername());
-                    article.setIsFavorite(isFavorite);
-                    setFavoriteIcon(item, isFavorite);
+                    setFavoriteIcon(item, article.isFavorite());
                 }
             }
 

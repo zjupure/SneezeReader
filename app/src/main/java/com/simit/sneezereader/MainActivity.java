@@ -24,7 +24,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
+import com.simit.datamodel.DataManager;
 import com.simit.fragment.ItemFragment;
 import com.simit.fragment.YituFragment;
 import com.sina.weibo.sdk.AccessTokenKeeper;
@@ -364,14 +366,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 updateYitu(resId);
                 break;
             default:break;
-        }
-        if(item.getItemId() == R.id.action_refresh ){
-            FragmentManager fm = getSupportFragmentManager();
-            Fragment fragment = fm.findFragmentByTag(FRAG_TAG[curpos]);
-            if(fragment instanceof YituFragment){
-                YituFragment yituFragment = (YituFragment)fragment;
-                yituFragment.refreshCurrentWebView();
-            }
         }
 
         return super.onOptionsItemSelected(item);

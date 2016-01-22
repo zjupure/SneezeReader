@@ -143,7 +143,8 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 handler.sendMessage(message);
             }else{
                 // get the latest articles from database
-                List<Article> datainfos = dbManager.getData(type, 30);
+                String username = app.getUsername();
+                List<Article> datainfos = dbManager.getData(type, 30, username);
                 // update the dataset
                 DataManager.getInstance().updateDataset(type, datainfos);
                 // send broadcast

@@ -209,6 +209,19 @@ public class DBManager {
         return datainfos;
     }
 
+    public List<Article> getData(int type, int limit, String username){
+        List<Article> articles = getData(type, limit);
+        List<Article> datainfos = new ArrayList<>();
+
+        for(Article article: articles){
+            boolean isFavorite = getFavoriteState(article.getId(), username);
+            article.setIsFavorite(isFavorite);
+            datainfos.add(article);
+        }
+
+        return datainfos;
+    }
+
     /**
      * 执行查询指令
      * @param sql

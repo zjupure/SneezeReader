@@ -46,6 +46,7 @@ public class YituFragment extends Fragment {
     public static final int LOAD_MORE_ARTICLE = 3;
     public static final int NO_MORE_ARTICLE = 4;
     public static final int NETWORK_ERROR = 5;
+    public static final int UPDATE_MENU = 6;
     public static final String DATASET_UPDATED_ACTION = "com.simit.fragment";
     private static final String TIME_FORMAT_REFRESH = "上次更新: yyyy年MM月dd日 HH:mm";
     private static final String TIME_FORMAT_LOAD = "上次加载: yyyy年MM月dd日 HH:mm";
@@ -59,7 +60,7 @@ public class YituFragment extends Fragment {
 
     private int curpos;    //当前页面标识
     private Activity context;
-    //数据集
+    // 数据集
     private List<Article> mDataSet;
     private int limit = 30;
     private String lastUpdated = "";
@@ -67,6 +68,11 @@ public class YituFragment extends Fragment {
     private SneezeClient client;
     private LocalBroadcastManager broadcastManager;
     private BroadcastReceiver receiver;
+    //
+    private SneezeApplication app;
+    private DataManager dataManager;
+    private DBManager dbManager;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,6 +98,9 @@ public class YituFragment extends Fragment {
         client = SneezeClient.getInstance(context);
         client.setUpdated(true);
         lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
+        app = (SneezeApplication) getActivity().getApplication();
+        dbManager = DBManager.getInstance(context);
+        dataManager = DataManager.getInstance();
         //初始化界面View
         initViewPager();
         // 注册广播接收器
@@ -122,7 +131,6 @@ public class YituFragment extends Fragment {
         //设置适配器
         mViewPager.setAdapter(mAdapter);
         mViewPager.setCurrentItem(position);
-        updateMenuState();
         // 设置监听
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -180,7 +188,8 @@ public class YituFragment extends Fragment {
                 }
             }
         });
-
+        //延迟,让菜单加载成功
+        handler.sendEmptyMessageDelayed(UPDATE_MENU, 500);
     }
 
     // 处理网络请求回应发过来的消息
@@ -206,6 +215,9 @@ public class YituFragment extends Fragment {
                     showToast("没有更多的数据了");
                     mAdapter.notifyDataSetChanged();
                     break;
+                case UPDATE_MENU:
+                    updateMenuState();
+                    break;
                 default:break;
             }
             mRefreshView.onRefreshComplete();
@@ -224,10 +236,6 @@ public class YituFragment extends Fragment {
      */
     public void updateMenuState(){
         Article article = mDataSet.get(position);
-        DBManager dbManager = DBManager.getInstance(context);
-        SneezeApplication app = (SneezeApplication) context.getApplication();
-        boolean isFavorite = dbManager.getFavoriteState(article.getId(), app.getUsername());
-        article.setIsFavorite(isFavorite);
         // 更新操作
         Activity activity = getActivity();
         if(activity != null && activity instanceof MainActivity){
@@ -321,11 +329,12 @@ public class YituFragment extends Fragment {
         @Override
         public void run() {
             // 从数据库查询最新的数据
-            List<Article> articles = DBManager.getInstance(context).getData(curpos, num);
+            String username = app.getUsername();
+            List<Article> articles = dbManager.getData(curpos, num, username);
 
             if(articles.size() > mDataSet.size()){
                 // 查询到更多的数据,更新数据
-                DataManager.getInstance().updateDataset(curpos, articles);
+                dataManager.updateDataset(curpos, articles);
                 Message message = handler.obtainMessage();
                 message.what = Constant.LOAD_MORE_ARTICLE;
                 message.arg1 = articles.size();
@@ -333,7 +342,7 @@ public class YituFragment extends Fragment {
                 handler.sendMessage(message);
             }else{
                 // 没有更多数据了
-                DataManager.getInstance().updateDataset(curpos, articles);
+                dataManager.updateDataset(curpos, articles);
                 handler.sendEmptyMessage(Constant.NO_MORE_ARTICLE);
             }
         }

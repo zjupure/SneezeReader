@@ -108,8 +108,10 @@ public class SplashActivity extends Activity {
 
     private void loadData(){
         List<Article> datainfos;
+        SneezeApplication app = (SneezeApplication) getApplication();
+        String username = app.getUsername();
         for(int i = 0; i < 4; i++){
-            datainfos = DBManager.getInstance(this).getData(i, 30);
+            datainfos = DBManager.getInstance(this).getData(i, 30, username);
             DataManager.getInstance().addDataset(datainfos);
         }
     }

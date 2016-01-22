@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,11 +18,13 @@ import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
+import com.simit.fragment.ShareDialogFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,8 +40,10 @@ public class BaseActivity extends AppCompatActivity {
     private ImageView mWeixinPhoto;
     private ImageView mWeixinFriendPhoto;
     private TextView mShareCancel;
+    private RelativeLayout mShareMask;
     // 弹窗
     private PopupWindow popupWindow;
+    private Article article;
     //
     private SneezeApplication app;
 
@@ -189,37 +194,21 @@ public class BaseActivity extends AppCompatActivity {
      * 弹出PopupWindow进行分享
      * @param article
      */
-    public void shareArticle(final Article article){
+    public void shareArticle(Article article){
+        this.article = article;
         // 构造PopupWindow
         View popView = LayoutInflater.from(this).inflate(R.layout.share_popup, null);
         mWeiboPhoto = (ImageView) popView.findViewById(R.id.share_weibo);
         mWeixinPhoto = (ImageView) popView.findViewById(R.id.share_weixin);
         mWeixinFriendPhoto = (ImageView)popView.findViewById(R.id.share_weixin_friend);
         mShareCancel = (TextView) popView.findViewById(R.id.share_cancel);
-        View.OnClickListener mListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()){
-                    case R.id.share_weibo:
-                        startShareActivity(article, "weibo");
-                        break;
-                    case R.id.share_weixin:
-                        startShareActivity(article, "weixin");
-                        break;
-                    case R.id.share_weixin_friend:
-                        startShareActivity(article, "weixinfriend");
-                        break;
-                    case R.id.share_cancel:
-                        break;
-                    default:break;
-                }
-                popupWindow.dismiss();
-            }
-        };
+        mShareMask = (RelativeLayout) popView.findViewById(R.id.share_mask);
+        // 设置监听
         mWeiboPhoto.setOnClickListener(mListener);
         mWeixinPhoto.setOnClickListener(mListener);
         mWeixinFriendPhoto.setOnClickListener(mListener);
         mShareCancel.setOnClickListener(mListener);
+        mShareMask.setOnClickListener(mListener);
         // 设置弹窗
         popupWindow = new PopupWindow(popView, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         // 初始化窗体
@@ -232,6 +221,28 @@ public class BaseActivity extends AppCompatActivity {
         // 显示窗体
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
     }
+
+    private View.OnClickListener mListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.share_weibo:
+                    startShareActivity(article, "weibo");
+                    break;
+                case R.id.share_weixin:
+                    startShareActivity(article, "weixin");
+                    break;
+                case R.id.share_weixin_friend:
+                    startShareActivity(article, "weixinfriend");
+                    break;
+                case R.id.share_cancel:
+                case R.id.share_mask:
+                    break;
+                default:break;
+            }
+            popupWindow.dismiss();
+        }
+    };
 
     /**
      * 启动分享Activity
@@ -246,5 +257,11 @@ public class BaseActivity extends AppCompatActivity {
         intent.putExtra("share", bundle);
         // 启动分享Activity
         startActivity(intent);
+    }
+
+    public void shareArticleDialog(Article article){
+        ShareDialogFragment fragment = ShareDialogFragment.newInstance(article);
+        FragmentManager fm = getSupportFragmentManager();
+        fragment.show(fm, "ShareDialog");
     }
 }

@@ -33,6 +33,7 @@ import com.simit.sneezereader.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
+import com.simit.sneezereader.SneezeApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -64,6 +65,8 @@ public class ItemFragment extends Fragment {
     // 数据库
     private Activity  context;
     private DBManager dbManager;
+    private DataManager dataManager;
+    private SneezeApplication app;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,7 +91,9 @@ public class ItemFragment extends Fragment {
         client = SneezeClient.getInstance(context);
         client.setUpdated(true);
         lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
+        app = (SneezeApplication) getActivity().getApplication();
         dbManager = DBManager.getInstance(context);
+        dataManager = DataManager.getInstance();
         //初始化界面View
         initRecyclerView();
         // 注册广播接收器
@@ -296,11 +301,12 @@ public class ItemFragment extends Fragment {
         @Override
         public void run() {
             // 从数据库查询最新的数据
-            List<Article> articles = dbManager.getData(curpos, num);
+            String username = app.getUsername();
+            List<Article> articles = dbManager.getData(curpos, num, username);
 
             if(articles.size() > mDataSet.size()){
                 // 查询到更多的数据,更新数据
-                DataManager.getInstance().updateDataset(curpos, articles);
+                dataManager.updateDataset(curpos, articles);
                 Message message = handler.obtainMessage();
                 message.what = Constant.LOAD_MORE_ARTICLE;
                 message.arg1 = articles.size();
@@ -308,7 +314,7 @@ public class ItemFragment extends Fragment {
                 handler.sendMessage(message);
             }else{
                 // 没有更多数据了
-                DataManager.getInstance().updateDataset(curpos, articles);
+                dataManager.updateDataset(curpos, articles);
                 handler.sendEmptyMessage(Constant.NO_MORE_ARTICLE);
             }
         }

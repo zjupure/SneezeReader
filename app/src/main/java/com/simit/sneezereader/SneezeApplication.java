@@ -31,7 +31,7 @@ public class SneezeApplication extends Application {
         night_mode = restoreConfigBoolean("night_mode", false);
         notify_mode = restoreConfigBoolean("notify_mode", true);
         advertise_mode = restoreConfigBoolean("ad_mode", false);
-
+        username = restoreConfigString("username", "annoymous");
     }
 
     public boolean getNightMode(){
@@ -71,6 +71,7 @@ public class SneezeApplication extends Application {
 
     public void setUsername(String user){
         username = user;
+        saveConfigString("username", user);
     }
 
     public String getUsername(){
@@ -85,10 +86,10 @@ public class SneezeApplication extends Application {
         editor.commit();
     }
 
-    public String restoreConfigString(String key){
+    public String restoreConfigString(String key, String defValue){
         SharedPreferences preferences = getSharedPreferences("config", Context.MODE_PRIVATE);
 
-        String value = preferences.getString(key, "");
+        String value = preferences.getString(key, defValue);
         return value;
     }
 
@@ -103,7 +104,6 @@ public class SneezeApplication extends Application {
     public boolean restoreConfigBoolean(String key, boolean defValue){
         SharedPreferences preferences = getSharedPreferences("config", Context.MODE_PRIVATE);
 
-        boolean value = preferences.getBoolean(key, defValue);
-        return value;
+        return preferences.getBoolean(key, defValue);
     }
 }

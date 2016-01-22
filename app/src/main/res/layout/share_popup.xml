@@ -83,6 +83,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/share_to"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -92,4 +93,10 @@
         android:textColor="?attr/global_textColor"
         android:textSize="18sp"
         android:padding="16dp"/>
+
+    <RelativeLayout
+        android:id="@+id/share_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/share_to"/>
 </RelativeLayout>

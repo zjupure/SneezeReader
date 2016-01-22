@@ -11,7 +11,6 @@ import android.support.v4.app.DialogFragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -101,7 +100,6 @@ public class ShareDialogFragment extends DialogFragment implements View.OnClickL
                 startShareActivity(article, "weixinfriend");
                 break;
             case R.id.share_cancel:
-            case R.id.share_mask:
             default:break;
         }
         getDialog().dismiss();
