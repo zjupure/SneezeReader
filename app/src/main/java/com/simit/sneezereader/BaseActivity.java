@@ -162,13 +162,14 @@ public class BaseActivity extends AppCompatActivity {
      * 改变收藏状态
      */
     public void changeFavoriteState(MenuItem item, Article article){
+        // 更新数据库
+        DBManager dbManager = DBManager.getInstance(this);
         // 改变状态
         boolean preFavorite = article.isFavorite();
         boolean curFavorite = !preFavorite;
         article.setIsFavorite(curFavorite);
         setFavoriteIcon(item, curFavorite);
-        // 更新数据库
-        DBManager dbManager = DBManager.getInstance(this);
+        //
         if(curFavorite){
             // 添加收藏
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);

@@ -227,7 +227,8 @@ public class FavoriteActivity extends BaseActivity {
         @Override
         public void run() {
             DBManager dbManager = DBManager.getInstance(FavoriteActivity.this);
-            List<Article> articles = dbManager.getFavorites(curpos, num);
+            SneezeApplication app = (SneezeApplication) getApplication();
+            List<Article> articles = dbManager.getFavorites(curpos, num, app.getUsername());
 
             if(msgId == INITIAL_CMD || msgId == REFRESH_CMD){
                 mDataSet.clear();

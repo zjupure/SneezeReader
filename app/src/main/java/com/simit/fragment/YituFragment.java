@@ -29,6 +29,7 @@ import com.simit.sneezereader.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.extras.viewpager.PullToRefreshViewPager;
+import com.simit.sneezereader.SneezeApplication;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -223,6 +224,10 @@ public class YituFragment extends Fragment {
      */
     public void updateMenuState(){
         Article article = mDataSet.get(position);
+        DBManager dbManager = DBManager.getInstance(context);
+        SneezeApplication app = (SneezeApplication) context.getApplication();
+        boolean isFavorite = dbManager.getFavoriteState(article.getId(), app.getUsername());
+        article.setIsFavorite(isFavorite);
         // 更新操作
         Activity activity = getActivity();
         if(activity != null && activity instanceof MainActivity){

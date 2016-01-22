@@ -34,8 +34,6 @@ public class FavoriteDetailActivity extends BaseActivity {
         type = article.getType();
         // 初始化界面
         initView();
-        // 初始化分享组件
-        //initShareConponents(savedInstanceState);
     }
 
     @Override

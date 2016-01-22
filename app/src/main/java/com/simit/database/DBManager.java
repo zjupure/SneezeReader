@@ -134,6 +134,7 @@ public class DBManager {
         if(cursor.moveToFirst()){
             local_link = cursor.getString(cursor.getColumnIndex("local_link"));
         }
+        cursor.close();
 
         return local_link;
     }
@@ -149,8 +150,10 @@ public class DBManager {
 
         sql = String.format(sql, description);
         Cursor cursor = db.rawQuery(sql, null);
+        boolean exist = cursor.moveToFirst();
+        cursor.close();
 
-        return cursor.moveToFirst() == true;
+        return exist;
     }
 
     public List<String> getRemoteLinks(int type, int limit){
@@ -186,13 +189,13 @@ public class DBManager {
     /**
      * 查询特定类型的数据填充到数据管理器
      * @param type
+     * @param limit
      * @return
      */
     public List<Article> getData(int type, int limit){
         //按照type查询所有列,根据发表时间降序排列,取前LIMIT项
         String sql_art = "SELECT * FROM articles WHERE type = %d ORDER BY pubDate DESC ";
-        String sql_fav_format = "SELECT article_id FROM favorites where article_id = %d";
-        List<Article> datainfos = new ArrayList<>();
+        List<Article> datainfos;
 
         if(limit == 0){
             //查询出所有符合条件的数据
@@ -201,21 +204,7 @@ public class DBManager {
             sql_art = String.format(sql_art, type) + " LIMIT " + limit;   //格式化
         }
 
-        List<Article> articles = query(sql_art);
-        // 去收藏列表查询
-        for(Article article : articles){
-            int article_id = article.getId();
-            String sql_fav = String.format(sql_fav_format, article_id);
-            Cursor cursor = db.rawQuery(sql_fav, null);
-            if(cursor.moveToFirst()){
-                article.setIsFavorite(true);
-            }else {
-                article.setIsFavorite(false);
-            }
-            cursor.close();
-            //
-            datainfos.add(article);
-        }
+        datainfos = query(sql_art);
 
         return datainfos;
     }
@@ -243,6 +232,7 @@ public class DBManager {
             data.setDescription(cursor.getString(cursor.getColumnIndex("description")));
             data.setImgurl(cursor.getString(cursor.getColumnIndex("imgurl")));
             data.setLocal_link(cursor.getString(cursor.getColumnIndex("local_link")));
+            data.setIsFavorite(false);
             // 查询到的数据集
             datainfos.add(data);
         }
@@ -265,7 +255,7 @@ public class DBManager {
         Cursor cursor = db.rawQuery(sql, null);
 
         boolean exist = cursor.moveToFirst();
-
+        cursor.close();
         // 收藏列表已经存在
         if(exist == true){
             return;
@@ -293,23 +283,35 @@ public class DBManager {
         db.delete("favorites", whereClause, whereArgs);
     }
 
+    public boolean getFavoriteState(int article_id, String user){
+        String sql_fav = "SELECT article_id FROM favorites where article_id = %d AND user = '%s'";
+
+        sql_fav = String.format(sql_fav, article_id, user);
+
+        Cursor cursor = db.rawQuery(sql_fav, null);
+        boolean isFavorite = cursor.moveToFirst();
+        cursor.close();
+
+        return isFavorite;
+    }
+
     /**
      * 根据类型获取收藏文章信息
      * @param type
      * @param limit
      * @return
      */
-    public List<Article> getFavorites(int type, int limit){
+    public List<Article> getFavorites(int type, int limit, String user){
         //按照type查询所有列,根据添加时间降序排列,取前LIMIT项
-        String sql_fav = "SELECT article_id FROM favorites WHERE type = %d ORDER BY add_time DESC ";
+        String sql_fav = "SELECT article_id FROM favorites WHERE type = %d AND user = '%s' ORDER BY add_time DESC ";
         String sql_art = "SELECT * FROM articles WHERE id = %d ";
         List<Article> datainfos = new ArrayList<>();
 
         if(limit == 0){
             //查询出所有符合条件的数据
-            sql_fav = String.format(sql_fav, type);
+            sql_fav = String.format(sql_fav, type, user);
         }else{
-            sql_fav = String.format(sql_fav, type) + " LIMIT " + limit;   //格式化
+            sql_fav = String.format(sql_fav, type, user) + " LIMIT " + limit;   //格式化
         }
         // 从收藏列表查询到article_id
         Cursor cursor = db.rawQuery(sql_fav, null);
