@@ -1,5 +1,6 @@
 package com.simit.fragment;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,9 @@ public class ItemFragment extends Fragment {
     private SneezeClient client;
     private LocalBroadcastManager broadcastManager;
     private BroadcastReceiver receiver;
+    // 数据库
+    private Activity  context;
+    private DBManager dbManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,13 +84,15 @@ public class ItemFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         curpos = getArguments().getInt("pos");
-        client = SneezeClient.getInstance(getActivity());
+        context = getActivity();
+        client = SneezeClient.getInstance(context);
         client.setUpdated(true);
-        lastUpdated = MainActivity.restoreLastUpdated(getActivity(), curpos);
+        lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
+        dbManager = DBManager.getInstance(context);
         //初始化界面View
         initRecyclerView();
         // 注册广播接收器
-        broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        broadcastManager = LocalBroadcastManager.getInstance(context);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constant.DATASET_UPDATED_ACTION);
         //
@@ -123,7 +129,7 @@ public class ItemFragment extends Fragment {
         mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
         mRecyclerView = mRefreshView.getRefreshableView();
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         //根据当前页面的位置,从数据管理器中获取数据
@@ -141,13 +147,27 @@ public class ItemFragment extends Fragment {
                     return;
                 }
 
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                Intent intent = new Intent(context, DetailActivity.class);
                 Bundle bundle = new Bundle();
                 Article article = mDataSet.get(position);
                 bundle.putParcelable("article", article);
                 intent.putExtra("detail", bundle);
                 intent.putExtra("position", position);
                 startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                // 只有段子页面才响应长按分享功能
+                if(curpos != Article.DUANZI){
+                    return;
+                }
+
+                Article article = mDataSet.get(position);
+                if(context instanceof MainActivity){
+                    MainActivity parent = (MainActivity)context;
+                    parent.shareArticle(article);
+                }
             }
         });
 
@@ -193,16 +213,18 @@ public class ItemFragment extends Fragment {
             public void onRefresh(PullToRefreshBase<RecyclerView> refreshView) {
 
                 if (mRefreshView.isHeaderShown()) {
-                    int networkState = NetworkMonitor.getNetWorkState(getActivity());
+                    //
+                    int networkState = NetworkMonitor.getNetWorkState(context);
+
                     if(networkState >= NetworkMonitor.WIFI){
                         // 执行网络请求
-                        client.getArticle(curpos, new SneezeJsonResponseHandler(getActivity(),
+                        client.getArticle(curpos, new SneezeJsonResponseHandler(context,
                                 curpos, handler));
 
                         SimpleDateFormat sdf = new SimpleDateFormat(Constant.TIME_FORMAT_REFRESH);
                         String last_refresh_time = sdf.format(new Date());
                         header.setLastUpdatedLabel(last_refresh_time);
-                        MainActivity.saveLastUpdated(getActivity(), curpos, last_refresh_time);
+                        MainActivity.saveLastUpdated(context, curpos, last_refresh_time);
                     }else {
                         showToast("网络连接不可用,请稍后重试");
                         mRefreshView.onRefreshComplete();
@@ -274,7 +296,7 @@ public class ItemFragment extends Fragment {
         @Override
         public void run() {
             // 从数据库查询最新的数据
-            List<Article> articles = DBManager.getInstance(getActivity()).getData(curpos, num);
+            List<Article> articles = dbManager.getData(curpos, num);
 
             if(articles.size() > mDataSet.size()){
                 // 查询到更多的数据,更新数据

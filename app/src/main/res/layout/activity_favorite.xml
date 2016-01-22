@@ -14,7 +14,7 @@
         <com.handmark.pulltorefresh.library.PullToRefreshRecyclerView
             android:id="@+id/favorite_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:ptrAnimationStyle="rotate"
             app:ptrMode="pullFromEnd" />
 
@@ -31,6 +31,17 @@
             app:backgroundTint="#ff0033"
             app:rippleColor="#aacc0033"
             app:elevation="8dp" />
+
+        <TextView
+            android:id="@+id/favorite_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/favorite_empty"
+            android:textColor="@color/favorite_bg_text"
+            android:textSize="16sp"
+            android:visibility="gone"/>
     </FrameLayout>
 
 </LinearLayout>

@@ -8,7 +8,7 @@
     <com.handmark.pulltorefresh.library.PullToRefreshRecyclerView
         android:id="@+id/tugua_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:ptrAnimationStyle="flip"
         app:ptrMode="both"
         app:ptrDrawable="@mipmap/pulltorefresh_arrow"/>

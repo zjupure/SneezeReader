@@ -3,12 +3,10 @@ package com.simit.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +20,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.simit.database.DBManager;
@@ -58,6 +55,9 @@ public class DetailFragment extends Fragment {
     // 加载的是本地文件还是远程文件
     private boolean location;
     private boolean night_mode;
+    //
+    private SneezeApplication app;
+    private Activity context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,9 +78,9 @@ public class DetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         article = getArguments().getParcelable("article");
-        Activity context = getActivity();
+        context = getActivity();
+        app = (SneezeApplication) context.getApplication();
         networkState = NetworkMonitor.getNetWorkState(context);
-        SneezeApplication app = (SneezeApplication) context.getApplication();
         night_mode = app.getNightMode();
         //初始化界面View
         initWebView();
@@ -92,11 +92,11 @@ public class DetailFragment extends Fragment {
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.loading_bar);
         // WebView
         mWebView = (WebView) rootView.findViewById(R.id.article_detail_container);
+        mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY); // 垂直滑动栏
+        // Websettings
         webSettings = mWebView.getSettings();
-        // 垂直滑动栏
-        mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        // 开启js
         webSettings.setJavaScriptEnabled(true);  // 开启js
+        webSettings.setPluginState(WebSettings.PluginState.ON);
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setUseWideViewPort(true);
@@ -139,8 +139,7 @@ public class DetailFragment extends Fragment {
                     return null;
                 }
                 //评论js,根据要求看是否覆盖
-                SneezeApplication app = (SneezeApplication) getActivity().getApplication();
-                boolean adMode = app.getAdMode();
+                boolean adMode = (app != null) && app.getAdMode();
                 // 开启评论
                 if((url.contains("mobile") || url.contains("wap")) && url.contains("js")){
                     if(adMode){
@@ -162,13 +161,10 @@ public class DetailFragment extends Fragment {
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-
-                Context context = getActivity();
-                if (context != null) {
-                    networkState = NetworkMonitor.getNetWorkState(context);
-                }
+                //
+                networkState = NetworkMonitor.getNetWorkState(context);
                 // 3g条件下,本地加载失败,重新加载远程数据,可能本地缓存被删除了
-                if (networkState >= NetworkMonitor.WIFI && location == false) {
+                if (networkState >= NetworkMonitor.WIFI && !location) {
                     String remote_url = article.getDescription();
                     mWebView.loadUrl(remote_url);
                     location = true;
@@ -228,7 +224,7 @@ public class DetailFragment extends Fragment {
     private String loadThemeJs(){
         InputStream is;
         try{
-            Context context = getActivity();
+            Activity context = getActivity();
             if(context != null){
                 is = context.getAssets().open("js/theme.js");
                 StringBuilder sb = new StringBuilder();
@@ -279,16 +275,17 @@ public class DetailFragment extends Fragment {
     public void displayArticle(){
         // 首先判断是否连接wifi，wifi条件下加载远程链接，无wifi条件下优先加载本地缓存资源
         Context context = getActivity();
-        if(context != null){
-            networkState = NetworkMonitor.getNetWorkState(context);
+        if(context == null){
+            return;  // 脱离父主Activity
         }
 
         Log.d("DetailFragment", "current network state: " + networkState);
         //
+        networkState = NetworkMonitor.getNetWorkState(context);
         String remote_url = article.getDescription();
         String local_url = article.getLocal_link();
         if(local_url.isEmpty()){
-            local_url = DBManager.getInstance(getActivity()).getLocalUrl(remote_url);
+            local_url = DBManager.getInstance(context).getLocalUrl(remote_url);
             // 更新链接
             if(!local_url.isEmpty()){
                 article.setLocal_link(local_url);

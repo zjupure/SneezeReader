@@ -51,7 +51,7 @@ public class DetailActivity extends BaseActivity{
         // 初始化界面
         initView();
         // 注册分享组件
-        initShareConponents(savedInstanceState);
+        //initShareConponents(savedInstanceState);
     }
 
     @Override

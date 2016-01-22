@@ -2,7 +2,6 @@ package com.simit.sneezereader;
 
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -11,22 +10,18 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager.LayoutParams;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.simit.database.DBManager;
 import com.simit.datamodel.Article;
-import com.simit.network.SneezeClient;
-import com.sina.weibo.sdk.api.ImageObject;
-import com.sina.weibo.sdk.api.TextObject;
-import com.sina.weibo.sdk.api.WeiboMessage;
-import com.sina.weibo.sdk.api.WeiboMultiMessage;
-import com.sina.weibo.sdk.api.share.BaseResponse;
-import com.sina.weibo.sdk.api.share.IWeiboHandler;
-import com.sina.weibo.sdk.api.share.IWeiboShareAPI;
-import com.sina.weibo.sdk.api.share.SendMessageToWeiboRequest;
-import com.sina.weibo.sdk.api.share.SendMultiMessageToWeiboRequest;
-import com.sina.weibo.sdk.api.share.WeiboShareSDK;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,10 +32,15 @@ import java.util.Locale;
  */
 public class BaseActivity extends AppCompatActivity {
     private Toolbar mToolBar;
-    // weibo share component
-    private IWeiboShareAPI mWeiboShareAPI;
-    // weibo share response
-    private IWeiboHandler.Response mWeiboResponse;
+    // share component
+    private ImageView mWeiboPhoto;
+    private ImageView mWeixinPhoto;
+    private ImageView mWeixinFriendPhoto;
+    private TextView mShareCancel;
+    // 弹窗
+    private PopupWindow popupWindow;
+    //
+    private SneezeApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,17 +49,8 @@ public class BaseActivity extends AppCompatActivity {
         setupTheme();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if(mWeiboShareAPI != null){
-            mWeiboShareAPI.handleWeiboResponse(intent, mWeiboResponse);
-        }
-    }
-
     protected void setupTheme(){
-        SneezeApplication app = (SneezeApplication) getApplication();
+        app = (SneezeApplication) getApplication();
         boolean mNightMode = app.getNightMode();
 
         if(mNightMode){
@@ -116,29 +107,6 @@ public class BaseActivity extends AppCompatActivity {
                 }
             }
 
-        }
-    }
-
-    /**
-     * 初始化分享组件
-     */
-    protected void initShareConponents(Bundle bundle){
-        // 先注册,后分享
-        mWeiboShareAPI = WeiboShareSDK.createWeiboAPI(this, Constant.WEIBO_APP_KEY);
-        mWeiboShareAPI.registerApp();
-        // 初始化Response接口
-        mWeiboResponse = new IWeiboHandler.Response() {
-            @Override
-            public void onResponse(BaseResponse baseResponse) {
-                //接收微博分享后的返回数据
-                switch (baseResponse.errCode){
-                    default:break;
-                }
-            }
-        };
-
-        if(bundle != null){
-            mWeiboShareAPI.handleWeiboResponse(getIntent(), mWeiboResponse);
         }
     }
 
@@ -205,45 +173,77 @@ public class BaseActivity extends AppCompatActivity {
             // 添加收藏
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             String curTime = sdf.format(new Date());
-            dbManager.insertFavorite(article, "anonymous", curTime);
+            dbManager.insertFavorite(article, app.getUsername(), curTime);
             // Toast
             Toast.makeText(this, "添加收藏成功", Toast.LENGTH_SHORT).show();
         }else{
             // 删除收藏
-            dbManager.deleteFavorite(article.getId(), "anonymous");
+            dbManager.deleteFavorite(article.getId(), app.getUsername());
             // Toast
             Toast.makeText(this, "删除收藏成功", Toast.LENGTH_SHORT).show();
         }
     }
 
     /**
-     * 分享文章信息
+     * 弹出PopupWindow进行分享
      * @param article
      */
-    public void shareArticle(Article article){
-        // 发起分享
-        shareToWeibo(article);
+    public void shareArticle(final Article article){
+        // 构造PopupWindow
+        View popView = LayoutInflater.from(this).inflate(R.layout.share_popup, null);
+        mWeiboPhoto = (ImageView) popView.findViewById(R.id.share_weibo);
+        mWeixinPhoto = (ImageView) popView.findViewById(R.id.share_weixin);
+        mWeixinFriendPhoto = (ImageView)popView.findViewById(R.id.share_weixin_friend);
+        mShareCancel = (TextView) popView.findViewById(R.id.share_cancel);
+        View.OnClickListener mListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()){
+                    case R.id.share_weibo:
+                        startShareActivity(article, "weibo");
+                        break;
+                    case R.id.share_weixin:
+                        startShareActivity(article, "weixin");
+                        break;
+                    case R.id.share_weixin_friend:
+                        startShareActivity(article, "weixinfriend");
+                        break;
+                    case R.id.share_cancel:
+                        break;
+                    default:break;
+                }
+                popupWindow.dismiss();
+            }
+        };
+        mWeiboPhoto.setOnClickListener(mListener);
+        mWeixinPhoto.setOnClickListener(mListener);
+        mWeixinFriendPhoto.setOnClickListener(mListener);
+        mShareCancel.setOnClickListener(mListener);
+        // 设置弹窗
+        popupWindow = new PopupWindow(popView, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        // 初始化窗体
+        int share_bgcolor = getResources().getColor(R.color.share_bgcolor);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(share_bgcolor));
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setAnimationStyle(R.style.popwindow_anim_style);
+        popupWindow.update();
+        // 显示窗体
+        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
     }
 
     /**
-     * 分享到微博
+     * 启动分享Activity
      * @param article
+     * @param from
      */
-    public void shareToWeibo(Article article){
-        if(mWeiboShareAPI != null){
-            // 分享文章的链接
-            WeiboMultiMessage message = new WeiboMultiMessage();
-            TextObject textObject = new TextObject();
-            // 文本内容
-            String content = article.getTitle() + article.getDescription();
-            textObject.text = content;
-            message.textObject = textObject;
-            // 初始化Request
-            SendMultiMessageToWeiboRequest request = new SendMultiMessageToWeiboRequest();
-            request.transaction = String.valueOf(System.currentTimeMillis());
-            request.multiMessage = message;
-            // 发起分享Request
-            mWeiboShareAPI.sendRequest(this, request);
-        }
+    public void startShareActivity(Article article, String from){
+        Intent intent = new Intent(this, ShareActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("article", article);
+        bundle.putString("from", from);
+        intent.putExtra("share", bundle);
+        // 启动分享Activity
+        startActivity(intent);
     }
 }
