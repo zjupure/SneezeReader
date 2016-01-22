@@ -86,7 +86,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         // 初始化界面
         initView();
         // 注册分享组件
-        initShareConponents(savedInstanceState);
+        //initShareConponents(savedInstanceState);
         // start service
         intent = new Intent(this, UpdateService.class);
         startService(intent);

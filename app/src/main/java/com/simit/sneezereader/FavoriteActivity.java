@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.handmark.pulltorefresh.library.ILoadingLayout;
@@ -42,6 +43,8 @@ public class FavoriteActivity extends BaseActivity {
     private MyRecylcerAdapter mAdapter;   //适配器
     private FloatingActionButton mGoTopBtn;
     private int curpos = 0;  //收藏类型
+    //
+    private TextView mBgText;
     // RecycleView数据集
     private List<Article> mDataSet;
     private int limit = 30;
@@ -66,6 +69,7 @@ public class FavoriteActivity extends BaseActivity {
         super.initView();
         setToolBarTitle(TOOLBAR_TITLE[curpos]);
         // 初始化界面组件
+        mBgText = (TextView) findViewById(R.id.favorite_text);
         // Floating action bar
         mGoTopBtn = (FloatingActionButton) findViewById(R.id.go_top_btn);
         // 为按钮设置监听事件
@@ -104,6 +108,11 @@ public class FavoriteActivity extends BaseActivity {
                 intent.putExtra("detail", bundle);
                 intent.putExtra("position", position);
                 startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+                //不处理,段子没有收藏功能
             }
         });
 
@@ -198,6 +207,12 @@ public class FavoriteActivity extends BaseActivity {
                     Toast.makeText(FavoriteActivity.this, "没有更多数据了", Toast.LENGTH_SHORT).show();
                     break;
                 default:break;
+            }
+            // 如果页面没有数据则显示空白提示页面
+            if(mDataSet.size() > 0){
+                mBgText.setVisibility(View.GONE);
+            }else{
+                mBgText.setVisibility(View.VISIBLE);
             }
         }
     };

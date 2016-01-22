@@ -57,6 +57,7 @@ public class YituFragment extends Fragment {
     private MyViewPagerAdapter mAdapter;
 
     private int curpos;    //当前页面标识
+    private Activity context;
     //数据集
     private List<Article> mDataSet;
     private int limit = 30;
@@ -86,13 +87,14 @@ public class YituFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         curpos = getArguments().getInt("pos");
-        client = SneezeClient.getInstance(getActivity());
+        context = getActivity();
+        client = SneezeClient.getInstance(context);
         client.setUpdated(true);
-        lastUpdated = MainActivity.restoreLastUpdated(getActivity(), curpos);
+        lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
         //初始化界面View
         initViewPager();
         // 注册广播接收器
-        broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        broadcastManager = LocalBroadcastManager.getInstance(context);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constant.DATASET_UPDATED_ACTION);
         //
@@ -158,13 +160,13 @@ public class YituFragment extends Fragment {
 
                 if (mRefreshView.isHeaderShown()) {
                     // 执行网络请求
-                    client.getArticle(curpos, new SneezeJsonResponseHandler(getActivity(),
+                    client.getArticle(curpos, new SneezeJsonResponseHandler(context,
                             curpos, handler));
 
                     SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT_REFRESH);
                     String last_refresh_time = sdf.format(new Date());
                     header.setLastUpdatedLabel(last_refresh_time);
-                    MainActivity.saveLastUpdated(getActivity(), curpos, last_refresh_time);
+                    MainActivity.saveLastUpdated(context, curpos, last_refresh_time);
                 } else if (mRefreshView.isFooterShown()) {
                     // 从数据库加载数据
                     loadFromDatabase(limit + 10);
@@ -314,7 +316,7 @@ public class YituFragment extends Fragment {
         @Override
         public void run() {
             // 从数据库查询最新的数据
-            List<Article> articles = DBManager.getInstance(getActivity()).getData(curpos, num);
+            List<Article> articles = DBManager.getInstance(context).getData(curpos, num);
 
             if(articles.size() > mDataSet.size()){
                 // 查询到更多的数据,更新数据

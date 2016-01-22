@@ -24,8 +24,9 @@ public class Constant {
 
     // weibo api key
     public static final String WEIBO_APP_KEY = "2994830099";
-    //
     public static final String WEIBO_REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";
-    //
     public static final String WEIBO_SCOPE = "";
+
+    // weixin api key
+    public static final String WEIXIN_APP_KEY = "wxf92a176150a2a179";
 }

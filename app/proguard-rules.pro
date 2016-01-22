@@ -122,6 +122,13 @@
 -dontwarn javax.annotation.**
 -dontwarn com.android.volley.toolbox.**
 
+# weixin
+-keep class com.tencent.mm.sdk.** {
+
+   *;
+
+}
+
 #友盟
 #-keep class com.umeng.**{*;}
 

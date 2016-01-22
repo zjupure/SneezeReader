@@ -86,7 +86,8 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
      * Item单击接口
      */
     public  interface OnItemClickListener {
-        public void onItemClick(View view, int position);
+        void onItemClick(View view, int position);
+        void onItemLongClick(View view, int position);
     }
 
     /**
@@ -100,13 +101,23 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
             super(rootView);
             mTextView = (TextView)rootView.findViewById(R.id.item_title);
             mImageView = (SimpleDraweeView) rootView.findViewById(R.id.item_photo);
-
+            // 单击操作
             rootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(mListener != null){
                         mListener.onItemClick(v, getLayoutPosition());
                     }
+                }
+            });
+            // 长按操作
+            rootView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if(mListener != null){
+                        mListener.onItemLongClick(v, getLayoutPosition());
+                    }
+                    return false;
                 }
             });
         }

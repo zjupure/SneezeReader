@@ -44,7 +44,6 @@ function changeTheme(cssPath){
 	}
 }
 
-
 function filterAD(){		
 	var content = "友情提示：请各位河蟹评论。道理你懂的";
 	var target = -1;
@@ -66,12 +65,9 @@ function filterAD(){
 		var p = paragraph[i];
 
 		if(p.childNodes.length == 1 && p.firstChild.nodeValue.match(content)){
-			target = i - 2;
-			if(target >= 1 && paragraph[target].getElementsByTagName("a") != null){
-				paragraph[target].innerHTML = "";
-			}
+			target = i;
 		}
-		
+
 		var link = p.getElementsByTagName("a");
 		if(link == null || link.length != 1){
 			continue;
@@ -79,7 +75,23 @@ function filterAD(){
 		var href = link[0].getAttribute("href");
 		if(href != null && ContainKeywords(href)){
 			p.innerHTML = "";
-		}		
+
+			if(i >= 1){
+				paragraph[i-1].innerHTML = " ";
+			}
+			if(i+1 < n){
+				paragraph[i+1].innerHTML = " ";
+			}
+		}			
+	}
+
+	var j = 1, pos = target - j;
+	while(j < 10 && pos >= 0){
+		if(paragraph[pos].innerHTML != " " && paragraph[pos-1].innerHTML == " "){
+			paragraph[pos].innerHTML = "";
+		}
+		j++;
+		pos = target - j;
 	}
 }
 
