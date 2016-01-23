@@ -118,7 +118,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                }
             );
             //查找Drawer header中的控件
-            View headerView = mNavView.getHeaderView(0);
+            View headerView = mNavView.getChildAt(0);
             mUserPhoto = (SimpleDraweeView) headerView.findViewById(R.id.user_photo);
             mUserName = (TextView) headerView.findViewById(R.id.user_name);
             mUserSignature = (TextView) headerView.findViewById(R.id.user_signature);
@@ -140,6 +140,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         initFragments();
         //RadioButton
         mTabMenu = (RadioGroup)findViewById(R.id.tab_menu);
+        if(app.getNightMode()){
+            mTabMenu.setBackgroundResource(R.drawable.tab_background_night);
+        }else {
+            mTabMenu.setBackgroundResource(R.drawable.tab_background);
+        }
         //设置Tab监听
         mTabMenu.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override

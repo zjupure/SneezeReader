@@ -26,6 +26,7 @@ import com.simit.datamodel.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
+import com.simit.sneezereader.BaseActivity;
 import com.simit.sneezereader.Constant;
 import com.simit.sneezereader.DetailActivity;
 import com.simit.sneezereader.MainActivity;
@@ -140,7 +141,7 @@ public class ItemFragment extends Fragment {
         //根据当前页面的位置,从数据管理器中获取数据
         mDataSet = DataManager.getInstance().getData(curpos);
         //定义Adapter
-        mAdapter = new MyRecylcerAdapter(mDataSet, curpos);  //绑定数据集
+        mAdapter = new MyRecylcerAdapter(mDataSet, curpos, app.getNightMode());  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
 
         //设置item点击事件

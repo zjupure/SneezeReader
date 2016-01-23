@@ -34,7 +34,7 @@ public class AboutActivity extends BaseActivity {
             BufferedInputStream bis = new BufferedInputStream(is);
             StringBuilder sb = new StringBuilder();
             byte[] buffer = new byte[1024];
-            int len = -1;
+            int len;
             while((len = bis.read(buffer, 0, 1024)) != -1){
                 sb.append(new String(buffer, 0, len));
             }

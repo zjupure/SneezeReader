@@ -22,14 +22,16 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
     private List<Article> mDataset;
     private OnItemClickListener mListener;
     private int type = 0;
-
-    public MyRecylcerAdapter(List<Article> dataset){
-        mDataset = dataset;
-    }
+    private boolean mNight_mode = false;
 
     public MyRecylcerAdapter(List<Article> dataset, int type){
         mDataset = dataset;
         this.type = type;
+    }
+
+    public MyRecylcerAdapter(List<Article> dataset, int type, boolean night_mode){
+        this(dataset, type);
+        mNight_mode = night_mode;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
@@ -39,7 +41,7 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v;
-
+        // 根据文章类型渲染不同的背景图
         if(type == Article.TUGUA){
             //
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.tugua_item_layout, parent, false);
@@ -47,7 +49,13 @@ public class MyRecylcerAdapter extends RecyclerView.Adapter<MyRecylcerAdapter.Vi
             //
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.lehuo_item_layout, parent, false);
         }
-
+        // 根据主题模式设置不同的背景
+        if(mNight_mode){
+            v.setBackgroundResource(R.drawable.item_background_night);
+        }else {
+            v.setBackgroundResource(R.drawable.item_background);
+        }
+        // 塞入容器缓存
         ViewHolder vh = new ViewHolder(v);
         //v.setOnClickListener(vh);
 

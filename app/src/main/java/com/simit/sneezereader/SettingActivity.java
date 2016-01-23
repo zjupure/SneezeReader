@@ -21,6 +21,8 @@ import com.simit.storage.FileManager;
  */
 public class SettingActivity extends BaseActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
     private static final String UPDATE_URL = "";
+    private static final int[]  IDS = {R.id.base_setting, R.id.notification, R.id.night, R.id.comments,
+            R.id.more_setting, R.id.clear_cache, R.id.check_update, R.id.go_feedback, R.id.go_rank, R.id.go_share};
     // Component
     private CheckBox mNight, mNotify, mAdvertise;
     private View mClearCache, mCheckUpdate, mFeedBack;
@@ -77,6 +79,15 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mCacheSize.setText(cache_size);
         String version = getAppVersionName();
         mVersion.setText(version);
+        // 设置背景
+        for(int ids : IDS){
+            View v = findViewById(ids);
+            if(app.getNightMode()){
+                v.setBackgroundResource(R.drawable.item_background_night);
+            }else {
+                v.setBackgroundResource(R.drawable.item_background);
+            }
+        }
     }
 
     @Override

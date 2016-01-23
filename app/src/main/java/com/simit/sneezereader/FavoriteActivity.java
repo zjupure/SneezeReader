@@ -92,7 +92,7 @@ public class FavoriteActivity extends BaseActivity {
         //根据当前页面的位置,Resume方法中获取数据
         mDataSet = new ArrayList<>();
         //定义Adapter
-        mAdapter = new MyRecylcerAdapter(mDataSet, Article.LEHUO);  //绑定数据集
+        mAdapter = new MyRecylcerAdapter(mDataSet, Article.LEHUO, mNightMode);  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
         //从数据库加载数据
         //loadFromDatabase(INITIAL_CMD, limit);
