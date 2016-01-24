@@ -84,7 +84,7 @@ public class DetailActivity extends BaseActivity{
                 article = datainfos.get(pos);
                 position = pos;
                 // 更新图标
-                if(topMenu != null){
+                if (topMenu != null) {
                     MenuItem item = topMenu.findItem(R.id.action_favorite);
                     setFavoriteIcon(item, article.isFavorite());
                 }
@@ -100,7 +100,7 @@ public class DetailActivity extends BaseActivity{
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_detail, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         topMenu = menu;
         // 根据文章的收藏状态设置图标
         MenuItem item = menu.findItem(R.id.action_favorite);
@@ -115,6 +115,9 @@ public class DetailActivity extends BaseActivity{
             case R.id.action_favorite:
                 changeFavoriteState(item, article);
                 break;
+            case R.id.action_refresh:
+                refreshArticle();
+                break;
             case R.id.action_share:
                 shareArticle(article);
                 break;
@@ -122,6 +125,14 @@ public class DetailActivity extends BaseActivity{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void refreshArticle(){
+        position = mViewPager.getCurrentItem();
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + position);
+        if(fragment != null && fragment instanceof  DetailFragment){
+            ((DetailFragment)fragment).displayArticle();
+        }
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.simit.sneezereader;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -21,6 +22,7 @@ public class FavoriteDetailActivity extends BaseActivity {
     private Article article;
     private int position;
     private int type;
+    private DetailFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +42,9 @@ public class FavoriteDetailActivity extends BaseActivity {
     protected void initView() {
         super.initView();
         setToolBarTitle(TOOLBAR_TITLE[type]);
-
         //
         FragmentManager fm = getSupportFragmentManager();
-        DetailFragment fragment = new DetailFragment();
+        fragment = new DetailFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable("article", article);
         fragment.setArguments(bundle);
@@ -54,7 +55,7 @@ public class FavoriteDetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_detail, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         // 根据文章的收藏状态设置图标
         MenuItem item = menu.findItem(R.id.action_favorite);
         setFavoriteIcon(item, article.isFavorite());
@@ -67,6 +68,11 @@ public class FavoriteDetailActivity extends BaseActivity {
         switch (item.getItemId()){
             case R.id.action_favorite:
                 changeFavoriteState(item, article);
+                break;
+            case R.id.action_refresh:
+                if(fragment != null){
+                    fragment.displayArticle();
+                }
                 break;
             case R.id.action_share:
                 shareArticle(article);

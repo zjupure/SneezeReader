@@ -250,10 +250,10 @@ public class YituFragment extends Fragment {
      */
     public void refreshCurrentWebView(){
         position = mViewPager.getCurrentItem();
-        Fragment fragement = getChildFragmentManager().
+        Fragment fragment = getChildFragmentManager().
                 findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + position);
-        if(fragement != null && fragement instanceof  DetailFragment){
-            ((DetailFragment)fragement).displayArticle();
+        if(fragment != null && fragment instanceof  DetailFragment){
+            ((DetailFragment)fragment).displayArticle();
         }
 
     }

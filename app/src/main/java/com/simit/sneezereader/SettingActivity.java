@@ -1,26 +1,38 @@
 package com.simit.sneezereader;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.DialogPreference;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.loopj.android.http.BinaryHttpResponseHandler;
+import com.loopj.android.http.TextHttpResponseHandler;
 import com.simit.database.DBManager;
+import com.simit.jsonparser.JsonParserUtil;
+import com.simit.jsonparser.JsonUpdateLink;
+import com.simit.network.SneezeClient;
 import com.simit.storage.FileManager;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by liuchun on 2015/12/18.
  */
 public class SettingActivity extends BaseActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
-    private static final String UPDATE_URL = "";
+    private static final String UPDATE_URL = "http://gracesite.applinzi.com/update";
     private static final int[]  IDS = {R.id.base_setting, R.id.notification, R.id.night, R.id.comments,
             R.id.more_setting, R.id.clear_cache, R.id.check_update, R.id.go_feedback, R.id.go_rank, R.id.go_share};
     // Component
@@ -29,9 +41,16 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     private View mGoRank, mGoShare;
     private TextView mCacheSize, mVersion;
     //
+    private AlertDialog mDownDialog;
+    private ProgressDialog mUpdateDialog;
+    private ProgressBar mUpdateProgress;
+    //
+    private String version;
+    //
     private FileManager fileManager;
     private DBManager dbManager;
-    SneezeApplication app;
+    private SneezeApplication app;
+    private SneezeClient client;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +59,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         fileManager = FileManager.getInstance(this);
         dbManager = DBManager.getInstance(this);
         app = (SneezeApplication) getApplication();
+        client = SneezeClient.getInstance(this);
         initView();
     }
 
@@ -77,7 +97,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
 
         String cache_size = FileManager.getInstance(this).getStoreDirSize();
         mCacheSize.setText(cache_size);
-        String version = getAppVersionName();
+        version = getAppVersionName();
         mVersion.setText(version);
         // 设置背景
         for(int ids : IDS){
@@ -147,8 +167,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         }
     }
 
-
-
     private void displayCacheWarning(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_warning);
@@ -173,7 +191,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     }
 
     private void displayCommentsWarning(){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_warning);
         builder.setMessage(R.string.dialog_comments_msg);
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -211,7 +229,97 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     }
 
     private void checkUpdate(){
-        //SneezeClient client = SneezeClient.getInstance(this);
-        //client.get(UPDATE_URL, null, hander);
+        //圆形进度条
+        mUpdateDialog = new ProgressDialog(this);
+        mUpdateDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  // 圆形转动进度条
+        mUpdateDialog.setCancelable(true);  // 设置可以点击Back键取消
+        mUpdateDialog.setCanceledOnTouchOutside(false);  // 设置点击Dialog外部是否可以取消Dialog
+        mUpdateDialog.setTitle("正在检查更新...");
+        mUpdateDialog.show();
+        //网络请求
+        client.get(UPDATE_URL, null, new TextHttpResponseHandler() {
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                if(mUpdateDialog != null){
+                    mUpdateDialog.dismiss();
+                    Toast.makeText(SettingActivity.this, "网络出错,请稍后重试", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                if(mUpdateDialog != null){
+                    mUpdateDialog.dismiss();
+                }
+                // 处理数据
+                JsonUpdateLink updateLink = JsonParserUtil.JsonUpdateLinkParser(responseString);
+                String updateVersion = updateLink.getVersion();
+                String link = updateLink.getLink();
+                if(updateVersion.compareTo(version) > 0){
+                    //发现版本更新
+                    displayDownLoad(link);
+                }else{
+                    Toast.makeText(SettingActivity.this, "暂时没有更新", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    /**
+     * 弹出对话框提示下载
+     * @param link
+     */
+    private void displayDownLoad(final String link){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("准备下载更新");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                // 发起下载网络请求
+                mUpdateProgress.setVisibility(View.VISIBLE);
+                getUpdateApk(link);
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        mUpdateProgress = new ProgressBar(this);
+        mUpdateProgress.setIndeterminate(false);
+        Drawable drawable = getResources().getDrawable(android.R.drawable.progress_horizontal);
+        mUpdateProgress.setProgressDrawable(drawable);
+        mUpdateProgress.setProgress(0);
+        mUpdateProgress.setVisibility(View.GONE);
+        builder.setView(mUpdateProgress);
+        //
+        mDownDialog = builder.create();
+        mDownDialog.show();
+    }
+
+    /**
+     * 实现apk下载功能
+     * @param url
+     */
+    public void getUpdateApk(final String url){
+        client.get(url, null, new BinaryHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
+                // 更新进度条
+                String[] paths = url.split("/");
+                String filename = paths[paths.length - 1];
+                fileManager.writeUpdateApk(filename, binaryData);
+                //
+                mDownDialog.dismiss();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
+                Toast.makeText(SettingActivity.this, "网络出错,请稍后再试", Toast.LENGTH_SHORT).show();
+                mDownDialog.dismiss();
+            }
+        });
     }
 }

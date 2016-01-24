@@ -86,6 +86,36 @@ public class FileManager {
         return absolutePath;
     }
 
+    public String writeUpdateApk(String filename, byte[] data){
+        // 文件路径
+        String storePath = filename;
+        String absolutePath = "";
+        boolean sdExist = CheckSDState();
+        File file;
+
+        // 时刻都要检测SD卡是否存在,优先存储到外部存储
+        if(sdExist){
+            file = new File(context.getExternalFilesDir(null), storePath);
+        }else {
+            file = new File(context.getFilesDir(), storePath);
+        }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(data);
+            fos.flush();
+            fos.close();
+            // 写入成功
+            absolutePath = file.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return absolutePath;
+    }
+
     public String getStoreDirSize(){
         // 文件夹路径
         String storePath = DEFAULT_PAGE_DIR;

@@ -18,6 +18,13 @@ public class JsonParserUtil {
         return loadUrl;
     }
 
+    public static JsonUpdateLink JsonUpdateLinkParser(String json){
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        return gson.fromJson(json, JsonUpdateLink.class);
+    }
+
     public static ArticleData[] JsonArticleParser(String json){
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(ArticleData.class, new ArticleDataDeserializer());

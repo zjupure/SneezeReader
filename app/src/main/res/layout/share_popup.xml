@@ -21,9 +21,9 @@
         android:orientation="horizontal"
         android:layout_below="@+id/share_to"
         android:baselineAligned="false"
+        android:background="?attr/global_background"
         android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:background="@drawable/share_background">
+        android:paddingBottom="10dp">
         <TextView
             android:id="@+id/share_weibo"
             android:layout_width="0dp"
@@ -66,7 +66,7 @@
         android:padding="16dp"
         android:textSize="18sp"
         android:textColor="?attr/global_textColor"
-        android:background="?attr/global_background"
+        android:background="@drawable/tab_background"
         android:text="@string/share_cancel"/>
     <!--
     <RelativeLayout

@@ -16,12 +16,15 @@
             android:id="@+id/feedback_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/feedback_title"/>
+            android:text="@string/feedback_title"
+            android:textSize="18sp"
+            android:textColor="?attr/global_textColor"/>
         <EditText
             android:id="@+id/feedback_title_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/feedback_title"
+            android:layout_alignTop="@+id/feedback_title"
             android:layout_marginLeft="10dp"
             android:singleLine="true"
             android:hint="@string/feedback_title_hint"
@@ -40,13 +43,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/feedback_description"
-            android:layout_gravity="top"/>
+            android:layout_gravity="top"
+            android:textSize="18sp"
+            android:textColor="?attr/global_textColor"/>
         <EditText
             android:id="@+id/feedback_des_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/feedback_description"
             android:layout_marginLeft="10dp"
+            android:layout_alignTop="@+id/feedback_description"
             android:background="@drawable/edittext_background"
             android:inputType="textMultiLine"
             android:hint="@string/feedback_des_hint"
@@ -62,6 +68,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:background="@drawable/btn_background"
+        android:background="@drawable/edittext_background"
         android:text="@string/feedback_submit"/>
 </LinearLayout>

@@ -38,7 +38,7 @@ public class BaseActivity extends AppCompatActivity {
     private TextView mWeiboPhoto;
     private TextView mWeixinPhoto;
     private TextView mWeixinFriendPhoto;
-    private TextView mShareCancel;
+    private TextView mShareCancel, mShareTo;
     //private RelativeLayout mShareMask;
     // 弹窗
     private PopupWindow popupWindow;
@@ -202,13 +202,20 @@ public class BaseActivity extends AppCompatActivity {
         mWeixinPhoto = (TextView) popView.findViewById(R.id.share_weixin);
         mWeixinFriendPhoto = (TextView)popView.findViewById(R.id.share_weixin_friend);
         mShareCancel = (TextView) popView.findViewById(R.id.share_cancel);
-        //mShareMask = (RelativeLayout) popView.findViewById(R.id.share_mask);
+        mShareTo = (TextView) popView.findViewById(R.id.share_to);
         // 设置监听
         mWeiboPhoto.setOnClickListener(mListener);
         mWeixinPhoto.setOnClickListener(mListener);
         mWeixinFriendPhoto.setOnClickListener(mListener);
         mShareCancel.setOnClickListener(mListener);
-        //mShareMask.setOnClickListener(mListener);
+        // 设置背景
+        if(app.getNightMode()){
+            mShareTo.setBackgroundResource(R.drawable.tab_background_night);
+            mShareCancel.setBackgroundResource(R.drawable.tab_background_night);
+        }else {
+            mShareTo.setBackgroundResource(R.drawable.tab_background);
+            mShareCancel.setBackgroundResource(R.drawable.tab_background);
+        }
         // 设置弹窗
         popupWindow = new PopupWindow(popView, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         // 初始化窗体
@@ -236,7 +243,7 @@ public class BaseActivity extends AppCompatActivity {
             @Override
             public void run() {
                 LayoutParams lp = getWindow().getAttributes();
-                lp.alpha = 0.7f;
+                lp.alpha = 0.6f;
                 getWindow().setAttributes(lp);
             }
         }, 1000);

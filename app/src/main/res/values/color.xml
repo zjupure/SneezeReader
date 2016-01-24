@@ -16,5 +16,5 @@
     <color name="favorite_color_nor">#ffffff</color>
     <color name="favorite_bg_text">#c2c2c2</color>
 
-    <color name="share_bgcolor">#aaaaaaaa</color>
+    <color name="share_bgcolor">#ffffff</color>
 </resources>
