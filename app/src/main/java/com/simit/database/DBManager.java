@@ -156,6 +156,17 @@ public class DBManager {
         return exist;
     }
 
+    public boolean isDuplicateImg(String imgurl){
+        String sql = "SELECT id FROM articles WHERE imgurl = '%s'";
+
+        sql = String.format(sql, imgurl);
+        Cursor cursor = db.rawQuery(sql, null);
+        boolean exist = cursor.moveToFirst();
+        cursor.close();
+
+        return exist;
+    }
+
     public List<String> getRemoteLinks(int type, int limit){
         //按照type查询所有列,根据发表时间降序排列,取前LIMIT项
         String sql = "SELECT description, local_link FROM articles WHERE type = %d ORDER BY pubDate DESC LIMIT %d";

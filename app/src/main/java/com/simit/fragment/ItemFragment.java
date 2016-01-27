@@ -259,6 +259,7 @@ public class ItemFragment extends Fragment {
                     loadFromDatabase(limit + nums);
                     break;
                 case Constant.NO_NEW_ARTICLE:
+                    //loadFromDatabase(limit);
                     showToast("没有新的数据了");
                     break;
                 case Constant.NETWORK_ERROR:

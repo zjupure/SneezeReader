@@ -1,8 +1,12 @@
 package com.simit.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -32,6 +36,7 @@ import com.simit.sneezereader.SneezeApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Created by liuchun on 2015/12/12.
@@ -42,6 +47,7 @@ public class DetailFragment extends Fragment {
             "tmall", "tianmao", "jd", "jingdong", "mougujie", "weidian"};
     private static final String DAY_THEME_CSS = "file:///android_asset/css/day.css";
     private static final String NIGHT_THEME_CSS = "file:///android_asset/css/night.css";
+    private static final String USER_AGENT = "Mozilla/5.0 (Linux; U; Android 4.0.3; zh-cn; M032 Build/IML74K) UC AppleWebKit/534.31 (KHTML, like Gecko) Mobile Safari/534.31";
     // rootView
     private View rootView;  //缓存根View,防止重复渲染
     // component
@@ -97,6 +103,9 @@ public class DetailFragment extends Fragment {
         webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);  // 开启js
         webSettings.setPluginState(WebSettings.PluginState.ON);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAppCacheEnabled(true);
+        //webSettings.setUserAgentString(USER_AGENT);
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setUseWideViewPort(true);
@@ -154,6 +163,13 @@ public class DetailFragment extends Fragment {
                     return null;
                 }
 
+                // swf请求
+                /*
+                if(url.contains(".swf")){
+                    installFlashPlayer();
+                    return null;
+                }*/
+
                 //站外请求,根据关键词过滤
                 return filterADs(url);
             }
@@ -199,6 +215,9 @@ public class DetailFragment extends Fragment {
                 // 加载过滤广告js
                 jsCmd = "javascript:filterAD()";
                 mWebView.loadUrl(jsCmd);
+                // 替换embed标签为iframe
+                //jsCmd = "javascript:replaceEmbed()";
+                //mWebView.loadUrl(jsCmd);
             }
         });
         // 设置进度条
@@ -217,6 +236,18 @@ public class DetailFragment extends Fragment {
         displayArticle();
     }
 
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+            mWebView.onPause();
+        }
+        //重新加载页面,停止视频和声音
+        mWebView.reload();
+    }
+
     /**
      * 加载assert目录下的js文件
      * @return
@@ -230,7 +261,7 @@ public class DetailFragment extends Fragment {
                 StringBuilder sb = new StringBuilder();
                 String line;
                 byte[] buffer = new byte[1024];
-                int len = 0;
+                int len;
                 while((len = is.read(buffer, 0, 1024)) > 0){
                     line = new String(buffer, 0, len);
                     sb.append(line);
@@ -279,7 +310,7 @@ public class DetailFragment extends Fragment {
             return;  // 脱离父主Activity
         }
 
-        Log.d("DetailFragment", "current network state: " + networkState);
+        //Log.d("DetailFragment", "current network state: " + networkState);
         //
         networkState = NetworkMonitor.getNetWorkState(context);
         String remote_url = article.getDescription();
@@ -292,8 +323,8 @@ public class DetailFragment extends Fragment {
             }
         }
 
-        Log.d("DetailFragment", "remote_url: "  + remote_url);
-        Log.d("DetailFragment", "local_url: " + local_url);
+        //Log.d("DetailFragment", "remote_url: "  + remote_url);
+        //Log.d("DetailFragment", "local_url: " + local_url);
         //
         if(networkState == NetworkMonitor.WIFI){
             //加载远程连接
@@ -329,7 +360,7 @@ public class DetailFragment extends Fragment {
             }
         }
 
-        Log.d("DetailFragment", "webview is loading data...");
+        //Log.d("DetailFragment", "webview is loading data...");
     }
 
     public boolean goBack(){
@@ -340,5 +371,48 @@ public class DetailFragment extends Fragment {
         }
 
         return false;
+    }
+
+    private boolean checkFlashPlayer(){
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> infoList = pm.getInstalledPackages(PackageManager.GET_SERVICES);
+        for(PackageInfo info : infoList){
+            if("com.adobe.flashplayer".equals(info.packageName)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void installFlashPlayer(){
+        boolean install = checkFlashPlayer();
+
+        if(install){
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("请安装FlashPlayer");
+        builder.setMessage("FlashPlayer未安装，视频无法播放");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                //
+                Intent intent = new Intent();
+                intent.setAction("android.intent.action.VIEW");
+                intent.setData(Uri.parse("market://details?id=com.adobe.flashplayer"));
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.create().show();
     }
 }

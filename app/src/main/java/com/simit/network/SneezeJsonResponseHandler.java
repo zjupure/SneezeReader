@@ -23,7 +23,11 @@ import com.simit.sneezereader.R;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.simit.sneezereader.SneezeApplication;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,31 +74,17 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     public void onSuccess(int statusCode, Header[] headers, String responseString) {
 
         boolean isUpdated = false;
+        String lastPubDate;
 
         ArticleData[] datas = JsonParserUtil.JsonArticleParser(responseString);
         List<Article> articles = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:30:00");
+        lastPubDate = sdf.format(new Date());
 
         for(ArticleData data : datas){
             if(data.getTitle().equals("AD")){
                 continue;  // filter advertisement
             }
-
-            String description = data.getDescription();
-            if(dbManager.isExist(description)){
-                String local_url = dbManager.getLocalUrl(description);
-                // 虽然在数据库中存在, 但是页面源码还未获取
-                int networkState = NetworkMonitor.getNetWorkState(context);
-                if(type != Article.DUANZI && local_url.isEmpty()
-                         && networkState == NetworkMonitor.WIFI){
-                    // 去请求获取页面源码
-                    //downLoadPages(articles);
-                    // 把连接加入待请求队列
-                    dataManager.putLink(description);
-                }
-                continue;  // exist in the database
-            }
-
-            isUpdated = true;
 
             // fix the pubDate bug
             String title = data.getTitle();
@@ -108,11 +98,49 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
                 if(!realDate.equals(date)){
                     pubDate = realDate.substring(0, 4) + "-" + realDate.substring(4, 6) +
                             "-" + realDate.substring(6, 8) + pubDate.substring(10, pubDate.length());
-
-                    Log.d("JsonResponse", pubDate);
+                    //Log.d("JsonResponse", pubDate);
+                }
+            }
+            // fix "1970-01-01 08:00:00" pubDate bug
+            if(pubDate.contains("1970-01-01")){
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try{
+                    Date lastDate = df.parse(lastPubDate);
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(lastDate);
+                    // 回退5分钟
+                    calendar.add(Calendar.MINUTE, -5);
+                    Date curDate = calendar.getTime();
+                    //
+                    pubDate = df.format(curDate);
+                }catch (ParseException e){
+                    e.printStackTrace();
                 }
             }
 
+            lastPubDate = pubDate;
+            // check duplicated
+            String description = data.getDescription();
+            String imgUrl = data.getImgurl();
+            if(dbManager.isExist(description)){
+                String local_url = dbManager.getLocalUrl(description);
+                // 虽然在数据库中存在, 但是页面源码还未获取
+                int networkState = NetworkMonitor.getNetWorkState(context);
+                if(type != Article.DUANZI && local_url.isEmpty()
+                         && networkState == NetworkMonitor.WIFI){
+                    // 去请求获取页面源码
+                    //downLoadPages(articles);
+                    // 把连接加入待请求队列
+                    dataManager.putLink(description);
+                }
+                continue;  // exist in the database
+            }else if(type == Article.YITU && dbManager.isDuplicateImg(imgUrl)){
+                // 重复的意图
+                continue;
+            }
+
+            isUpdated = true;
+            //
             Article article = new Article();
             article.setType(type);
             article.setTitle(data.getTitle());

@@ -44,6 +44,27 @@ function changeTheme(cssPath){
 	}
 }
 
+function replaceEmbed(){
+	var flashs = document.getElementsByTagName("embed");
+
+	for(var i = 0, n = flashs.length; i < n; i++){
+		var eb = flashs[i];
+		var parent = eb.parentNode;
+
+		var src = eb.getAttribute("src");
+		var w = eb.getAttribute("width");
+		var h = eb.getAttribute("height");
+
+		var video = document.createElement("iframe");
+		video.setAttribute("src", src);
+		video.setAttribute("frameborder", "0");
+		video.setAttribute("width", w);
+		video.setAttribute("height", h);
+
+		parent.replaceChild(video, eb);
+	}
+}
+
 function filterAD(){		
 	var content = "友情提示：请各位河蟹评论。道理你懂的";
 	var target = -1;

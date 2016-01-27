@@ -202,6 +202,7 @@ public class YituFragment extends Fragment {
                     loadFromDatabase(limit + nums);
                     break;
                 case NO_NEW_ARTICLE:
+                    //loadFromDatabase(limit);
                     showToast("没有新的数据了");
                     break;
                 case NETWORK_ERROR:
@@ -235,6 +236,10 @@ public class YituFragment extends Fragment {
      * 更新Menu的状态
      */
     public void updateMenuState(){
+        if(position >= mDataSet.size()){
+            return;
+        }
+
         Article article = mDataSet.get(position);
         // 更新操作
         Activity activity = getActivity();
