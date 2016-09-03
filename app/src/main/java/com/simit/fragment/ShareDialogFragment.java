@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,9 +15,9 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.simit.datamodel.Article;
-import com.simit.sneezereader.R;
-import com.simit.sneezereader.ShareActivity;
+import com.simit.model.Article;
+import com.simit.activity.R;
+import com.simit.activity.ShareActivity;
 
 /**
  * Created by liuchun on 2016/1/22.

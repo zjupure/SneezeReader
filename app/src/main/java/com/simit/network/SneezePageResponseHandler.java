@@ -3,7 +3,7 @@ package com.simit.network;
 import android.content.Context;
 import android.util.Log;
 
-import com.simit.database.DBManager;
+import com.simit.database.DbController;
 import com.simit.storage.FileManager;
 import com.loopj.android.http.TextHttpResponseHandler;
 
@@ -31,7 +31,7 @@ public class SneezePageResponseHandler extends TextHttpResponseHandler {
         Log.d("PageResponse", "page source download success!");
 
         FileManager fileManager = FileManager.getInstance(context);
-        DBManager dbManager = DBManager.getInstance(context);
+        DbController dbManager = DbController.getInstance(context);
 
         String[] paths = remote_link.split("[?]");
         String filename = paths[paths.length - 1];

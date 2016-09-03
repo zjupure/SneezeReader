@@ -36,7 +36,7 @@ import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.simit.sneezereader.R;
+import com.simit.activity.R;
 
 public class CircleImageView extends ImageView {
 

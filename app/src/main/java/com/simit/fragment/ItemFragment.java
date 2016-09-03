@@ -19,22 +19,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.simit.database.DBManager;
-import com.simit.fragment.MyRecylcerAdapter.OnItemClickListener;
-import com.simit.datamodel.Article;
-import com.simit.datamodel.DataManager;
+import com.simit.database.DbController;
+import com.simit.fragment.adapter.ArticleAdapter;
+import com.simit.fragment.adapter.ArticleAdapter.OnItemClickListener;
+import com.simit.model.Article;
+import com.simit.model.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
-import com.simit.sneezereader.BaseActivity;
-import com.simit.sneezereader.Constant;
-import com.simit.sneezereader.DetailActivity;
-import com.simit.sneezereader.MainActivity;
-import com.simit.sneezereader.R;
+import com.simit.activity.Constant;
+import com.simit.activity.DetailActivity;
+import com.simit.activity.MainActivity;
+import com.simit.activity.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
-import com.simit.sneezereader.SneezeApplication;
+import com.simit.activity.SneezeApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,7 +52,7 @@ public class ItemFragment extends Fragment {
     private ILoadingLayout header, footer;
     private RecyclerView mRecyclerView;  // 列表
     private LinearLayoutManager mLayoutManager;
-    private MyRecylcerAdapter mAdapter;   //适配器
+    private ArticleAdapter mAdapter;   //适配器
     private FloatingActionButton mGoTopBtn;
     private int curpos;    //当前页面标识
     // RecycleView数据集
@@ -65,7 +65,7 @@ public class ItemFragment extends Fragment {
     private BroadcastReceiver receiver;
     // 数据库
     private Activity  context;
-    private DBManager dbManager;
+    private DbController dbManager;
     private DataManager dataManager;
     private SneezeApplication app;
 
@@ -93,7 +93,7 @@ public class ItemFragment extends Fragment {
         client.setUpdated(true);
         lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
         app = (SneezeApplication) getActivity().getApplication();
-        dbManager = DBManager.getInstance(context);
+        dbManager = DbController.getInstance(context);
         dataManager = DataManager.getInstance();
         //初始化界面View
         initRecyclerView();
@@ -141,7 +141,7 @@ public class ItemFragment extends Fragment {
         //根据当前页面的位置,从数据管理器中获取数据
         mDataSet = DataManager.getInstance().getData(curpos);
         //定义Adapter
-        mAdapter = new MyRecylcerAdapter(mDataSet, curpos, app.getNightMode());  //绑定数据集
+        mAdapter = new ArticleAdapter(mDataSet, curpos);  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
 
         //设置item点击事件
@@ -220,9 +220,9 @@ public class ItemFragment extends Fragment {
 
                 if (mRefreshView.isHeaderShown()) {
                     //
-                    int networkState = NetworkMonitor.getNetWorkState(context);
+                    //int networkState = NetworkMonitor.getNetWorkState(context);
 
-                    if(networkState >= NetworkMonitor.WIFI){
+                    if(NetworkMonitor.isNetworkConnected(context)){
                         // 执行网络请求
                         client.getArticle(curpos, new SneezeJsonResponseHandler(context,
                                 curpos, handler));

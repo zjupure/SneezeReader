@@ -18,18 +18,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.simit.database.DBManager;
-import com.simit.datamodel.Article;
-import com.simit.datamodel.DataManager;
+import com.simit.database.DbController;
+import com.simit.fragment.adapter.HomeViewPagerAdapter;
+import com.simit.model.Article;
+import com.simit.model.DataManager;
 import com.simit.network.SneezeClient;
 import com.simit.network.SneezeJsonResponseHandler;
-import com.simit.sneezereader.Constant;
-import com.simit.sneezereader.MainActivity;
-import com.simit.sneezereader.R;
+import com.simit.activity.Constant;
+import com.simit.activity.MainActivity;
+import com.simit.activity.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.extras.viewpager.PullToRefreshViewPager;
-import com.simit.sneezereader.SneezeApplication;
+import com.simit.activity.SneezeApplication;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -56,7 +57,7 @@ public class YituFragment extends Fragment {
     private PullToRefreshViewPager mRefreshView;
     private ILoadingLayout header, footer;
     private ViewPager mViewPager;
-    private MyViewPagerAdapter mAdapter;
+    private HomeViewPagerAdapter mAdapter;
 
     private int curpos;    //当前页面标识
     private Activity context;
@@ -71,7 +72,7 @@ public class YituFragment extends Fragment {
     //
     private SneezeApplication app;
     private DataManager dataManager;
-    private DBManager dbManager;
+    private DbController dbManager;
 
 
     @Override
@@ -99,7 +100,7 @@ public class YituFragment extends Fragment {
         client.setUpdated(true);
         lastUpdated = MainActivity.restoreLastUpdated(context, curpos);
         app = (SneezeApplication) getActivity().getApplication();
-        dbManager = DBManager.getInstance(context);
+        dbManager = DbController.getInstance(context);
         dataManager = DataManager.getInstance();
         //初始化界面View
         initViewPager();
@@ -127,7 +128,7 @@ public class YituFragment extends Fragment {
         mDataSet = DataManager.getInstance().getData(curpos);
         //
         FragmentManager fm = getChildFragmentManager();
-        mAdapter = new MyViewPagerAdapter(fm, mDataSet);
+        mAdapter = new HomeViewPagerAdapter(fm, mDataSet);
         //设置适配器
         mViewPager.setAdapter(mAdapter);
         mViewPager.setCurrentItem(position);

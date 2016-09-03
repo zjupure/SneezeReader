@@ -12,7 +12,6 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +25,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
-import com.simit.database.DBManager;
-import com.simit.datamodel.Article;
-import com.simit.datamodel.DataManager;
+import com.simit.database.DbController;
+import com.simit.model.Article;
+import com.simit.model.DataManager;
 import com.simit.network.NetworkMonitor;
 import com.simit.network.SneezeClient;
-import com.simit.sneezereader.R;
-import com.simit.sneezereader.SneezeApplication;
+import com.simit.activity.R;
+import com.simit.activity.SneezeApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,7 +85,7 @@ public class DetailFragment extends Fragment {
         article = getArguments().getParcelable("article");
         context = getActivity();
         app = (SneezeApplication) context.getApplication();
-        networkState = NetworkMonitor.getNetWorkState(context);
+        networkState = NetworkMonitor.getNetworkType(context);
         night_mode = app.getNightMode();
         //初始化界面View
         initWebView();
@@ -178,9 +177,9 @@ public class DetailFragment extends Fragment {
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 //
-                networkState = NetworkMonitor.getNetWorkState(context);
+                //networkState = NetworkMonitor.getNetworkType(context);
                 // 3g条件下,本地加载失败,重新加载远程数据,可能本地缓存被删除了
-                if (networkState >= NetworkMonitor.WIFI && !location) {
+                if (NetworkMonitor.isMobileConnected(context) && !location) {
                     String remote_url = article.getDescription();
                     mWebView.loadUrl(remote_url);
                     location = true;
@@ -312,21 +311,21 @@ public class DetailFragment extends Fragment {
 
         //Log.d("DetailFragment", "current network state: " + networkState);
         //
-        networkState = NetworkMonitor.getNetWorkState(context);
+        networkState = NetworkMonitor.getNetworkType(context);
         String remote_url = article.getDescription();
-        String local_url = article.getLocal_link();
+        String local_url = article.getLocalLink();
         if(local_url.isEmpty()){
-            local_url = DBManager.getInstance(context).getLocalUrl(remote_url);
+            local_url = DbController.getInstance(context).getLocalUrl(remote_url);
             // 更新链接
             if(!local_url.isEmpty()){
-                article.setLocal_link(local_url);
+                article.setLocalLink(local_url);
             }
         }
 
         //Log.d("DetailFragment", "remote_url: "  + remote_url);
         //Log.d("DetailFragment", "local_url: " + local_url);
         //
-        if(networkState == NetworkMonitor.WIFI){
+        if(networkState == NetworkMonitor.NETWORK_WIFI){
             //加载远程连接
             mWebView.loadUrl(remote_url);
             location = true;
@@ -336,7 +335,7 @@ public class DetailFragment extends Fragment {
                 //client.getPageContent(remote_url, new SneezePageResponseHandler(context, remote_url));
                 DataManager.getInstance().putLink(remote_url);
             }
-        }else if(networkState > NetworkMonitor.WIFI){
+        }else if((networkState & NetworkMonitor.NETWORK_MOBILE_MASK) == NetworkMonitor.NETWORK_MOBILE){
             // 3g网络优先加载本地连接
             if(!local_url.isEmpty()){
                 // 本地文件存储非空

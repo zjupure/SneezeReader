@@ -31,13 +31,19 @@ proguard/
 captures/
 
 # IDEA
-*iml
+*.iml
 *.properties
 .idea/
 app/build
+app/*.iml
 build
 build/*
 
 # others
 *.db
 ic_logo
+.DS_STORE
+*/.DS_STORE
+SneezeReader.iml
+app/app.iml
+

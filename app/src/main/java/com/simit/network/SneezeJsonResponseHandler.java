@@ -12,16 +12,15 @@ import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.simit.database.DBManager;
-import com.simit.datamodel.Article;
-import com.simit.datamodel.DataManager;
-import com.simit.jsonparser.ArticleData;
-import com.simit.jsonparser.JsonParserUtil;
-import com.simit.sneezereader.Constant;
-import com.simit.sneezereader.DetailActivity;
-import com.simit.sneezereader.R;
+import com.simit.database.DbController;
+import com.simit.model.DataManager;
+import com.simit.model.Article;
+import com.simit.json.ParserUtils;
+import com.simit.activity.Constant;
+import com.simit.activity.DetailActivity;
+import com.simit.activity.R;
 import com.loopj.android.http.TextHttpResponseHandler;
-import com.simit.sneezereader.SneezeApplication;
+import com.simit.activity.SneezeApplication;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +42,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
     private Context context;
     private int type;  // page indicator
     private Handler handler;  // send message to main activity
-    private DBManager dbManager;
+    private DbController dbManager;
     private DataManager dataManager;
     private SneezeClient client;
 
@@ -56,7 +55,7 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         this.type = type;
         this.handler = handler;
 
-        dbManager = DBManager.getInstance(context);
+        dbManager = DbController.getInstance(context);
         dataManager = DataManager.getInstance();
         client = SneezeClient.getInstance(context);
     }
@@ -76,12 +75,12 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
         boolean isUpdated = false;
         String lastPubDate;
 
-        ArticleData[] datas = JsonParserUtil.JsonArticleParser(responseString);
+        Article[] datas = ParserUtils.parseArticles(responseString);
         List<Article> articles = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:30:00");
         lastPubDate = sdf.format(new Date());
 
-        for(ArticleData data : datas){
+        for(Article data : datas){
             if(data.getTitle().equals("AD")){
                 continue;  // filter advertisement
             }
@@ -121,13 +120,13 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
             lastPubDate = pubDate;
             // check duplicated
             String description = data.getDescription();
-            String imgUrl = data.getImgurl();
+            String imgUrl = data.getImgUrl();
             if(dbManager.isExist(description)){
                 String local_url = dbManager.getLocalUrl(description);
                 // 虽然在数据库中存在, 但是页面源码还未获取
-                int networkState = NetworkMonitor.getNetWorkState(context);
+                //int networkState = NetworkMonitor.getNetWorkState(context);
                 if(type != Article.DUANZI && local_url.isEmpty()
-                         && networkState == NetworkMonitor.WIFI){
+                         && NetworkMonitor.isWifiConnected(context)){
                     // 去请求获取页面源码
                     //downLoadPages(articles);
                     // 把连接加入待请求队列
@@ -144,12 +143,12 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
             Article article = new Article();
             article.setType(type);
             article.setTitle(data.getTitle());
-            article.setRemote_link(data.getLink());
+            article.setLink(data.getLink());
             article.setAuthor(data.getAuthor());
             article.setPubDate(pubDate);
             article.setDescription(data.getDescription());
-            article.setImgurl(data.getImgurl());
-            article.setLocal_link("");
+            article.setImgUrl(data.getImgUrl());
+            article.setLocalLink("");
 
             articles.add(article);
         }
@@ -182,8 +181,8 @@ public class SneezeJsonResponseHandler extends TextHttpResponseHandler {
             }
 
             // 新的页面,加载页面源码,只有wifi状态下才加载源码
-            int networkState = NetworkMonitor.getNetWorkState(context);
-            if(type != Article.DUANZI && networkState == NetworkMonitor.WIFI){
+            //int networkState = NetworkMonitor.getNetWorkState(context);
+            if(type != Article.DUANZI && NetworkMonitor.isWifiConnected(context)){
                 Log.d("PageResponse", "start to get page source");
                 // 去请求获取页面源码
                 //downLoadPages(articles);
