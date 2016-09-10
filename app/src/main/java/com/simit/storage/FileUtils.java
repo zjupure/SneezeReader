@@ -2,6 +2,7 @@ package com.simit.storage;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -40,6 +41,7 @@ public class FileUtils {
                 String path = sdcards.get(0).mPath;
                 String suffix = "Android/data/" + context.getPackageName() + "/files";
                 defaultPath = new File(path, suffix);
+                ContextCompat.getExternalFilesDirs(context, null);  // try to make the dir
             }else {
                 defaultPath = context.getFilesDir();
             }
@@ -74,6 +76,10 @@ public class FileUtils {
 
         FileOutputStream fos = null;
         try{
+            if(!file.exists()){
+                file.createNewFile();
+            }
+
             fos = new FileOutputStream(file);
 
             fos.write(content.getBytes());
@@ -108,6 +114,10 @@ public class FileUtils {
         FileOutputStream fos = null;
 
         try{
+            if(!file.exists()){
+                file.createNewFile();
+            }
+
             fos = new FileOutputStream(file);
 
             byte[] buffer = new byte[1024];

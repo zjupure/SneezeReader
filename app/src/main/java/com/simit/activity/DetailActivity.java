@@ -33,8 +33,6 @@ public class DetailActivity extends BaseActivity{
     private int curPage;
     private int type;
     private int limit = 30;
-    // Menu
-    private Menu topMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +83,7 @@ public class DetailActivity extends BaseActivity{
             public void onPageSelected(int position) {
                 article = mArticles.get(position);
                 curPage = position;
-                // 更新图标
-                if (topMenu != null) {
-                    MenuItem item = topMenu.findItem(R.id.action_favorite);
-                    setFavoriteIcon(item, article.isFavorite());
-                }
+                supportInvalidateOptionsMenu();
             }
 
             @Override
@@ -149,7 +143,7 @@ public class DetailActivity extends BaseActivity{
                 DbController dbHelper = DbController.getInstance(DetailActivity.this);
                 //从数据库查询最新的数据
                 String username = SharedPreferenceUtils.get(DetailActivity.this, "username", "any");
-                List<Article> articles = dbHelper.getData(type, limit, username);
+                List<Article> articles = dbHelper.getArticles(type, limit, username);
 
                 return articles;
             }

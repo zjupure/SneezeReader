@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
@@ -29,6 +30,7 @@ import com.simit.storage.SharedPreferenceUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -56,7 +58,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutId());
         // handle intent
         handleIntent(getIntent());
-        //
         initView();
 
         Log.d("BaseActivity", this.getClass().getName() + "-->onCreate() called");
@@ -125,9 +126,9 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     protected void restartActivity(){
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-            recreate();
-        }else {
+        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+        //    recreate();
+        //}else {
             overridePendingTransition(0, 0); // 不设置进入退出动画
             finish();
             Intent intent = getIntent();
@@ -135,7 +136,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             overridePendingTransition(0, 0);
             startActivity(intent);
-        }
+        //}
     }
 
     /**
@@ -172,7 +173,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         String username = SharedPreferenceUtils.get(this, "username", "any");
         if(isFavorite){
             //添加收藏
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             String addTime = sdf.format(new Date());
             dbHelper.insertFavorite(article, username, addTime);
             // Toast

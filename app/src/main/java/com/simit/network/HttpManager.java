@@ -170,6 +170,8 @@ public class HttpManager {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 /**TODO 数据解析处理成Bean对象 **/
+                Log.e(TAG, "request url: " + call.request().url().toString());
+
                 String resp = response.body().string();
                 Article[] articles = ParserUtils.parseArticles(resp);
 
@@ -246,8 +248,6 @@ public class HttpManager {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String resp = response.body().string();
-
-                Log.e("ParserUtils", resp);
 
                 String imgUrl = ParserUtils.parseSplashImgUrl(resp);
 

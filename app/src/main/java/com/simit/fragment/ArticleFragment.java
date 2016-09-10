@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,7 +13,6 @@ import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.simit.activity.BaseActivity;
 import com.simit.common.Constants;
 import com.simit.database.DbController;
 import com.simit.fragment.adapter.ArticleAdapter;
@@ -72,12 +70,12 @@ public class ArticleFragment extends Fragment {
      * 当前页面标识
      */
     private int curPos;    //当前页面标识
+    private boolean isShow = true;  //标示该页面是否在前端显示
+    private Activity activity;
     // RecycleView数据集
     private List<Article> mArticles = new ArrayList<>();
     private int limit = 30;
     private String lastUpdated = "";
-    //
-    private Activity activity;
     // 数据库
     private DbController dbHelper;
 
@@ -122,6 +120,12 @@ public class ArticleFragment extends Fragment {
         initRecyclerView();
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        isShow = !hidden;
+    }
 
     /**
      * 初始化RecyclerView控件
@@ -177,6 +181,9 @@ public class ArticleFragment extends Fragment {
 
                 Article article = mArticles.get(position);
                 /**TODO share article operation **/
+                if(activity instanceof BaseActivity){
+                    ((BaseActivity)activity).shareArticle(article);
+                }
             }
         });
 
@@ -261,6 +268,7 @@ public class ArticleFragment extends Fragment {
             switch (msg.what){
                 case Constants.MSG_NETWORK_SUCCESS:{
                     mAdapter.notifyDataSetChanged();
+                    invalidateOptionsMenu();
                     break;
                 }
                 case Constants.MSG_NETWORK_ERROR:{
@@ -271,6 +279,7 @@ public class ArticleFragment extends Fragment {
                     int size = msg.arg1;
                     limit = size + 10;
                     mAdapter.notifyDataSetChanged();
+                    invalidateOptionsMenu();
                     break;
                 }
                 case Constants.MSG_LOCAL_LOAD_FAIL:{
@@ -311,12 +320,22 @@ public class ArticleFragment extends Fragment {
 
 
     /**
+     * 刷新菜单
+     */
+    private void invalidateOptionsMenu(){
+
+        if(getActivity() != null){
+            getActivity().supportInvalidateOptionsMenu();
+        }
+    }
+
+    /**
      * 弹出Toast
      * @param text
      */
     private void  showToast(CharSequence text){
         Context context = getActivity();
-        if(context != null){
+        if(context != null && isShow){
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
         }
     }
@@ -338,19 +357,22 @@ public class ArticleFragment extends Fragment {
                     public void onSuccess(final List<Article> data) {
                         Log.d(TAG, "fetch data from network success; data size: " + data.size());
 
-                        mArticles.clear();
-                        mArticles.addAll(data);
-                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
                         //检查是否有新的文章
                         boolean hasUpdated = false;
                         List<Article> newArticles = new ArrayList<Article>();
-                        for(Article article : data){
+                        String username = SharedPreferenceUtils.get(activity, "username", "any");
+                        for(int i = 0; i < data.size(); i++){
+                            Article article = data.get(i);
+
                             String description = article.getDescription();
                             String imgUrl = article.getImgUrl();
+                            String localUrl = "";
 
-                            if(dbHelper.isExist(description)){
-                                String localUrl = dbHelper.getLocalUrl(description);
-
+                            Article tmp = dbHelper.getArticleByLink(description, username);
+                            if(tmp != null){
+                                //重复的文章,更新当前的article
+                                data.set(i, tmp);
+                                localUrl = article.getLocalLink();
                                 if(curPos != Article.DUANZI && TextUtils.isEmpty(localUrl)){
                                     //源码未获取,通知service处理
                                     Message msg = handler.obtainMessage();
@@ -358,16 +380,27 @@ public class ArticleFragment extends Fragment {
                                     msg.obj = article;
                                     msg.sendToTarget();
                                 }
+
                                 continue;
-                            }else if(curPos == Article.YITU && dbHelper.isDuplicateImg(imgUrl)){
-                                //重复的意图
-                                continue;
+                            }
+                            //
+                            if(curPos == Article.YITU) {
+                                tmp = dbHelper.getArticleByImgUrl(imgUrl, username);
+                                if(tmp != null) {
+                                    // 重复的意图,更新当前article
+                                    data.set(i, tmp);
+                                    continue;
+                                }
                             }
 
                             hasUpdated = true;
                             newArticles.add(article);
                         }
-
+                        // 更新内存中的数据集
+                        mArticles.clear();
+                        mArticles.addAll(data);
+                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
+                        // 新的数据插入数据库
                         if(hasUpdated){
                             //插入数据库
                             dbHelper.insertMultiRecords(newArticles);
@@ -394,7 +427,7 @@ public class ArticleFragment extends Fragment {
             public void run() {
                 //从数据库查询最新的数据
                 String username = SharedPreferenceUtils.get(activity, "username", "any");
-                List<Article> articles = dbHelper.getData(curPos, limit, username);
+                List<Article> articles = dbHelper.getArticles(curPos, limit, username);
 
                 if(articles.size() > mArticles.size()){
                     //查询到更多的数据

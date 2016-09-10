@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     private List<Article> articles;
-    private HashMap<Article, DetailFragment> fragMaps;
+    private HashMap<Article, Fragment> fragMaps;
 
     public HomeViewPagerAdapter(FragmentManager fm, List<Article> articles){
         super(fm);
@@ -27,16 +27,16 @@ public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         Article article = articles.get(position);
-        DetailFragment fragment;
+        Fragment fragment;
 
         if(fragMaps.containsKey(article)){
             // cache in the map
             fragment = fragMaps.get(article);
         }else{
-            fragment = new DetailFragment();
+
             Bundle bundle = new Bundle();
             bundle.putParcelable("article", article);
-            fragment.setArguments(bundle);
+            fragment = DetailFragment.newInstance(bundle);
             // add to the cache
             fragMaps.put(article, fragment);
         }

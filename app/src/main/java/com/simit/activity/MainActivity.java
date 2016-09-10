@@ -1,9 +1,7 @@
 package com.simit.activity;
 
-import android.app.Activity;
-import android.content.Context;
+
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -13,7 +11,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
@@ -94,6 +91,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         // 启动后台轮询service
         Intent intent = new Intent(this, UpdateService.class);
         startService(intent);
+
+        if(savedInstanceState != null){
+            curPos = savedInstanceState.getInt("curpos");
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            for(int i = 0; i < 4; i++){
+                ft.hide(mFragments.get(i));
+            }
+            ft.show(mFragments.get(curPos));
+            ft.commit();
+        }
     }
 
     @Override
@@ -196,14 +204,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         //添加第0个页面到frag_container中
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        /*
+
         for(int i = 0; i < 4; i++){
             ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);  //打Tag
             ft.hide(mFragments.get(i));    // hide all fragments
         }
         ft.show(mFragments.get(curPos));   // show first fragments
-        */
-        ft.add(R.id.content_container, mFragments.get(0), FRAG_TAG[0]);
+
+        //ft.add(R.id.content_container, mFragments.get(0), FRAG_TAG[0]);
         ft.commit();
     }
 
@@ -270,9 +278,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         if (curPos != prePos) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             // hide/show to save the fragment state
-            //ft.hide(mFragments.get(prePos));  // hide previous fragment
-            //ft.show(mFragments.get(curPos));  // show current fragment
-            ft.replace(R.id.content_container, mFragments.get(curPos), FRAG_TAG[curPos]);  //打Tag
+            ft.hide(mFragments.get(prePos));  // hide previous fragment
+            ft.show(mFragments.get(curPos));  // show current fragment
+            //ft.replace(R.id.content_container, mFragments.get(curPos), FRAG_TAG[curPos]);  //打Tag
             ft.commit();
         }
 
@@ -297,6 +305,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         startActivity(intent);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putInt("curpos", curPos);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onResume() {

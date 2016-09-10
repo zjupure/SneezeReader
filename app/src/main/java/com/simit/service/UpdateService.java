@@ -18,6 +18,7 @@ import com.simit.network.NetworkMonitor;
 import com.simit.storage.FileUtils;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -31,6 +32,7 @@ public class UpdateService extends Service {
     private boolean isNetworkAvailable = false;
     private boolean isWifiAvaiable = false;
     //阻塞队列和后台线程
+    private HashSet<String> urlSet;   //防止重复添加到队列
     private BlockingQueue<String> remoteUrlQueue;
     private NetworkDispatcher dispatcher;
     //数据库
@@ -61,8 +63,10 @@ public class UpdateService extends Service {
         registerReceiver(connReceiver, filter);
 
         //创建阻塞队列和后台线程
+        urlSet = new HashSet<>();
         remoteUrlQueue = new ArrayBlockingQueue<String>(1024);
         dispatcher = new NetworkDispatcher();
+        dispatcher.start();
     }
 
 
@@ -72,10 +76,15 @@ public class UpdateService extends Service {
         if(intent != null){
             String url = intent.getStringExtra("link");
             if(!TextUtils.isEmpty(url) && (url.startsWith("http://") || url.startsWith("https://"))) {
-                try {
-                    remoteUrlQueue.put(url);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "UpdateService--->onStartCommand: " + e.getMessage());
+
+                if(!urlSet.contains(url)) {
+
+                    try {
+                        remoteUrlQueue.put(url);
+                        urlSet.add(url);
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "UpdateService--->onStartCommand: " + e.getMessage());
+                    }
                 }
             }
         }
@@ -170,6 +179,7 @@ public class UpdateService extends Service {
                 if(isWifiAvaiable) {
                     try {
                         final String url = remoteUrlQueue.take();
+                        urlSet.remove(url);
 
                         HttpManager.getInstance(UpdateService.this)
                                 .getPageSource(url, new HttpManager.INetworkCallback<InputStream>() {
