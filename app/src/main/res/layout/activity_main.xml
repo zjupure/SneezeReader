@@ -19,13 +19,17 @@
             android:layout_weight="1">
         </FrameLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dividerColor"/>
+
         <RadioGroup
             android:id="@+id/tab_menu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:paddingBottom="6dp"
-            android:background="@drawable/tab_background"
             android:orientation="horizontal">
             <RadioButton
                 android:id="@+id/tab_tugua"
@@ -59,7 +63,7 @@
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/menu_drawer"
         app:itemIconTint="#ee9a00"
-        app:itemTextColor="?attr/global_textColor" />
+        app:itemTextColor="@color/textColorPrimary" />
 </android.support.v4.widget.DrawerLayout>
 
 

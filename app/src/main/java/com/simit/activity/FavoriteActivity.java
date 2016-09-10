@@ -19,7 +19,8 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
 import com.simit.database.DbController;
 import com.simit.fragment.adapter.ArticleAdapter;
-import com.simit.model.Article;
+import com.simit.database.Article;
+import com.simit.storage.SharedPreferenceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class FavoriteActivity extends BaseActivity {
     private LinearLayoutManager mLayoutManager;
     private ArticleAdapter mAdapter;   //适配器
     private FloatingActionButton mGoTopBtn;
-    private int curpos = 0;  //收藏类型
+    private int curPos = 0;  //收藏类型
     //
     private TextView mBgText;
     // RecycleView数据集
@@ -51,22 +52,28 @@ public class FavoriteActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_favorite);
-        //
-        Intent intent = getIntent();
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_favorite;
+    }
+
+    @Override
+    protected void handleIntent(Intent intent) {
+        super.handleIntent(intent);
+
         int defValue = restoreFavoriteType();
-        curpos = intent.getIntExtra("curpos", defValue);
-        if(curpos != defValue){
-            saveFavoriteType(curpos);
+        curPos = intent.getIntExtra("curPos", defValue);
+        if(curPos != defValue){
+            saveFavoriteType(curPos);
         }
-        // 初始化界面
-        initView();
     }
 
     @Override
     protected void initView() {
         super.initView();
-        setToolBarTitle(TOOLBAR_TITLE[curpos]);
+        setToolBarTitle(TOOLBAR_TITLE[curPos]);
         // 初始化界面组件
         mBgText = (TextView) findViewById(R.id.favorite_text);
         // Floating action bar
@@ -93,8 +100,6 @@ public class FavoriteActivity extends BaseActivity {
         //定义Adapter
         mAdapter = new ArticleAdapter(mDataSet, Article.LEHUO);  //绑定数据集
         mRecyclerView.setAdapter(mAdapter);   //设置适配器
-        //从数据库加载数据
-        //loadFromDatabase(INITIAL_CMD, limit);
         //设置item点击事件
         mAdapter.setOnItemClickListener(new ArticleAdapter.OnItemClickListener() {
             @Override
@@ -226,8 +231,8 @@ public class FavoriteActivity extends BaseActivity {
         @Override
         public void run() {
             DbController dbManager = DbController.getInstance(FavoriteActivity.this);
-            SneezeApplication app = (SneezeApplication) getApplication();
-            List<Article> articles = dbManager.getFavorites(curpos, num, app.getUsername());
+            String username = SharedPreferenceUtils.get(FavoriteActivity.this, "username", "any");
+            List<Article> articles = dbManager.getFavorites(curPos, num, username);
 
             if(msgId == INITIAL_CMD || msgId == REFRESH_CMD){
                 mDataSet.clear();

@@ -21,8 +21,7 @@
             android:paddingBottom="6dp"
             android:text="@string/setting_basic"
             android:textSize="18sp"
-            android:textColor="?attr/global_textColor"
-            android:background="@drawable/item_background"/>
+            android:textColor="@color/textColorPrimary" />
         <RelativeLayout
             android:id="@+id/notification"
             style="@style/setting_item">
@@ -88,8 +87,7 @@
             android:paddingBottom="6dp"
             android:text="@string/setting_more"
             android:textSize="18sp"
-            android:textColor="?attr/global_textColor"
-            android:background="@drawable/item_background"/>
+            android:textColor="@color/textColorPrimary" />
         <RelativeLayout
             android:id="@+id/clear_cache"
             style="@style/setting_item_more">

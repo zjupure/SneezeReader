@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.simit.fragment.DetailFragment;
-import com.simit.model.Article;
+import com.simit.database.Article;
 
 /**
  * Created by liuchun on 2016/1/17.
@@ -25,15 +25,22 @@ public class FavoriteDetailActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_favorite_detail);
-        // 获取数据
-        Intent intent = getIntent();
+    }
+
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_favorite_detail;
+    }
+
+    @Override
+    protected void handleIntent(Intent intent) {
+        super.handleIntent(intent);
+
         Bundle bundle = intent.getBundleExtra("detail");
         article = bundle.getParcelable("article");
         position = intent.getIntExtra("position", 0);
         type = article.getType();
-        // 初始化界面
-        initView();
     }
 
     @Override
@@ -53,7 +60,7 @@ public class FavoriteDetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_yitu, menu);
         // 根据文章的收藏状态设置图标
         MenuItem item = menu.findItem(R.id.action_favorite);
         setFavoriteIcon(item, article.isFavorite());
@@ -65,7 +72,7 @@ public class FavoriteDetailActivity extends BaseActivity {
         // 菜单点击操作
         switch (item.getItemId()){
             case R.id.action_favorite:
-                changeFavoriteState(item, article);
+                refreshFavoriteState(article);
                 break;
             case R.id.action_refresh:
                 if(fragment != null){

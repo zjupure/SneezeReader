@@ -5,10 +5,9 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.simit.model.Article;
+import com.simit.database.Article;
 
 import java.lang.reflect.Type;
-import java.util.UUID;
 
 /**
  * Created by liuchun on 2015/12/6.

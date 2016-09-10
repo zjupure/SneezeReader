@@ -2,24 +2,21 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:layout_marginBottom="1dp"
-    android:background="@drawable/item_background">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:background="@null"
+        android:padding="16dp"
         android:ellipsize="none"
         android:textSize="18sp"
-        android:textColor="?attr/global_textColor"
+        android:textColor="@color/textColorPrimary"
         android:text="@string/app_name"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/dividerColor"/>
 </LinearLayout>

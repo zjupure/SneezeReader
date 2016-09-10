@@ -2,12 +2,13 @@ package com.simit.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.simit.model.Article;
+import com.simit.database.Article;
 
 /**
  * Created by liuchun on 2015/12/6.
  */
 public class ParserUtils {
+    private static final String TAG = "ParserUtils";
 
     public static String parseSplashImgUrl(String json){
         GsonBuilder builder = new GsonBuilder();
@@ -32,7 +33,7 @@ public class ParserUtils {
         Gson gson = builder.create();
 
         ArticleWrapper jsonArticle = gson.fromJson(json, ArticleWrapper.class);
-        Article[] articles = jsonArticle.getArticles();
+        Article[] articles = jsonArticle.getData();
 
         return articles;
     }

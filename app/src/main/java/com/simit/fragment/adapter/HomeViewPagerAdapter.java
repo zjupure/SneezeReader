@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.simit.fragment.DetailFragment;
-import com.simit.model.Article;
+import com.simit.database.Article;
 
 import java.util.HashMap;
 import java.util.List;

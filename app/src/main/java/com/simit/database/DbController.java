@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.simit.model.Article;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -301,7 +299,7 @@ public class DbController {
         boolean exist = cursor.moveToFirst();
         cursor.close();
         // 收藏列表已经存在
-        if(exist == true){
+        if(exist){
             return;
         }
         // 收藏列表不存在则插入
@@ -349,7 +347,7 @@ public class DbController {
         //按照type查询所有列,根据添加时间降序排列,取前LIMIT项
         String sql_fav = "SELECT article_id FROM favorites WHERE type = %d AND user = '%s' ORDER BY add_time DESC ";
         String sql_art = "SELECT * FROM articles WHERE id = %d ";
-        List<Article> datainfos = new ArrayList<>();
+        List<Article> articles = new ArrayList<>();
 
         if(limit == 0){
             //查询出所有符合条件的数据
@@ -363,14 +361,14 @@ public class DbController {
         while (cursor.moveToNext()){
             int article_id = cursor.getInt(cursor.getColumnIndex("article_id"));
             String sql = String.format(sql_art, article_id);
-            List<Article> articles = query(sql);
-            for(Article article : articles){
+            List<Article> results = query(sql);
+            for(Article article : results){
                 article.setFavorite(true);
-                datainfos.add(article);
+                articles.add(article);
             }
         }
         cursor.close();
 
-        return datainfos;
+        return articles;
     }
 }

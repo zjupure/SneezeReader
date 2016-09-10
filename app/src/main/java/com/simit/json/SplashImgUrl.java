@@ -34,6 +34,6 @@ public class SplashImgUrl {
 
     @Override
     public String toString() {
-        return "{\"msg\":" + msg + ",\"error\":" + error + ",\"data\":" + data.toString() + "}";
+        return "{\"msg\":" + msg + ",\"error\":" + error + ",\"data\":" + data + "}";
     }
 }

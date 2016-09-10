@@ -1,6 +1,8 @@
 package com.simit.json;
 
-import com.simit.model.Article;
+import com.simit.database.Article;
+
+import java.util.Arrays;
 
 /**
  * Created by liuchun on 2015/12/6.
@@ -8,7 +10,7 @@ import com.simit.model.Article;
 public class ArticleWrapper {
     private String msg;
     private int error;
-    private Article[] articles;
+    private Article[] data;
 
     public String getMsg() {
         return msg;
@@ -26,16 +28,16 @@ public class ArticleWrapper {
         this.error = error;
     }
 
-    public Article[] getArticles() {
-        return articles;
+    public Article[] getData() {
+        return data;
     }
 
-    public void setArticles(Article[] articles) {
-        this.articles = articles;
+    public void setData(Article[] data) {
+        this.data = data;
     }
 
     @Override
     public String toString() {
-        return "{\"msg\":" + msg + ",\"error\":" + error + ",\"data\":" + articles.toString() + "}";
+        return "{\"msg\":" + msg + ",\"error\":" + error + ",\"data\":" + Arrays.toString(data) + "}";
     }
 }

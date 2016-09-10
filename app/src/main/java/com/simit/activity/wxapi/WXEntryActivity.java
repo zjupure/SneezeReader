@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.simit.activity.Constant;
+import com.simit.common.Constants;
 import com.tencent.mm.sdk.modelbase.BaseReq;
 import com.tencent.mm.sdk.modelbase.BaseResp;
 import com.tencent.mm.sdk.openapi.IWXAPI;
@@ -28,8 +28,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		view.setBackgroundColor(0xffffff);
 		setContentView(view);
 		// 注册微信分享组件
-		mWeixinShareAPI = WXAPIFactory.createWXAPI(this, Constant.WEIXIN_APP_KEY, true);
-		mWeixinShareAPI.registerApp(Constant.WEIXIN_APP_KEY);
+		mWeixinShareAPI = WXAPIFactory.createWXAPI(this, Constants.WEIXIN_APP_KEY, true);
+		mWeixinShareAPI.registerApp(Constants.WEIXIN_APP_KEY);
 		// 处理回调响应
 		mWeixinShareAPI.handleIntent(getIntent(), this);
 	}

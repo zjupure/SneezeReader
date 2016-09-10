@@ -1,18 +1,22 @@
 package com.simit.activity;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.simit.fragment.adapter.HomeViewPagerAdapter;
-import com.simit.model.Article;
-import com.simit.model.DataManager;
+import com.simit.database.DbController;
+import com.simit.database.Article;
 import com.simit.fragment.DetailFragment;
+import com.simit.fragment.adapter.HomeViewPagerAdapter;
+import com.simit.storage.SharedPreferenceUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -25,25 +29,32 @@ public class DetailActivity extends BaseActivity{
     private HomeViewPagerAdapter mAdapter;
     // article info
     private Article article;
-    private List<Article> datainfos;
-    private int position;
+    private List<Article> mArticles;
+    private int curPage;
     private int type;
+    private int limit = 30;
     // Menu
     private Menu topMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.article_detail_layout);
+    }
 
-        Intent intent = getIntent();
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.article_detail_layout;
+    }
+
+    @Override
+    protected void handleIntent(Intent intent) {
+        super.handleIntent(intent);
+
         Bundle bundle = intent.getBundleExtra("detail");
         article = bundle.getParcelable("article");
-        position = intent.getIntExtra("position", 0);
+        curPage = intent.getIntExtra("position", 0);
         type = article.getType();
-
-        // 初始化界面
-        initView();
     }
 
     @Override
@@ -57,15 +68,12 @@ public class DetailActivity extends BaseActivity{
 
         // ViewPager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        //
-        datainfos = DataManager.getInstance().getData(type);
-        //
-        FragmentManager fm = getSupportFragmentManager();
-        mAdapter = new HomeViewPagerAdapter(fm, datainfos);
+        mArticles = new ArrayList<>();
+        if(article != null){
+            mArticles.add(article);
+        }
+        mAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), mArticles);
         mViewPager.setAdapter(mAdapter);
-        // 显示第position项
-        mViewPager.setCurrentItem(position);
-        article = datainfos.get(position);
         //
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -74,9 +82,9 @@ public class DetailActivity extends BaseActivity{
             }
 
             @Override
-            public void onPageSelected(int pos) {
-                article = datainfos.get(pos);
-                position = pos;
+            public void onPageSelected(int position) {
+                article = mArticles.get(position);
+                curPage = position;
                 // 更新图标
                 if (topMenu != null) {
                     MenuItem item = topMenu.findItem(R.id.action_favorite);
@@ -89,17 +97,25 @@ public class DetailActivity extends BaseActivity{
 
             }
         });
+        //加载本地数据
+        fetchArticleFromLocal();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        topMenu = menu;
-        // 根据文章的收藏状态设置图标
-        MenuItem item = menu.findItem(R.id.action_favorite);
-        setFavoriteIcon(item, article.isFavorite());
+        getMenuInflater().inflate(R.menu.menu_yitu, menu);
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        MenuItem favorite = menu.findItem(R.id.action_favorite);
+        setFavoriteIcon(favorite, article.isFavorite());
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -107,7 +123,7 @@ public class DetailActivity extends BaseActivity{
         // 菜单点击操作
         switch (item.getItemId()){
             case R.id.action_favorite:
-                changeFavoriteState(item, article);
+                refreshFavoriteState(article);
                 break;
             case R.id.action_refresh:
                 refreshArticle();
@@ -121,9 +137,59 @@ public class DetailActivity extends BaseActivity{
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 从本地数据库加载数据
+     */
+    private void fetchArticleFromLocal(){
+
+        AsyncTask<Void, Void, List<Article>> asyncTask = new AsyncTask<Void, Void, List<Article>>() {
+            @Override
+            protected List<Article> doInBackground(Void... params) {
+
+                DbController dbHelper = DbController.getInstance(DetailActivity.this);
+                //从数据库查询最新的数据
+                String username = SharedPreferenceUtils.get(DetailActivity.this, "username", "any");
+                List<Article> articles = dbHelper.getData(type, limit, username);
+
+                return articles;
+            }
+
+
+            @Override
+            protected void onPostExecute(List<Article> articles) {
+                if(articles.size() < 0){
+                    return;
+                }
+
+                int index = -1;
+                for(int i = 0; i < articles.size(); i++){
+                    Article tmp = articles.get(i);
+
+                    if(TextUtils.equals(article.getDescription(), tmp.getDescription())){
+                        index = i;
+                        break;
+                    }
+                }
+
+                if(index < 0){
+                    return;
+                }
+
+                curPage = index;
+                article = articles.get(index);
+                mArticles.clear();
+                mArticles.addAll(articles);
+                mAdapter.notifyDataSetChanged();
+                mViewPager.setCurrentItem(curPage);
+            }
+        };
+        asyncTask.execute();
+
+    }
+
     public void refreshArticle(){
-        position = mViewPager.getCurrentItem();
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + position);
+        curPage = mViewPager.getCurrentItem();
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + curPage);
         if(fragment != null && fragment instanceof  DetailFragment){
             ((DetailFragment)fragment).displayArticle();
         }
@@ -131,13 +197,13 @@ public class DetailActivity extends BaseActivity{
 
     @Override
     public void onBackPressed() {
-        position = mViewPager.getCurrentItem();
-        Fragment fragement = getSupportFragmentManager().
-                findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + position);
+        curPage = mViewPager.getCurrentItem();
+        Fragment fragment = getSupportFragmentManager().
+                findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + curPage);
 
-        if(fragement != null && fragement instanceof DetailFragment)
+        if(fragment != null && fragment instanceof DetailFragment)
         {
-            DetailFragment frag = (DetailFragment)fragement;
+            DetailFragment frag = (DetailFragment)fragment;
             if(frag.goBack()){
                 return;
             }

@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/dividerColor"/>
 
     <TextView
         android:id="@+id/share_to"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:background="@drawable/tab_background"
         android:text="@string/share_to"
-        android:textColor="?attr/global_textColor"
+        android:textColor="@color/textColorPrimary"
         android:textSize="18sp"
         android:padding="16dp"/>
 
@@ -19,9 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/share_to"
         android:baselineAligned="false"
-        android:background="?attr/global_background"
         android:paddingTop="10dp"
         android:paddingBottom="10dp">
         <TextView
@@ -32,7 +35,7 @@
             android:gravity="center"
             android:drawableTop="@drawable/weibo_photo"
             android:drawablePadding="6dp"
-            android:textColor="?attr/global_textColor"
+            android:textColor="@color/textColorPrimary"
             android:text="@string/share_weibo"/>
         <TextView
             android:id="@+id/share_weixin"
@@ -42,7 +45,7 @@
             android:gravity="center"
             android:drawableTop="@drawable/weixin_photo"
             android:drawablePadding="6dp"
-            android:textColor="?attr/global_textColor"
+            android:textColor="@color/textColorPrimary"
             android:text="@string/share_weixin"/>
         <TextView
             android:id="@+id/share_weixin_friend"
@@ -52,27 +55,24 @@
             android:gravity="center"
             android:drawableTop="@drawable/weixinfriend_photo"
             android:drawablePadding="6dp"
-            android:textColor="?attr/global_textColor"
+            android:textColor="@color/textColorPrimary"
             android:text="@string/share_weixin_friend"/>
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/dividerColor"/>
 
     <TextView
         android:id="@+id/share_cancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/share_wrapper"
         android:gravity="center"
         android:padding="16dp"
         android:textSize="18sp"
-        android:textColor="?attr/global_textColor"
-        android:background="@drawable/tab_background"
+        android:textColor="@color/textColorPrimary"
         android:text="@string/share_cancel"/>
-    <!--
-    <RelativeLayout
-        android:id="@+id/share_mask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/share_to"/>
-    -->
-</RelativeLayout>
+
+</LinearLayout>

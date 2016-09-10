@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,10 +22,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.simit.fragment.ItemFragment;
+import com.simit.common.Constants;
+import com.simit.fragment.ArticleFragment;
 import com.simit.fragment.YituFragment;
-import com.simit.model.Article;
+import com.simit.database.Article;
 import com.simit.service.UpdateService;
+import com.simit.storage.SharedPreferenceUtils;
 import com.sina.weibo.sdk.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.AuthInfo;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
@@ -48,89 +48,109 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
                                 R.string.title_yitu, R.string.title_duanzi};
     private static final int[] RADIO_BUTTON_ID = {R.id.tab_tugua, R.id.tab_lehuo, R.id.tab_yitu, R.id.tab_duanzi};
-    //界面组件
+    /**
+     * 界面组件
+     */
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
     private ActionBarDrawerToggle mToggle;
     private RadioGroup mTabMenu;
-    // Drawer Components
+    /**
+     * NavigationView的headerLayout控件
+     */
     private SimpleDraweeView mUserPhoto;
     private TextView mUserName;
     private TextView mUserSignature;
-    // Menu
-    private Menu topMenu;
-    // Fragment UI
+    /**
+     * ViewPager的Fragment UI
+     */
     public List<Fragment> mFragments;
-    private FragmentManager fm;
-    //基本信息
-    private int curpos;
-    // Back按键时间
-    private long lastBackPress;
-    // application context
-    private SneezeApplication app;
-    private boolean nightMode;
-    // weibo sdk
+    /**
+     * 记录当前Fragment的position
+     */
+    private int curPos;
+    /**
+     * 记录Back按键时间
+     */
+    private long lastBackPressTime;
+    /**
+     * 微博sdk, 用户登陆使用
+     */
     private AuthInfo mAuthInfo;
     private SsoHandler mSsoHandler;
     private Oauth2AccessToken mAccessToken;
     private UsersAPI mUsersAPI;
 
+    /**
+     * 记录用户登陆信息和状态状态
+     */
+    private String userName = "any";
+    private boolean isLogin;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
-        curpos = intent.getIntExtra("pos", 0);
-        app = (SneezeApplication) getApplication();
-        nightMode = app.getNightMode();
-        // 初始化界面
-        initView();
-        // start service
-        intent = new Intent(this, UpdateService.class);
+        // 启动后台轮询service
+        Intent intent = new Intent(this, UpdateService.class);
         startService(intent);
+    }
+
+    @Override
+    protected int getLayoutId() {
+
+        return R.layout.activity_main;
+    }
+
+    @Override
+    protected void handleIntent(Intent intent) {
+        super.handleIntent(intent);
+
+        curPos = intent.getIntExtra("pos", 0);
     }
 
     @Override
     protected void initView(){
         // init the toolbar
         super.initView();
-        setToolBarTitle(APP_TITLE[curpos]);
+        setToolBarTitle(APP_TITLE[curPos]);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
         // DrawerLayout, Navigation View
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mNavView = (NavigationView)findViewById(R.id.nav_view);
         //设置mToggle
-        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, getToolBar(), R.string.app_name, R.string.app_name);
+        mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolBar, R.string.app_name, R.string.app_name);
         mToggle.syncState();
-        mDrawerLayout.setDrawerListener(mToggle);
-        // set up toolbar
-        //mToolBar.setNavigationIcon(R.drawable.user_logo);
+        mDrawerLayout.addDrawerListener(mToggle);
+        //
         if(mNavView != null){
             //为Navigation设置点击事件
             mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                    @Override
                    public boolean onNavigationItemSelected(MenuItem menuItem) {
                         // 菜单单击操作
-                       navigationMenuChecked(menuItem);
+                       navigationMenuClicked(menuItem);
                        return false;
                    }
                }
             );
             //查找Drawer header中的控件
-            View headerView = mNavView.getChildAt(0);
+            View headerView = mNavView.getHeaderView(0);
             mUserPhoto = (SimpleDraweeView) headerView.findViewById(R.id.user_photo);
             mUserName = (TextView) headerView.findViewById(R.id.user_name);
             mUserSignature = (TextView) headerView.findViewById(R.id.user_signature);
             //恢复mAccessToken
+            isLogin = false;
             mAccessToken = AccessTokenKeeper.readAccessToken(this);
             if(mAccessToken.isSessionValid()){
-                //app.setLoginState(true);
                 // Token有效,获取用户信息并显示
-                mUsersAPI = new UsersAPI(this, Constant.WEIBO_APP_KEY, mAccessToken);
+                mUsersAPI = new UsersAPI(this, Constants.WEIBO_APP_KEY, mAccessToken);
                 long uid = Long.parseLong(mAccessToken.getUid());
                 mUsersAPI.show(uid, mWeiboListener);
             }else {
-                app.setLoginState(false);
                 mUserPhoto.setOnClickListener(this);
                 mUserName.setOnClickListener(this);
             }
@@ -139,11 +159,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         initFragments();
         //RadioButton
         mTabMenu = (RadioGroup)findViewById(R.id.tab_menu);
-        if(app.getNightMode()){
-            mTabMenu.setBackgroundResource(R.drawable.tab_background_night);
-        }else {
-            mTabMenu.setBackgroundResource(R.drawable.tab_background);
-        }
         //设置Tab监听
         mTabMenu.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -153,10 +168,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             }
         });
         //选中当前项
-        RadioButton button = (RadioButton) findViewById(RADIO_BUTTON_ID[curpos]);
-        button.setChecked(true);
+        RadioButton button = (RadioButton) findViewById(RADIO_BUTTON_ID[curPos]);
+        if(button != null){
+            button.setChecked(true);
+        }
     }
-
 
     /**
      * 初始化ViewPager中的Fragments
@@ -165,26 +181,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         //内容呈现页,新建Fragment添加到List
         mFragments = new ArrayList<>();
         for(int i = 0; i < 4; i++){
+            Bundle args = new Bundle();
+            args.putInt("pos", i);
+
             Fragment frag;
             if(i == 2) {
-                frag = new YituFragment();   //第3个页面是一个带WebView的ViewPager,承载图片和文字
+                frag = YituFragment.newInstance(args);   //第3个页面是一个带WebView的ViewPager,承载图片和文字
             }else{
-                frag = new ItemFragment();   //其他的都是RecylerView,承载标题
+                frag = ArticleFragment.newInstance(args);   //其他的都是RecyclerView,承载标题
             }
-            Bundle bundle = new Bundle();
-            bundle.putInt("pos", i);
-            frag.setArguments(bundle);
             mFragments.add(frag);
         }
 
         //添加第0个页面到frag_container中
-        fm = getSupportFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
+        /*
         for(int i = 0; i < 4; i++){
             ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);  //打Tag
-            ft.hide(mFragments.get(i));  // hide all fragments
+            ft.hide(mFragments.get(i));    // hide all fragments
         }
-        ft.show(mFragments.get(curpos));  // show first fragments
+        ft.show(mFragments.get(curPos));   // show first fragments
+        */
+        ft.add(R.id.content_container, mFragments.get(0), FRAG_TAG[0]);
         ft.commit();
     }
 
@@ -192,7 +211,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      * 导航栏菜单点击操作
      * @param menuItem
      */
-    private void navigationMenuChecked(MenuItem menuItem){
+    private void navigationMenuClicked(MenuItem menuItem){
         //切换对应的Fragment操作
         menuItem.setChecked(true);
         mDrawerLayout.closeDrawers();
@@ -200,8 +219,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         Intent intent;
         switch (menuItem.getItemId()) {
             case R.id.nav_theme:
-                app.setNightMode(!nightMode);
-                updateTheme();
+                mNightMode = !mNightMode;
+                setCurrentTheme(mNightMode, true);
                 break;
             case R.id.nav_setting:
                 intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -230,36 +249,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      * @param checkedId
      */
     private void tabMenuChecked(int checkedId){
-        int prepos = curpos;
+        int prePos = curPos;
         switch (checkedId) {
             case R.id.tab_tugua:
-                curpos = Article.TUGUA;
+                curPos = Article.TUGUA;
                 break;
             case R.id.tab_lehuo:
-                curpos = Article.LEHUO;
+                curPos = Article.LEHUO;
                 break;
             case R.id.tab_yitu:
-                curpos = Article.YITU;
+                curPos = Article.YITU;
                 break;
             case R.id.tab_duanzi:
-                curpos = Article.DUANZI;
+                curPos = Article.DUANZI;
                 break;
             default:
                 break;
         }
         //开始事务替换
-        if (curpos != prepos) {
-            FragmentTransaction ft = fm.beginTransaction();
+        if (curPos != prePos) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             // hide/show to save the fragment state
-            ft.hide(mFragments.get(prepos));  // hide previous fragment
-            ft.show(mFragments.get(curpos));  // show current fragment
-            //ft.replace(R.id.content_container, mFragments.get(curpos), FRAG_TAG[curpos]);  //打Tag
+            //ft.hide(mFragments.get(prePos));  // hide previous fragment
+            //ft.show(mFragments.get(curPos));  // show current fragment
+            ft.replace(R.id.content_container, mFragments.get(curPos), FRAG_TAG[curPos]);  //打Tag
             ft.commit();
         }
 
-        setToolBarTitle(APP_TITLE[curpos]);
-        setUpMenu();
+        setToolBarTitle(APP_TITLE[curPos]);
     }
+
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState){
+        super.onPostCreate(savedInstanceState);
+        mToggle.syncState();  //状态同步
+    }
+
 
     /**
      * 进入收藏页面
@@ -267,147 +293,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void goFavorite(int type){
         Intent intent = new Intent(this, FavoriteActivity.class);
-        intent.putExtra("curpos", type);
+        intent.putExtra("curPos", type);
         startActivity(intent);
     }
 
 
     @Override
-    protected void updateTheme() {
-        //
-        Handler handler =  new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // finish itself
-                overridePendingTransition(0, 0);
-                finish();
-                // restart itself
-                Intent intent = getIntent();
-                intent.putExtra("pos", curpos);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                overridePendingTransition(0, 0);
-                startActivity(intent);
-            }
-        }, 200);
-    }
-
-    public static void saveLastUpdated(Activity activity, int curpos,  String lastUpdated){
-        SharedPreferences preferences = activity.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        editor.putString("lastUpdated" + curpos, lastUpdated);
-        editor.commit();
-    }
-
-    public static String restoreLastUpdated(Activity activity, int curpos){
-        SharedPreferences preferences = activity.getPreferences(Context.MODE_PRIVATE);
-
-        String lastUpdated = preferences.getString("lastUpdated" + curpos,
-                activity.getString(R.string.pull_to_refresh_last_update));
-
-        return lastUpdated;
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState){
-        super.onPostCreate(savedInstanceState);
-        mToggle.syncState();  //状态同步
-        // set up toolbar
-        //mToolBar.setNavigationIcon(R.drawable.user_logo);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // 渲染菜单
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        topMenu = menu;
-        setUpMenu();
-        Log.d("MainActivity", "OptionMenu created");
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    private void setUpMenu(){
-        if(topMenu == null){
-            return;  // Menu has not be loaded
-        }
-        // 根据当前状态显示或隐藏菜单
-        MenuItem refresh = topMenu.findItem(R.id.action_refresh);
-        MenuItem favorite = topMenu.findItem(R.id.action_favorite);
-        MenuItem share = topMenu.findItem(R.id.action_share);
-
-        if (curpos == Article.YITU) {
-            refresh.setVisible(true);
-            favorite.setVisible(true);
-            share.setVisible(true);
-        } else {
-            refresh.setVisible(false);
-            favorite.setVisible(false);
-            share.setVisible(false);
-        }
-    }
-
-    /**
-     * 根据id查找item
-     * @return
-     */
-    public MenuItem findMenuItem(int resId){
-        MenuItem item = null;
-        if(topMenu != null){
-            item = topMenu.findItem(resId);
-        }
-        return item;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // 刷新事件,回调Fragment的函数
-        int resId = item.getItemId();
-        switch (item.getItemId()){
-            case R.id.action_refresh:
-            case R.id.action_favorite:
-            case R.id.action_share:
-                updateYitu(resId);
-                break;
-            default:break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void updateYitu(int resId){
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentByTag(FRAG_TAG[curpos]);
-        if(fragment instanceof YituFragment){
-            YituFragment yituFragment = (YituFragment)fragment;
-            // 根据不同的id回调不同的响应函数
-            if(resId == R.id.action_refresh){
-                yituFragment.refreshCurrentWebView();
-            }else if(resId == R.id.action_favorite){
-                yituFragment.favoriteCurrentPage();
-            }else if(resId == R.id.action_share){
-                yituFragment.shareCurrentPage();
-            }
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         // 预设定比恢复的时间少2s
-        lastBackPress = System.currentTimeMillis() - 2000;
+        lastBackPressTime = System.currentTimeMillis() - 2000;
     }
 
     @Override
     public void onBackPressed() {
         long curBackPress = System.currentTimeMillis();
         // 2s
-        if(curBackPress - lastBackPress >= 2000){
+        if(curBackPress - lastBackPressTime >= 2000){
             Toast.makeText(this, R.string.toast_back, Toast.LENGTH_SHORT).show();
         }else{
             super.onBackPressed();
         }
-        lastBackPress = curBackPress;
+        lastBackPressTime = curBackPress;
     }
 
 
@@ -416,7 +323,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         switch (v.getId()){
             case R.id.user_photo:
             case R.id.user_name:
-                if(!app.getUserLogin()){
+                if(!isLogin){
                     weiboLogin();
                 }
                 break;
@@ -428,7 +335,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      * 微博登陆
      */
     private void weiboLogin(){
-        mAuthInfo = new AuthInfo(this, Constant.WEIBO_APP_KEY, Constant.WEIBO_REDIRECT_URL, Constant.WEIBO_SCOPE);
+        mAuthInfo = new AuthInfo(this, Constants.WEIBO_APP_KEY, Constants.WEIBO_REDIRECT_URL, Constants.WEIBO_SCOPE);
         mSsoHandler = new SsoHandler(this, mAuthInfo);
         // Web授权
         //mSsoHandler.authorizeWeb(new LoginWeiboAuthListener());
@@ -464,8 +371,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 Uri uri = Uri.parse(user.avatar_large);
                 mUserPhoto.setImageURI(uri);
                 //
-                app.setUsername(user.screen_name);
-                app.setLoginState(true);
+                //app.setUsername(user.screen_name);
+                //app.setLoginState(true);
+                userName = user.screen_name;
+                isLogin = true;
+                //
+                SharedPreferenceUtils.put(MainActivity.this, "userName", userName);
+                SharedPreferenceUtils.put(MainActivity.this, "isLogin", isLogin);
+
             }
         }
 
@@ -487,7 +400,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 // 保存Token到SharePreferences
                 AccessTokenKeeper.writeAccessToken(MainActivity.this, mAccessToken);
                 // 获取用户信息
-                mUsersAPI = new UsersAPI(MainActivity.this, Constant.WEIBO_APP_KEY, mAccessToken);
+                mUsersAPI = new UsersAPI(MainActivity.this, Constants.WEIBO_APP_KEY, mAccessToken);
                 long uid = Long.parseLong(mAccessToken.getUid());
                 mUsersAPI.show(uid, mWeiboListener);
             }else{

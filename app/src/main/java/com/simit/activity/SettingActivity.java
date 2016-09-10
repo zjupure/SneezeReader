@@ -10,22 +10,15 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.loopj.android.http.BinaryHttpResponseHandler;
-import com.loopj.android.http.TextHttpResponseHandler;
 import com.simit.database.DbController;
-import com.simit.json.ParserUtils;
-import com.simit.json.UpdateApkUrl;
-import com.simit.network.SneezeClient;
-import com.simit.storage.FileManager;
-
-import cz.msebera.android.httpclient.Header;
+import com.simit.storage.FileUtils;
 
 /**
  * Created by liuchun on 2015/12/18.
@@ -46,20 +39,25 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     //
     private String version;
     //
-    private FileManager fileManager;
-    private DbController dbManager;
-    private SneezeApplication app;
-    private SneezeClient client;
+    private DbController dbHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setting);
         //
-        fileManager = FileManager.getInstance(this);
-        dbManager = DbController.getInstance(this);
-        app = (SneezeApplication) getApplication();
-        client = SneezeClient.getInstance(this);
-        initView();
+
+    }
+
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_setting;
+    }
+
+    @Override
+    protected void handleIntent(Intent intent) {
+        super.handleIntent(intent);
+
+        dbHelper = DbController.getInstance(this);
     }
 
     @Override
@@ -77,12 +75,12 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mGoShare = findViewById(R.id.go_share);
 
         // 监听checkbox
-        mNight.setChecked(app.getNightMode());
+        mNight.setChecked(mNightMode);
         mNight.setOnCheckedChangeListener(this);
-        mNotify.setChecked(app.getNotifyMode());
-        mNotify.setOnCheckedChangeListener(this);
-        mAdvertise.setChecked(app.getAdMode());
-        mAdvertise.setOnCheckedChangeListener(this);
+        //mNotify.setChecked(app.getNotifyMode());
+        //mNotify.setOnCheckedChangeListener(this);
+        //mAdvertise.setChecked(app.getAdMode());
+        //mAdvertise.setOnCheckedChangeListener(this);
         // 监听其他设置按键
         mClearCache.setOnClickListener(this);
         mCheckUpdate.setOnClickListener(this);
@@ -94,19 +92,10 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mCacheSize = (TextView) findViewById(R.id.cache_cap_tv);
         mVersion = (TextView) findViewById(R.id.version_tv);
 
-        String cache_size = FileManager.getInstance(this).getStoreDirSize();
-        mCacheSize.setText(cache_size);
+        long cacheSize = FileUtils.getCacheDirSize(this);
+        mCacheSize.setText(Formatter.formatFileSize(this, cacheSize));
         version = getAppVersionName();
         mVersion.setText(version);
-        // 设置背景
-        for(int ids : IDS){
-            View v = findViewById(ids);
-            if(app.getNightMode()){
-                v.setBackgroundResource(R.drawable.item_background_night);
-            }else {
-                v.setBackgroundResource(R.drawable.item_background);
-            }
-        }
     }
 
     @Override
@@ -114,18 +103,18 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
 
         switch (buttonView.getId()){
             case R.id.night_mode:
-                app.setNightMode(isChecked);
-                updateTheme();
+                mNightMode = !mNightMode;
+                setCurrentTheme(mNightMode, true);
                 break;
             case R.id.notify_mode:
-                app.setNotifyMode(isChecked);
+                //app.setNotifyMode(isChecked);
                 break;
             case R.id.advertise_mode:
                 /*
                 if(isChecked == true){
                     displayCommentsWarning();
                 }*/
-                app.setAdMode(isChecked);
+                //app.setAdMode(isChecked);
                 break;
             default:break;
         }
@@ -174,8 +163,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                fileManager.clearStoreDir();
-                dbManager.clearLocalLink();
+                FileUtils.clearCache(SettingActivity.this);
+                dbHelper.clearLocalLink();
                 mCacheSize.setText("0KB");
             }
         });
@@ -234,34 +223,9 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mUpdateDialog.setCancelable(true);  // 设置可以点击Back键取消
         mUpdateDialog.setCanceledOnTouchOutside(false);  // 设置点击Dialog外部是否可以取消Dialog
         mUpdateDialog.setTitle("正在检查更新...");
-        mUpdateDialog.show();
+        //mUpdateDialog.show();
         //网络请求
-        client.get(UPDATE_URL, null, new TextHttpResponseHandler() {
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                if(mUpdateDialog != null){
-                    mUpdateDialog.dismiss();
-                    Toast.makeText(SettingActivity.this, "网络出错,请稍后重试", Toast.LENGTH_SHORT).show();
-                }
-            }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                if(mUpdateDialog != null){
-                    mUpdateDialog.dismiss();
-                }
-                // 处理数据
-                UpdateApkUrl updateLink = ParserUtils.parseUpdateApkUrl(responseString);
-                String updateVersion = updateLink.getVersion();
-                String link = updateLink.getLink();
-                if(updateVersion.compareTo(version) > 0){
-                    //发现版本更新
-                    displayDownLoad(link);
-                }else{
-                    Toast.makeText(SettingActivity.this, "暂时没有更新", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     /**
@@ -303,22 +267,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
      * @param url
      */
     public void getUpdateApk(final String url){
-        client.get(url, null, new BinaryHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                // 更新进度条
-                String[] paths = url.split("/");
-                String filename = paths[paths.length - 1];
-                fileManager.writeUpdateApk(filename, binaryData);
-                //
-                mDownDialog.dismiss();
-            }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
-                Toast.makeText(SettingActivity.this, "网络出错,请稍后再试", Toast.LENGTH_SHORT).show();
-                mDownDialog.dismiss();
-            }
-        });
     }
 }

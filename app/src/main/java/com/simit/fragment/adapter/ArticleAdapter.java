@@ -1,6 +1,5 @@
 package com.simit.fragment.adapter;
 
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
@@ -9,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.simit.model.Article;
+import com.simit.database.Article;
 import com.simit.activity.R;
 import com.facebook.drawee.view.SimpleDraweeView;
 
@@ -56,8 +55,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
             holder.mTextView.setText(article.getTitle());
 
-            Uri uri = Uri.parse(article.getImgUrl());
-            holder.mImageView.setImageURI(uri);
+            holder.mImageView.setImageURI(article.getImgUrl());
 
         }else if(type == Article.LEHUO){
 
@@ -72,7 +70,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        // add footer in the bottom
+
         return (mArticles == null) ? 0 : mArticles.size();
     }
 
@@ -100,7 +98,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     /**
      * 内部类,ViewHolder容器,对ViewHolder实现Item监听
      */
-    class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView mTextView;
         public SimpleDraweeView mImageView;
 

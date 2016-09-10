@@ -1,4 +1,4 @@
-package com.simit.model;
+package com.simit.database;
 
 import android.os.Parcel;
 import android.os.Parcelable;

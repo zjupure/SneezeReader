@@ -15,7 +15,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.simit.model.Article;
+import com.simit.database.Article;
 import com.simit.activity.R;
 import com.simit.activity.ShareActivity;
 

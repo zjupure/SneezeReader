@@ -1,45 +1,46 @@
 package com.simit.fragment;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.simit.common.Constants;
 import com.simit.database.DbController;
-import com.simit.fragment.adapter.HomeViewPagerAdapter;
+import com.simit.fragment.adapter.ArticleAdapter;
+import com.simit.fragment.adapter.ArticleAdapter.OnItemClickListener;
 import com.simit.database.Article;
 import com.simit.network.HttpManager;
-import com.simit.activity.MainActivity;
+import com.simit.network.NetworkMonitor;
+import com.simit.activity.DetailActivity;
 import com.simit.activity.R;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.extras.viewpager.PullToRefreshViewPager;
-import com.simit.network.NetworkMonitor;
+import com.handmark.pulltorefresh.library.PullToRefreshRecyclerView;
 import com.simit.service.UpdateService;
 import com.simit.storage.SharedPreferenceUtils;
 
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,45 +48,38 @@ import java.util.List;
 import java.util.Locale;
 
 
-
 /**
  * Created by liuchun on 2015/7/16.
  */
-public class YituFragment extends Fragment {
-    private static final String TAG = "YituFragment";
+public class ArticleFragment extends Fragment {
+    private static final String TAG = "ArticleFragment";
 
-    public static final int NEW_ARTICLE_ARRIVAL = 1;
-    public static final int NO_NEW_ARTICLE = 2;
-    public static final int LOAD_MORE_ARTICLE = 3;
-    public static final int NO_MORE_ARTICLE = 4;
-    public static final int NETWORK_ERROR = 5;
-
-
-    public static final String DATASET_UPDATED_ACTION = "com.simit.fragment";
-    private static final String TIME_FORMAT_REFRESH = "上次更新: yyyy年MM月dd日 HH:mm";
-    private static final String TIME_FORMAT_LOAD = "上次加载: yyyy年MM月dd日 HH:mm";
+    private static final int[] THRESHOLD = {5, 15, 10, 10};
     /**
      * Fragment的根View
      */
-    private View rootView;
+    private View rootView;  //缓存根View,防止重复渲染
     /**
-     * ViewPager组件和刷新控件
+     * Fragment的UI组件
      */
-    private PullToRefreshViewPager mRefreshView;
+    private PullToRefreshRecyclerView mRefreshView;  // RecyclerView wrapper
     private ILoadingLayout header, footer;
-    private ViewPager mViewPager;
-    private HomeViewPagerAdapter mAdapter;
-
+    private RecyclerView mRecyclerView;  // 列表
+    private LinearLayoutManager mLayoutManager;
+    private ArticleAdapter mAdapter;   //适配器
+    private FloatingActionButton mGoTopBtn;
+    /**
+     * 当前页面标识
+     */
     private int curPos;    //当前页面标识
-    private Activity activity;
-    // 数据集
+    // RecycleView数据集
     private List<Article> mArticles = new ArrayList<>();
     private int limit = 30;
     private String lastUpdated = "";
-    private int position = 0;
-    // 数据库操作
+    //
+    private Activity activity;
+    // 数据库
     private DbController dbHelper;
-
 
     /**
      * 静态工厂方法
@@ -94,23 +88,16 @@ public class YituFragment extends Fragment {
      */
     public static Fragment newInstance(Bundle bundle){
 
-        Fragment fragment = new YituFragment();
+        Fragment fragment = new ArticleFragment();
         fragment.setArguments(bundle);
 
         return fragment;
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // rootView
         if(rootView == null){
-            rootView = inflater.inflate(R.layout.yitu_page_layout, container, false);
+            rootView = inflater.inflate(R.layout.main_entry_page, container, false);
         }
         //缓存的rootView已经被加载过parent,需要移除
         ViewGroup parent = (ViewGroup)rootView.getParent();
@@ -132,77 +119,126 @@ public class YituFragment extends Fragment {
 
         dbHelper = DbController.getInstance(activity);
         //初始化界面View
-        initViewPager();
+        initRecyclerView();
     }
 
 
     /**
-     * 初始化ViewPager
+     * 初始化RecyclerView控件
      */
-    private void initViewPager(){
-        // ViewPager
-        mRefreshView = (PullToRefreshViewPager) rootView.findViewById(R.id.refresh_viewpager);
-        mViewPager = mRefreshView.getRefreshableView();
-        //
-        FragmentManager fm = getChildFragmentManager();
-        mAdapter = new HomeViewPagerAdapter(fm, mArticles);
-        //设置适配器
-        mViewPager.setAdapter(mAdapter);
-        mViewPager.setCurrentItem(position);
-        // 设置监听
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+    public void initRecyclerView(){
+        // Floating action bar
+        mGoTopBtn = (FloatingActionButton) rootView.findViewById(R.id.go_top_btn);
+        // 为按钮设置监听事件
+        mGoTopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onClick(View v) {
+                //自动滑动到顶部
+                mRecyclerView.smoothScrollToPosition(0);
+                //mGoTopBtn.setVisibility(View.GONE);
+            }
+        });
 
+        // RecyclerView
+        mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
+        mRecyclerView = mRefreshView.getRefreshableView();
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(activity);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        //定义Adapter
+        mAdapter = new ArticleAdapter(mArticles, curPos);  //绑定数据集
+        mRecyclerView.setAdapter(mAdapter);   //设置适配器
+
+        //设置item点击事件
+        mAdapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                // 图卦和乐活页面响应点击事件,段子页面无效
+                if (curPos > 1) {
+                    return;
+                }
+
+                Intent intent = new Intent(activity, DetailActivity.class);
+                Bundle bundle = new Bundle();
+                Article article = mArticles.get(position);
+                bundle.putParcelable("article", article);
+                intent.putExtra("detail", bundle);
+                intent.putExtra("position", position);
+                startActivity(intent);
             }
 
             @Override
-            public void onPageSelected(int pos) {
-                position = pos;
-                if(getActivity() != null){
-                    getActivity().supportInvalidateOptionsMenu();
+            public void onItemLongClick(View view, int position) {
+                // 只有段子页面才响应长按分享功能
+                if(curPos != Article.DUANZI){
+                    return;
+                }
+
+                Article article = mArticles.get(position);
+                /**TODO share article operation **/
+            }
+        });
+
+        // 为RecyclerView添加滑动监听
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+                if(firstVisibleItem > THRESHOLD[curPos]){
+                    mGoTopBtn.setVisibility(View.VISIBLE);
+                }else {
+                    mGoTopBtn.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+                if(firstVisibleItem > THRESHOLD[curPos]){
+                    mGoTopBtn.setVisibility(View.VISIBLE);
+                }else {
+                    mGoTopBtn.setVisibility(View.GONE);
+                }
             }
         });
 
+
         // 基本配置
         header = mRefreshView.getLoadingLayoutProxy(true, false);
-        header.setPullLabel(getString(R.string.pull_to_right_pull_label));
-        header.setReleaseLabel(getString(R.string.pull_to_right_release_label));
-        header.setRefreshingLabel(getString(R.string.pull_to_right_refreshing_label));
+        header.setPullLabel(getString(R.string.pull_to_refresh_pull_label));
+        header.setReleaseLabel(getString(R.string.pull_to_refresh_release_label));
+        header.setRefreshingLabel(getString(R.string.pull_to_refresh_refreshing_label));
         header.setLastUpdatedLabel(lastUpdated);
-
+        //header.setLastUpdatedLabel(getString(R.string.pull_to_refresh_last_update));
         footer = mRefreshView.getLoadingLayoutProxy(false, true);
-        footer.setPullLabel(getString(R.string.pull_to_left_pull_label));
-        footer.setReleaseLabel(getString(R.string.pull_to_left_release_label));
-        footer.setRefreshingLabel(getString(R.string.pull_to_left_refreshing_label));
-
+        footer.setPullLabel(getString(R.string.pull_to_load_pull_label));
+        footer.setReleaseLabel(getString(R.string.pull_to_load_release_label));
+        footer.setRefreshingLabel(getString(R.string.pull_to_load_refreshing_label));
+        //footer.setLastUpdatedLabel(getString(R.string.pull_to_refresh_last_update));
         // 设置刷新
-        mRefreshView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ViewPager>() {
+        mRefreshView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<RecyclerView>() {
             @Override
-            public void onRefresh(PullToRefreshBase<ViewPager> refreshView) {
+            public void onRefresh(PullToRefreshBase<RecyclerView> refreshView) {
 
                 if (mRefreshView.isHeaderShown()) {
-
-                    if(NetworkMonitor.isNetworkConnected(activity)) {
+                    //
+                    if(NetworkMonitor.isNetworkConnected(activity)){
                         // 执行网络请求
                         fetchArticleFromNetwork();
 
-                        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT_REFRESH);
+                        SimpleDateFormat sdf = new SimpleDateFormat(Constants.TIME_FORMAT_REFRESH, Locale.getDefault());
                         String last_refresh_time = sdf.format(new Date());
                         header.setLastUpdatedLabel(last_refresh_time);
-                        SharedPreferenceUtils.putLocal(activity, "lastUpdated" + curPos, last_refresh_time);
+
+                        SharedPreferenceUtils.putLocal(activity, "lastUpdated" + curPos, lastUpdated);
+
                     }else {
                         showToast("网络连接不可用,请稍后重试");
                         mRefreshView.onRefreshComplete();
                     }
                 } else if (mRefreshView.isFooterShown()) {
-                    // 从数据库加载数据
+                    // 从本地数据库加载数据
                     fetchArticleFromLocal();
                     //SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT_LOAD);
                     //String last_load_time = sdf.format(new Date());
@@ -212,13 +248,14 @@ public class YituFragment extends Fragment {
                 }
             }
         });
-
         // 开始请求网络
         fetchArticleFromNetwork();
+        mRefreshView.setRefreshing();
     }
 
     // 处理网络请求回应发过来的消息
-    private Handler handler = new Handler(){
+    private Handler handler = new Handler(Looper.getMainLooper()){
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
@@ -243,6 +280,12 @@ public class YituFragment extends Fragment {
                     int size = msg.arg1;
                     String text = "已刷新" + size + "篇文章";
                     showToast(text);
+                    /**TODO 图卦需要展示通知 */
+                    Article article = (Article) msg.obj;
+                    if(article.getType() == Article.TUGUA){
+                        //
+                        notifyNewArticle(article);
+                    }
                     break;
                 }
                 case Constants.MSG_NO_NEW_ARTICLE:{
@@ -268,10 +311,10 @@ public class YituFragment extends Fragment {
 
 
     /**
-     * 显示Toast
+     * 弹出Toast
      * @param text
      */
-    private void showToast(CharSequence text){
+    private void  showToast(CharSequence text){
         Context context = getActivity();
         if(context != null){
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
@@ -292,13 +335,12 @@ public class YituFragment extends Fragment {
                     }
 
                     @Override
-                    public void onSuccess(List<Article> data) {
+                    public void onSuccess(final List<Article> data) {
                         Log.d(TAG, "fetch data from network success; data size: " + data.size());
 
                         mArticles.clear();
                         mArticles.addAll(data);
                         handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
-
                         //检查是否有新的文章
                         boolean hasUpdated = false;
                         List<Article> newArticles = new ArrayList<Article>();
@@ -309,7 +351,7 @@ public class YituFragment extends Fragment {
                             if(dbHelper.isExist(description)){
                                 String localUrl = dbHelper.getLocalUrl(description);
 
-                                if(TextUtils.isEmpty(localUrl)){
+                                if(curPos != Article.DUANZI && TextUtils.isEmpty(localUrl)){
                                     //源码未获取,通知service处理
                                     Message msg = handler.obtainMessage();
                                     msg.what = Constants.MSG_GET_PAGE_SOURCE;
@@ -317,7 +359,7 @@ public class YituFragment extends Fragment {
                                     msg.sendToTarget();
                                 }
                                 continue;
-                            }else if(dbHelper.isDuplicateImg(imgUrl)){
+                            }else if(curPos == Article.YITU && dbHelper.isDuplicateImg(imgUrl)){
                                 //重复的意图
                                 continue;
                             }
@@ -343,10 +385,9 @@ public class YituFragment extends Fragment {
     }
 
     /**
-     * 从本地数据库加载数据
+     * 从本地数据库加载数据, 开启异步线程执行
      */
     private void fetchArticleFromLocal(){
-
 
         new Thread(new Runnable() {
             @Override
@@ -369,6 +410,11 @@ public class YituFragment extends Fragment {
                     handler.sendEmptyMessage(Constants.MSG_NO_MORE_ARTICLE);
                 }
 
+                if(curPos == Article.DUANZI){
+                    //段子页面不需要缓存页面源码
+                    return;
+                }
+
                 //检查是否有源码未获取的数据
                 for(Article article : articles){
                     String description = article.getDescription();
@@ -386,142 +432,37 @@ public class YituFragment extends Fragment {
         }).start();
     }
 
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        position = mViewPager.getCurrentItem();
-    }
-
-    @Override
-    public void onDestroyView() {
-        // TODO Auto-generated method stub
-        super.onDestroyView();
-        try {
-            Field childFragmentManager = Fragment.class.getDeclaredField("mChildFragmentManager");
-            childFragmentManager.setAccessible(true);
-            childFragmentManager.set(this, null);
-
-
-        } catch (NoSuchFieldException e) {
-            Log.e(TAG, "YituFragment--->onDestoryView() NoSuchFieldException: " + e.getMessage());
-        } catch (IllegalAccessException e) {
-            Log.e(TAG, "YituFragment--->onDestoryView() IllegalAccessException: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_yitu, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-
-        if(position >= mArticles.size()){
-            return;
-        }
-
-        Article article = mArticles.get(position);
-        MenuItem favorite = menu.findItem(R.id.action_favorite);
-        setFavoriteIcon(favorite, article.isFavorite());
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()){
-            case R.id.action_refresh:
-                refreshCurrentWebView();
-                break;
-            case R.id.action_favorite:
-                refreshFavoriteState();
-                break;
-            case R.id.action_share:
-                shareCurrentPage();
-                break;
-            default:break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
-     * 刷新当前页面,重新加载WebView
+     * 收到新的文章,弹出通知栏,仅针对图卦页面
+     * @param article
      */
-    public void refreshCurrentWebView(){
-        position = mViewPager.getCurrentItem();
-        Fragment fragment = getChildFragmentManager().
-                findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + position);
-        if(fragment != null && fragment instanceof  DetailFragment){
-            ((DetailFragment)fragment).displayArticle();
-        }
+    private void notifyNewArticle(Article article){
 
-    }
+        NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+        String tickerText = article.getTitle();
+        long when = System.currentTimeMillis();
 
-    /**
-     * 收藏当前页面
-     */
-    public void refreshFavoriteState(){
-        position = mViewPager.getCurrentItem();
-        Article article = mArticles.get(position);
-        // 收藏操作
-        boolean isFavorite = !article.isFavorite();
-        article.setFavorite(isFavorite);
+        String contentTitle = article.getTitle();
+        String contentText = article.getPubDate();
 
-        String username = SharedPreferenceUtils.get(activity, "username", "any");
-        if(isFavorite){
-            //添加收藏
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-            String addTime = sdf.format(new Date());
-            dbHelper.insertFavorite(article, username, addTime);
-            // Toast
-            showToast("添加收藏成功");
-        }else {
-            //删除收藏
-            dbHelper.deleteFavorite(article.getId(), username);
-            // Toast
-            showToast("删除收藏成功");
-        }
-        getActivity().supportInvalidateOptionsMenu();
-    }
+        Intent intent = new Intent(activity, DetailActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("article", article);
+        intent.putExtra("detail", bundle);
+        intent.putExtra("position", 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
 
-    /**
-     * 分享当前页面
-     */
-    public void shareCurrentPage(){
-        position = mViewPager.getCurrentItem();
-        Article article = mArticles.get(position);
-        // 分享操作
-        Activity activity = getActivity();
-        if(activity != null && activity instanceof MainActivity){
-            MainActivity parent = (MainActivity)activity;
-            parent.shareArticle(article);
-        }
-    }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(activity);
+        builder.setSmallIcon(R.mipmap.logo)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setContentIntent(pendingIntent)
+                .setTicker(tickerText)
+                .setWhen(when)
+                .setAutoCancel(true);
 
-    /**
-     * 设置菜单icon的颜色
-     * @param item
-     * @param isFavorite
-     */
-    private void setFavoriteIcon(MenuItem item, boolean isFavorite){
-        if(item == null){
-            return;
-        }
-        // item存在则进行设置
-        Drawable iconDrawable = getResources().getDrawable(R.mipmap.ic_favorite);
-        Drawable wrappedDrawable = DrawableCompat.wrap(iconDrawable);
-
-        int color = 0xffffff;  // while
-        if (isFavorite) {
-            color = getResources().getColor(R.color.favorite_color);
-        }else {
-            color = getResources().getColor(R.color.favorite_color_nor);
-        }
-        DrawableCompat.setTint(wrappedDrawable, color);
-        item.setIcon(wrappedDrawable);
+        Notification notification = builder.build();
+        notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS;
+        nm.notify(0, notification);
     }
 }

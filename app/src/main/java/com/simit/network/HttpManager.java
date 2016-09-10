@@ -1,9 +1,10 @@
 package com.simit.network;
 
 import android.content.Context;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
-import com.simit.model.Article;
+import com.simit.database.Article;
 import com.simit.json.ParserUtils;
 
 import java.io.IOException;
@@ -15,13 +16,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -53,8 +54,6 @@ public class HttpManager {
     private int pageNum = DEFAULT_PAGE_NUMBER;
     private int limitNum = DEFAULT_LIMIT_NUMER;
 
-
-
     private final OkHttpClient httpClient;
 
     /**
@@ -62,6 +61,7 @@ public class HttpManager {
      * @param context
      */
     private HttpManager(Context context){
+
 
         Cache cache = new Cache(context.getCacheDir(), CACHE_SIZE);
 
@@ -107,17 +107,43 @@ public class HttpManager {
     /**
      * get方法
      * @param url
-     * @param headers
      * @param callback
      */
-    private void get(String url, Headers headers, Callback callback){
+    private void get(String url, ArrayMap<String,String> params, Callback callback){
 
+        String getUrl = buildUrl(url, params);
         Request request = new Request.Builder()
-                .url(url)
-                .headers(headers)
+                .url(getUrl)
                 .build();
 
+        Log.d(TAG, "url: " + getUrl);
+
         httpClient.newCall(request).enqueue(callback);
+    }
+
+
+    /**
+     * 构造Get请求的URL
+     * @param baseUrl
+     * @param params
+     * @return
+     */
+    private static String buildUrl(String baseUrl, ArrayMap<String, String> params){
+
+        StringBuilder sb = new StringBuilder(baseUrl);
+        if(params.size() > 0){
+            sb.append("?");
+            for(Map.Entry<String, String> entry : params.entrySet()){
+                sb.append(entry.getKey());
+                sb.append("=");
+                sb.append(entry.getValue());
+                sb.append("&");
+            }
+            // delete last "&"
+            sb.delete(sb.length()-1, sb.length());
+        }
+
+        return sb.toString();
     }
 
 
@@ -126,14 +152,14 @@ public class HttpManager {
      * @param type
      * @param callback
      */
-    public void getArticle(int type, final INetworkCallback<List<Article>> callback){
-        Headers headers = new Headers.Builder()
-                .add("s", APP_PARAMS[type])
-                .add("p", String.valueOf(pageNum))
-                .add("limit", String.valueOf(limitNum))
-                .build();
+    public void getArticle(final int type, final INetworkCallback<List<Article>> callback){
 
-        get(BASE_URL, headers, new Callback() {
+        ArrayMap<String, String> params = new ArrayMap<>();
+        params.put("s", APP_PARAMS[type]);
+        params.put("p", String.valueOf(pageNum));
+        params.put("limit", String.valueOf(limitNum));
+
+        get(BASE_URL, params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 /**TODO 异常信息处理 **/
@@ -190,6 +216,10 @@ public class HttpManager {
 
                     list.add(article);
                 }
+                // update the article type
+                for(Article article : list){
+                    article.setType(type);
+                }
 
                 callback.onSuccess(list);
             }
@@ -202,11 +232,11 @@ public class HttpManager {
      * @param callback
      */
     public void getSplashImage(final INetworkCallback<String> callback){
-        Headers headers = new Headers.Builder()
-                .add("s", SPLASH_IMAGE_PARAM)
-                .build();
 
-        get(BASE_URL, headers, new Callback() {
+        ArrayMap<String, String> arrayMap = new ArrayMap<>();
+        arrayMap.put("s", SPLASH_IMAGE_PARAM);
+
+        get(BASE_URL, arrayMap, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 /**TODO 异常处理*/
@@ -216,6 +246,9 @@ public class HttpManager {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String resp = response.body().string();
+
+                Log.e("ParserUtils", resp);
+
                 String imgUrl = ParserUtils.parseSplashImgUrl(resp);
 
                 callback.onSuccess(imgUrl);
@@ -229,7 +262,7 @@ public class HttpManager {
      * @param url
      * @param callback
      */
-    public void getPageContent(String url, final INetworkCallback<InputStream> callback){
+    public void getPageSource(String url, final INetworkCallback<InputStream> callback){
 
         final Request request = new Request.Builder()
                 .url(url)
@@ -250,4 +283,5 @@ public class HttpManager {
             }
         });
     }
+
 }

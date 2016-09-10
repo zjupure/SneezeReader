@@ -7,7 +7,8 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Toast;
 
-import com.simit.model.Article;
+import com.simit.common.Constants;
+import com.simit.database.Article;
 import com.sina.weibo.sdk.api.TextObject;
 import com.sina.weibo.sdk.api.WeiboMultiMessage;
 import com.sina.weibo.sdk.api.share.BaseResponse;
@@ -43,11 +44,11 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response{
         view.setBackgroundColor(0xffffff);
         setContentView(view);
         // 注册微博分享组件
-        mWeiboShareAPI = WeiboShareSDK.createWeiboAPI(this, Constant.WEIBO_APP_KEY);
+        mWeiboShareAPI = WeiboShareSDK.createWeiboAPI(this, Constants.WEIBO_APP_KEY);
         mWeiboShareAPI.registerApp();
         // 注册微信分享组件
-        mWeixinShareAPI = WXAPIFactory.createWXAPI(this, Constant.WEIXIN_APP_KEY, true);
-        mWeixinShareAPI.registerApp(Constant.WEIXIN_APP_KEY);
+        mWeixinShareAPI = WXAPIFactory.createWXAPI(this, Constants.WEIXIN_APP_KEY, true);
+        mWeixinShareAPI.registerApp(Constants.WEIXIN_APP_KEY);
 
         Intent intent = getIntent();
         String action = intent.getAction();

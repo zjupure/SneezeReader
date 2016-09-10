@@ -6,12 +6,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.TextHttpResponseHandler;
-import com.simit.network.SneezeClient;
-
-import cz.msebera.android.httpclient.Header;
-
 /**
  * Created by liuchun on 2015/12/20.
  */
@@ -25,10 +19,15 @@ public class FeedBackActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feedback);
-
-        initView();
     }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_feedback;
+    }
+
+
+
 
     @Override
     protected void initView(){
@@ -69,24 +68,7 @@ public class FeedBackActivity extends BaseActivity {
      * @param description
      */
     private void sendFeedBack(String title, String description){
-        SneezeApplication app = (SneezeApplication) getApplication();
-        String user = app.getUsername();
-        SneezeClient client = SneezeClient.getInstance(this);
-        //
-        RequestParams params = new RequestParams();
-        params.add("user", user);
-        params.add("title", title);
-        params.add("description", description);
-        client.post(FEEDBACK_URL, params, new TextHttpResponseHandler() {
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(FeedBackActivity.this, "网络出错,反馈提交失败", Toast.LENGTH_SHORT).show();
-            }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Toast.makeText(FeedBackActivity.this, "反馈提交成功", Toast.LENGTH_SHORT).show();
-            }
-        });
+        /**TODO empty implement**/
     }
 }
