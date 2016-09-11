@@ -171,6 +171,7 @@ public class DetailActivity extends BaseActivity{
 
                 curPage = index;
                 article = articles.get(index);
+
                 mArticles.clear();
                 mArticles.addAll(articles);
                 mAdapter.notifyDataSetChanged();

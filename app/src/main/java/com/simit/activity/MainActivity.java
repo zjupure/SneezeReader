@@ -88,20 +88,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //初始化Fragments
+        initFragments(savedInstanceState);
         // 启动后台轮询service
         Intent intent = new Intent(this, UpdateService.class);
         startService(intent);
-
-        if(savedInstanceState != null){
-            curPos = savedInstanceState.getInt("curpos");
-
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            for(int i = 0; i < 4; i++){
-                ft.hide(mFragments.get(i));
-            }
-            ft.show(mFragments.get(curPos));
-            ft.commit();
-        }
     }
 
     @Override
@@ -163,8 +154,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 mUserName.setOnClickListener(this);
             }
         }
-        //初始化Fragment
-        initFragments();
         //RadioButton
         mTabMenu = (RadioGroup)findViewById(R.id.tab_menu);
         //设置Tab监听
@@ -184,35 +173,52 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     /**
      * 初始化ViewPager中的Fragments
+     * 根据bundle决定是否创建新的Fragment
+     * @param bundle
      */
-    private void initFragments(){
+    private void initFragments(Bundle bundle){
         //内容呈现页,新建Fragment添加到List
         mFragments = new ArrayList<>();
-        for(int i = 0; i < 4; i++){
-            Bundle args = new Bundle();
-            args.putInt("pos", i);
-
-            Fragment frag;
-            if(i == 2) {
-                frag = YituFragment.newInstance(args);   //第3个页面是一个带WebView的ViewPager,承载图片和文字
-            }else{
-                frag = ArticleFragment.newInstance(args);   //其他的都是RecyclerView,承载标题
-            }
-            mFragments.add(frag);
-        }
-
-        //添加第0个页面到frag_container中
         FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
+        FragmentTransaction ft = null;
+        if(bundle != null){
+            //恢复栈中原有的Fragment
+            mFragments.clear();
+            for(int i = 0; i < 4; i++){
+                Fragment frag = fm.findFragmentByTag(FRAG_TAG[i]);
+                mFragments.add(frag);
+            }
+            curPos = bundle.getInt("curpos");
+            //隐藏其他所有的fragment
+            ft = fm.beginTransaction();
+            for(int i = 0; i < 4; i++){
+                ft.hide(mFragments.get(i));
+            }
+            ft.show(mFragments.get(curPos));  //显示当前Fragment
+            ft.commit();
+        }else {
+            //新建Fragment
+            for(int i = 0; i < 4; i++){
+                Bundle args = new Bundle();
+                args.putInt("pos", i);
 
-        for(int i = 0; i < 4; i++){
-            ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);  //打Tag
-            ft.hide(mFragments.get(i));    // hide all fragments
+                Fragment frag;
+                if(i == 2) {
+                    frag = YituFragment.newInstance(args);   //第3个页面是一个带WebView的ViewPager,承载图片和文字
+                }else{
+                    frag = ArticleFragment.newInstance(args);   //其他的都是RecyclerView,承载标题
+                }
+                mFragments.add(frag);
+            }
+            //第一次需要add进去
+            ft = fm.beginTransaction();
+            for(int i = 0; i < 4; i++){
+                ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);
+                ft.hide(mFragments.get(i));
+            }
+            ft.show(mFragments.get(curPos));  // 显示当前Fragment
+            ft.commit();
         }
-        ft.show(mFragments.get(curPos));   // show first fragments
-
-        //ft.add(R.id.content_container, mFragments.get(0), FRAG_TAG[0]);
-        ft.commit();
     }
 
     /**

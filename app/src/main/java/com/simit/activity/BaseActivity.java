@@ -131,9 +131,9 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     protected void restartActivity(){
 
-        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-        //    recreate();
-        //}else {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+            recreate();
+        }else {
             overridePendingTransition(0, 0); // 不设置进入退出动画
             finish();
             Intent intent = getIntent();
@@ -141,7 +141,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             overridePendingTransition(0, 0);
             startActivity(intent);
-        //}
+        }
     }
 
     /**

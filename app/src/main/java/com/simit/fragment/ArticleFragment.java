@@ -125,6 +125,10 @@ public class ArticleFragment extends Fragment {
         super.onHiddenChanged(hidden);
 
         isShow = !hidden;
+        if(isShow){
+            //页面显示的时候需要重新请求网络
+            fetchArticleFromNetwork();
+        }
     }
 
     /**
