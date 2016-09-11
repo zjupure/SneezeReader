@@ -1,6 +1,7 @@
 package com.simit.activity;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -18,6 +19,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -37,11 +39,14 @@ import java.util.Locale;
  * Created by liuchun on 2015/12/27.
  */
 public abstract class BaseActivity extends AppCompatActivity {
+    private static final String TAG = "BaseActivity";
     /**
      * 页面顶部的Toolbar
      */
     protected Toolbar mToolBar;
-    // 弹窗
+    /**
+     * 分享弹窗
+     */
     private PopupWindow popupWindow;
     /**
      * 是否夜间模式
@@ -161,6 +166,60 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 
     /**
+     * 获取状态栏的高度
+     * @return
+     */
+    protected int getStatusBarHeight(){
+        Resources resources = getResources();
+        int resId = resources.getIdentifier("status_bar_height", "dimen","android");
+        int height = resources.getDimensionPixelSize(resId);
+
+        Log.d(TAG, "status bar height: " + height);
+
+        return height;
+    }
+
+
+    /**
+     * 获取底部导航栏的高度
+     * @return
+     */
+    protected int getNavigationBarHeight(){
+        Resources resources = getResources();
+        int resId = resources.getIdentifier("navigation_bar_height","dimen", "android");
+        int height = resources.getDimensionPixelSize(resId);
+
+        Log.d(TAG, "navigation bar height: " + height);
+
+        return height;
+    }
+
+
+    /**
+     * dp转px
+     * @param dpValue
+     * @return
+     */
+    protected int dp2px(float dpValue){
+
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int)(dpValue * scale + 0.5f);
+
+    }
+
+    /**
+     * px转dp
+     * @param pxValue
+     * @return
+     */
+    protected int px2dp(float pxValue){
+
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int)(pxValue / scale + 0.5f);
+    }
+
+
+    /**
      * 刷新当前的收藏状态
      * @param article
      */
@@ -270,6 +329,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 getWindow().setAttributes(lp);
             }
         });
+        //防止被虚拟按键遮住
+        popupWindow.setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         popupWindow.update();
         // 显示窗体
         View parent = getWindow().getDecorView().getRootView();

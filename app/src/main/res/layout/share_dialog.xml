@@ -10,7 +10,7 @@
         android:gravity="center"
         android:background="@drawable/tab_background"
         android:text="@string/share_to"
-        android:textColor="?attr/global_textColor"
+        android:textColor="@color/textColorPrimary"
         android:textSize="18sp"
         android:padding="16dp"/>
 
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_marginTop="6dp"
-                android:textColor="?attr/global_textColor"
+                android:textColor="@color/textColorPrimary"
                 android:text="@string/share_weibo"/>
         </LinearLayout>
         <LinearLayout
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_marginTop="6dp"
-                android:textColor="?attr/global_textColor"
+                android:textColor="@color/textColorPrimary"
                 android:text="@string/share_weixin"/>
         </LinearLayout>
         <LinearLayout
@@ -73,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_marginTop="6dp"
-                android:textColor="?attr/global_textColor"
+                android:textColor="@color/textColorPrimary"
                 android:text="@string/share_weixin_friend"/>
         </LinearLayout>
     </LinearLayout>
@@ -85,8 +85,7 @@
         android:gravity="center"
         android:padding="16dp"
         android:textSize="18sp"
-        android:textColor="?attr/global_textColor"
-        android:background="?attr/global_background"
+        android:textColor="@color/textColorPrimary"
         android:text="@string/share_cancel"/>
 
 </LinearLayout>

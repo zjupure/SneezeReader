@@ -41,7 +41,7 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response{
         View view = new View(this);
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         view.setLayoutParams(layoutParams);
-        view.setBackgroundColor(0xffffff);
+        view.setBackgroundColor(0x00ffffff);  //透明activity
         setContentView(view);
         // 注册微博分享组件
         mWeiboShareAPI = WeiboShareSDK.createWeiboAPI(this, Constants.WEIBO_APP_KEY);
@@ -74,6 +74,7 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response{
         }else if(from.equals("weixinfriend")){
             shareToWeixin(article, Req.WXSceneTimeline);
         }
+        finish(); //销毁自身
     }
 
     @Override
@@ -158,6 +159,5 @@ public class ShareActivity extends Activity implements IWeiboHandler.Response{
         req.scene = scene;
         // 调用接口发送数据到微信
         mWeixinShareAPI.sendReq(req);
-        finish();  // 销毁自身
     }
 }

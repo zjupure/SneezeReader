@@ -385,11 +385,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 Uri uri = Uri.parse(user.avatar_large);
                 mUserPhoto.setImageURI(uri);
                 //
-                //app.setUsername(user.screen_name);
-                //app.setLoginState(true);
                 userName = user.screen_name;
                 isLogin = true;
-                //
+                // 写入sp
                 SharedPreferenceUtils.put(MainActivity.this, "userName", userName);
                 SharedPreferenceUtils.put(MainActivity.this, "isLogin", isLogin);
 
@@ -398,7 +396,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         @Override
         public void onWeiboException(WeiboException e) {
-
+            Toast.makeText(MainActivity.this, "微博登录失败", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -424,12 +422,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         @Override
         public void onWeiboException(WeiboException e) {
-
+            Toast.makeText(MainActivity.this, "微博登录失败", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onCancel() {
-
+            Toast.makeText(MainActivity.this, "取消微博登录", Toast.LENGTH_SHORT).show();
         }
     }
 }

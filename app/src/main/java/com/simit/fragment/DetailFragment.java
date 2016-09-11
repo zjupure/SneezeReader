@@ -122,13 +122,6 @@ public class DetailFragment extends Fragment {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
             webSettings.setDisplayZoomControls(false);
         }
-        // 设置webView的背景色
-        /*
-        if(night_mode){
-            mWebView.setBackgroundColor(getResources().getColor(R.color.nightBackground));
-        }else{
-            mWebView.setBackgroundColor(getResources().getColor(R.color.background));
-        }*/
 
         mWebView.setWebViewClient(new WebViewClient() {
 
@@ -155,7 +148,7 @@ public class DetailFragment extends Fragment {
                     return null;
                 }
                 //评论js,根据要求看是否覆盖
-                boolean adMode = true;
+                boolean adMode = SharedPreferenceUtils.get(activity, "adMode", false);
                 // 开启评论
                 if((url.contains("mobile") || url.contains("wap")) && url.contains("js")){
                     if(adMode){
@@ -170,13 +163,6 @@ public class DetailFragment extends Fragment {
                     return null;
                 }
 
-                // swf请求
-                /*
-                if(url.contains(".swf")){
-                    installFlashPlayer();
-                    return null;
-                }*/
-
                 //站外请求,根据关键词过滤
                 return filterADs(url);
             }
@@ -184,8 +170,6 @@ public class DetailFragment extends Fragment {
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                //
-                //networkState = NetworkMonitor.getNetworkType(context);
                 // 3g条件下,本地加载失败,重新加载远程数据,可能本地缓存被删除了
                 if (NetworkMonitor.isMobileConnected(activity) && isLoadLocal) {
                     String remote_url = article.getDescription();

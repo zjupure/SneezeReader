@@ -207,6 +207,42 @@ public class DbController {
     }
 
     /**
+     * 根据远程连接检查是否是重复的文章
+     * @param description
+     * @return
+     */
+    public boolean isExist(String description){
+
+        String[] columns = {"id"};
+        String[] args = {description};
+
+        Cursor cursor = db.query(DbOpenHelper.ARTICLE_TABLE_NAME, columns, "description=?", args, null, null, null);
+        boolean exist = cursor.moveToFirst();
+        cursor.close();
+
+        return exist;
+    }
+
+
+    /**
+     * 根据ImgUrl判断是否是重复的意图
+     * @param imgurl
+     * @return
+     */
+    public boolean isDuplicatedImg(String imgurl){
+
+        String[] columns = {"id"};
+        String[] args = {imgurl};
+
+        Cursor cursor = db.query(DbOpenHelper.ARTICLE_TABLE_NAME, columns, "imgurl=?", args, null, null, null);
+        boolean exist = cursor.moveToFirst();
+        cursor.close();
+
+        return exist;
+    }
+
+
+    /**
      * 本地缓存文件被清除时,
      * 同时清除数据库中的记录
      */
@@ -262,6 +298,8 @@ public class DbController {
 
         return results;
     }
+
+
 
     /**
      * 执行查询指令

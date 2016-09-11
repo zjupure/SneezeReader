@@ -102,7 +102,7 @@ public class ParserUtils {
 
 
     /**
-     * ArtilceWrapper反序列化规则
+     * ArticleWrapper反序列化规则
      */
     public static class ArticleWrapperDeserializer implements JsonDeserializer<ArticleWrapper> {
 

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.simit.database.DbController;
 import com.simit.storage.FileUtils;
+import com.simit.storage.SharedPreferenceUtils;
 
 /**
  * Created by liuchun on 2015/12/18.
@@ -38,6 +39,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     private ProgressBar mUpdateProgress;
     //
     private String version;
+    private boolean notifyMode = true;
+    private boolean adMode = false;
     //
     private DbController dbHelper;
     @Override
@@ -77,10 +80,14 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         // 监听checkbox
         mNight.setChecked(mNightMode);
         mNight.setOnCheckedChangeListener(this);
-        //mNotify.setChecked(app.getNotifyMode());
-        //mNotify.setOnCheckedChangeListener(this);
-        //mAdvertise.setChecked(app.getAdMode());
-        //mAdvertise.setOnCheckedChangeListener(this);
+
+        notifyMode = SharedPreferenceUtils.get(this, "notify", true);
+        mNotify.setChecked(notifyMode);
+        mNotify.setOnCheckedChangeListener(this);
+
+        adMode = SharedPreferenceUtils.get(this, "adMode", false);
+        mAdvertise.setChecked(adMode);
+        mAdvertise.setOnCheckedChangeListener(this);
         // 监听其他设置按键
         mClearCache.setOnClickListener(this);
         mCheckUpdate.setOnClickListener(this);
@@ -107,14 +114,15 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 setCurrentTheme(mNightMode, true);
                 break;
             case R.id.notify_mode:
-                //app.setNotifyMode(isChecked);
+                notifyMode = isChecked;
+                SharedPreferenceUtils.put(this, "notify", isChecked);
                 break;
             case R.id.advertise_mode:
-                /*
-                if(isChecked == true){
+                if(isChecked){
                     displayCommentsWarning();
-                }*/
-                //app.setAdMode(isChecked);
+                }
+                adMode = isChecked;
+                SharedPreferenceUtils.put(this, "adMode", isChecked);
                 break;
             default:break;
         }

@@ -291,7 +291,8 @@ public class ArticleFragment extends Fragment {
                     showToast(text);
                     /**TODO 图卦需要展示通知 */
                     Article article = (Article) msg.obj;
-                    if(article.getType() == Article.TUGUA){
+                    boolean notify = SharedPreferenceUtils.get(activity, "notify", true);
+                    if(article.getType() == Article.TUGUA && notify){
                         //
                         notifyNewArticle(article);
                     }
@@ -356,7 +357,6 @@ public class ArticleFragment extends Fragment {
                     @Override
                     public void onSuccess(final List<Article> data) {
                         Log.d(TAG, "fetch data from network success; data size: " + data.size());
-
                         //检查是否有新的文章
                         boolean hasUpdated = false;
                         List<Article> newArticles = new ArrayList<Article>();
@@ -396,10 +396,7 @@ public class ArticleFragment extends Fragment {
                             hasUpdated = true;
                             newArticles.add(article);
                         }
-                        // 更新内存中的数据集
-                        mArticles.clear();
-                        mArticles.addAll(data);
-                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
+
                         // 新的数据插入数据库
                         if(hasUpdated){
                             //插入数据库
@@ -413,6 +410,17 @@ public class ArticleFragment extends Fragment {
                         }else {
                             handler.sendEmptyMessage(Constants.MSG_NO_NEW_ARTICLE);
                         }
+                        //从数据库加载对应的数据,需要更新id和favorite两个属性
+                        ArrayList<Article> tmpList = new ArrayList<Article>();
+                        for(Article article : data){
+                            String description = article.getDescription();
+                            Article tmp = dbHelper.getArticleByLink(description, username);
+                            tmpList.add(article);
+                        }
+                        // 更新内存中的数据集
+                        mArticles.clear();
+                        mArticles.addAll(tmpList);
+                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
                     }
                 });
     }

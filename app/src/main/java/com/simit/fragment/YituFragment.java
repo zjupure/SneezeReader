@@ -337,10 +337,6 @@ public class YituFragment extends Fragment {
                             hasUpdated = true;
                             newArticles.add(article);
                         }
-                        // 更新内存中的数据集
-                        mArticles.clear();
-                        mArticles.addAll(data);
-                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
                         // 新的数据插入数据库
                         if(hasUpdated){
                             //插入数据库
@@ -354,6 +350,17 @@ public class YituFragment extends Fragment {
                         }else {
                             handler.sendEmptyMessage(Constants.MSG_NO_NEW_ARTICLE);
                         }
+                        //从数据库加载对应的数据, 需要更新id和favorite属性
+                        ArrayList<Article> tmpList = new ArrayList<Article>();
+                        for(Article article : data){
+                            String description = article.getDescription();
+                            Article tmp = dbHelper.getArticleByLink(description, username);
+                            tmpList.add(article);
+                        }
+                        // 更新内存中的数据集
+                        mArticles.clear();
+                        mArticles.addAll(tmpList);
+                        handler.sendEmptyMessage(Constants.MSG_NETWORK_SUCCESS);
                     }
                 });
     }
