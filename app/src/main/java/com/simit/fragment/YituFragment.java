@@ -74,8 +74,6 @@ public class YituFragment extends Fragment {
     private String lastUpdated = "";
     private int position = 0;
     // 数据库操作
-
-
     private DbController dbHelper;
 
 
@@ -92,11 +90,13 @@ public class YituFragment extends Fragment {
         return fragment;
     }
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -118,11 +118,13 @@ public class YituFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         curPos = getArguments().getInt("pos");
+
         activity = getActivity();
 
         lastUpdated = SharedPreferenceUtils.getLocal(activity, "lastUpdated" + curPos, "");
 
         dbHelper = DbController.getInstance(activity);
+
         //初始化界面View
         initViewPager();
     }
@@ -141,6 +143,7 @@ public class YituFragment extends Fragment {
         //设置适配器
         mViewPager.setAdapter(mAdapter);
         mViewPager.setCurrentItem(position);
+        mViewPager.setOffscreenPageLimit(5);  //缓存5屏
         // 设置监听
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -151,6 +154,7 @@ public class YituFragment extends Fragment {
             @Override
             public void onPageSelected(int pos) {
                 position = pos;
+
                 if(getActivity() != null){
                     getActivity().supportInvalidateOptionsMenu();
                 }
@@ -204,9 +208,9 @@ public class YituFragment extends Fragment {
                 }
             }
         });
-
         // 开始请求网络
         fetchArticleFromNetwork();
+        mRefreshView.setRefreshing(true);
     }
 
     // 处理网络请求回应发过来的消息
@@ -288,7 +292,7 @@ public class YituFragment extends Fragment {
      */
     private void fetchArticleFromNetwork(){
 
-        HttpManager.getInstance(getActivity())
+        HttpManager.getInstance(activity)
                 .getArticle(curPos, new HttpManager.INetworkCallback<List<Article>>() {
                     @Override
                     public void onError(Exception e) {
@@ -303,6 +307,7 @@ public class YituFragment extends Fragment {
                         //检查是否有新的文章
                         boolean hasUpdated = false;
                         List<Article> newArticles = new ArrayList<Article>();
+
                         String username = SharedPreferenceUtils.get(activity, "username", "any");
                         for(int i = 0; i < data.size(); i++){
                             Article article = data.get(i);

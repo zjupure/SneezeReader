@@ -31,6 +31,7 @@ public class FileUtils {
      */
     public static void scanSDCards(Context context){
 
+        File rootPath = null;
         synchronized (mScanLock) {
             List<StorageUtils.StorageInfo> sdcards = StorageUtils.getStorageList(context);
             if(sdcards.size() > 0){
@@ -40,12 +41,21 @@ public class FileUtils {
 
                 String path = sdcards.get(0).mPath;
                 String suffix = "Android/data/" + context.getPackageName() + "/files";
-                defaultPath = new File(path, suffix);
+                rootPath = new File(path, suffix);
                 ContextCompat.getExternalFilesDirs(context, null);  // try to make the dir
             }else {
-                defaultPath = context.getFilesDir();
+                rootPath = context.getFilesDir();
             }
         }
+
+        Log.i(TAG, "default root path: " + rootPath.getAbsolutePath());
+
+        defaultPath = new File(rootPath, DEFAULT_DIR);
+        if(!defaultPath.exists()){
+            defaultPath.mkdirs();  //创建目录
+        }
+
+        Log.i(TAG, "default cache path: " + defaultPath.getAbsolutePath());
     }
 
     /**
@@ -162,10 +172,9 @@ public class FileUtils {
         filename = filename.replace('=', '_');
         filename += ".html";
 
-        String storePath = DEFAULT_DIR + File.separator + filename;
-        if(write(storePath, is)){
+        if(write(filename, is)){
 
-            Uri uri = Uri.fromFile(new File(defaultPath, storePath));
+            Uri uri = Uri.fromFile(new File(defaultPath, filename));
 
             return uri.toString();
         }

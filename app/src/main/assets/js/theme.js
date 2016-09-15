@@ -119,7 +119,7 @@ function filterAD(){
 
 function ContainKeywords(str){
 	var keywords = new Array("sale", "product", "jd", "3mmr", "google", "show_ads", 
-		"taobao", "tmall", "mogujie", "weidian");
+		"taobao", "tmall", "mogujie", "weidian", "360buy", "baidu");
 	for(var i = 0, n = keywords.length; i < n; i++){
 		if(str.match(keywords[i])){
 			return true;

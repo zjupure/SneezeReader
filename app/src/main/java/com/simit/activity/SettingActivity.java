@@ -29,7 +29,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     private static final int[]  IDS = {R.id.base_setting, R.id.notification, R.id.night, R.id.comments,
             R.id.more_setting, R.id.clear_cache, R.id.check_update, R.id.go_feedback, R.id.go_rank, R.id.go_share};
     // Component
-    private CheckBox mNight, mNotify, mAdvertise;
+    private CheckBox mNight, mNotify, mComments;
     private View mClearCache, mCheckUpdate, mFeedBack;
     private View mGoRank, mGoShare;
     private TextView mCacheSize, mVersion;
@@ -40,7 +40,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     //
     private String version;
     private boolean notifyMode = true;
-    private boolean adMode = false;
+    private boolean commentOpen = false;
     //
     private DbController dbHelper;
     @Override
@@ -70,7 +70,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         //
         mNight = (CheckBox) findViewById(R.id.night_mode);
         mNotify = (CheckBox) findViewById(R.id.notify_mode);
-        mAdvertise = (CheckBox) findViewById(R.id.advertise_mode);
+        mComments = (CheckBox) findViewById(R.id.comments_mode);
         mClearCache = findViewById(R.id.clear_cache);
         mCheckUpdate = findViewById(R.id.check_update);
         mFeedBack = findViewById(R.id.go_feedback);
@@ -85,9 +85,9 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mNotify.setChecked(notifyMode);
         mNotify.setOnCheckedChangeListener(this);
 
-        adMode = SharedPreferenceUtils.get(this, "adMode", false);
-        mAdvertise.setChecked(adMode);
-        mAdvertise.setOnCheckedChangeListener(this);
+        commentOpen = SharedPreferenceUtils.get(this, "comments", false);
+        mComments.setChecked(commentOpen);
+        mComments.setOnCheckedChangeListener(this);
         // 监听其他设置按键
         mClearCache.setOnClickListener(this);
         mCheckUpdate.setOnClickListener(this);
@@ -117,12 +117,12 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 notifyMode = isChecked;
                 SharedPreferenceUtils.put(this, "notify", isChecked);
                 break;
-            case R.id.advertise_mode:
+            case R.id.comments_mode:
                 if(isChecked){
                     displayCommentsWarning();
                 }
-                adMode = isChecked;
-                SharedPreferenceUtils.put(this, "adMode", isChecked);
+                commentOpen = isChecked;
+                SharedPreferenceUtils.put(this, "comments", isChecked);
                 break;
             default:break;
         }
@@ -200,7 +200,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                mAdvertise.setChecked(false);
+                mComments.setChecked(false);
             }
         });
 

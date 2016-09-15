@@ -4,6 +4,7 @@ package com.simit.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,6 +12,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.simit.common.Constants;
+import com.simit.database.DbController;
 import com.simit.fragment.ArticleFragment;
 import com.simit.fragment.YituFragment;
 import com.simit.database.Article;
@@ -39,7 +43,9 @@ import com.sina.weibo.sdk.openapi.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends BaseActivity implements View.OnClickListener{
+    private static final String TAG = "MainActivity";
     //Fragment　Tag
     public static final String[] FRAG_TAG = {"tugua", "lehuo", "yitu", "duanzi"};
     public static final int[] APP_TITLE = {R.string.title_tugua, R.string.title_lehuo,
@@ -88,6 +94,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        DbController.getInstance(this);
         //初始化Fragments
         initFragments(savedInstanceState);
         // 启动后台轮询service
@@ -192,9 +199,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             //隐藏其他所有的fragment
             ft = fm.beginTransaction();
             for(int i = 0; i < 4; i++){
-                ft.hide(mFragments.get(i));
+                if(i != curPos) {
+                    //不等于当前的页面都隐藏起来
+                    ft.hide(mFragments.get(i));
+                }
             }
-            ft.show(mFragments.get(curPos));  //显示当前Fragment
+            //ft.show(mFragments.get(curPos));  //显示当前Fragment
             ft.commit();
         }else {
             //新建Fragment
@@ -214,9 +224,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             ft = fm.beginTransaction();
             for(int i = 0; i < 4; i++){
                 ft.add(R.id.content_container, mFragments.get(i), FRAG_TAG[i]);
-                ft.hide(mFragments.get(i));
+                if(i != curPos) {
+                    //不等于当前的页面都隐藏起来
+                    ft.hide(mFragments.get(i));
+                }
             }
-            ft.show(mFragments.get(curPos));  // 显示当前Fragment
+            //ft.show(mFragments.get(curPos));  // 显示当前Fragment
             ft.commit();
         }
     }
@@ -233,8 +246,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         Intent intent;
         switch (menuItem.getItemId()) {
             case R.id.nav_theme:
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        setCurrentTheme(mNightMode, true);
+                    }
+                }, 500);
                 mNightMode = !mNightMode;
-                setCurrentTheme(mNightMode, true);
+                mDrawerLayout.closeDrawers();
                 break;
             case R.id.nav_setting:
                 intent = new Intent(MainActivity.this, SettingActivity.class);
@@ -364,7 +384,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         // All in one
         // 此种授权方式会根据手机是否安装微博客户端来决定使用sso授权还是网页授权，
         // 如果安装有微博客户端 则调用微博客户端授权，否则调用Web页面方式授权
-        mSsoHandler.authorize(new LoginWeiboAuthListener());
+        try {
+            mSsoHandler.authorize(new LoginWeiboAuthListener());
+        }catch (Exception e){
+            Log.e(TAG, "weibo login exception: " + e.getMessage());
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.simit.fragment;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +38,13 @@ import java.io.InputStream;
  * Created by liuchun on 2015/12/12.
  */
 public class DetailFragment extends Fragment {
+    private static final String TAG = "DetailFragment";
+
     private static final String DAPENTI_HOST = "dapenti.com";
-    private static final String[] AD_KEYWORDS = {"google", "show_ads", "adsbygoogle", "taobao", 
-            "tmall", "tianmao", "jd", "jingdong", "mougujie", "weidian"};
+    private static final String DAPENTI_IMG_HOST = "ptimg.org";
+    private static final String DAPENTI_PIC_HOST = "pic.yupoo.com";
+    private static final String[] AD_KEYWORDS = {"google", "show_ads","ad", "taobao", "alibaba",
+            "tmall", "tianmao", "jd", "jingdong", "mougujie", "weidian", "360buy", "baidu"};
     private static final String DAY_THEME_CSS = "file:///android_asset/css/day.css";
     private static final String NIGHT_THEME_CSS = "file:///android_asset/css/night.css";
     private static final String USER_AGENT = "Mozilla/5.0 (Linux; U; Android 4.0.3; zh-cn; M032 Build/IML74K) UC AppleWebKit/534.31 (KHTML, like Gecko) Mobile Safari/534.31";
@@ -54,7 +60,6 @@ public class DetailFragment extends Fragment {
     private boolean isLoadLocal;
     //
     private Activity activity;
-    private boolean mNightMode;
 
 
     /**
@@ -69,6 +74,8 @@ public class DetailFragment extends Fragment {
 
         return fragment;
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,8 +96,8 @@ public class DetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         article = getArguments().getParcelable("article");
+
         activity = getActivity();
-        mNightMode = SharedPreferenceUtils.get(activity, "nightMode", false);
         //初始化界面View
         initWebView();
     }
@@ -139,31 +146,51 @@ public class DetailFragment extends Fragment {
                 return true;
             }
 
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                WebResourceResponse response = new WebResourceResponse("text/plain", "UTF-8", null);
                 //站内请求,无需过滤
                 Uri uri = Uri.parse(url);
-                if(uri.getHost().equals(DAPENTI_HOST) || url.contains("dapenti")
-                        || url.contains("penti")){
-                    return null;
-                }
-                //评论js,根据要求看是否覆盖
-                boolean adMode = SharedPreferenceUtils.get(activity, "adMode", false);
-                // 开启评论
-                if((url.contains("mobile") || url.contains("wap")) && url.contains("js")){
-                    if(adMode){
-                        return null;
-                    }else{
-                        // 拦截
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            WebResourceResponse response = new WebResourceResponse("text/plain", "UTF-8", null);
-                            return response;
-                        }
-                    }
+                String host = uri.getHost();
+                if(host.equals(DAPENTI_HOST) || host.equals(DAPENTI_IMG_HOST) ||
+                        host.equals(DAPENTI_PIC_HOST)){
+                    //主站域名和意图的域名
+                    Log.i(TAG, "webview load url: " + url);
+
                     return null;
                 }
 
-                //站外请求,根据关键词过滤
+                //拦截百度域名
+                if(host.equals("pos.baidu.com") || host.equals("eclick.baidu.com")){
+                    Log.w(TAG, "webview intercept baidu url: " + url);
+
+                    return response;
+                }
+
+                //主站资源不拦截
+                if(url.contains("dapenti") || url.contains("penti")){
+                    Log.i(TAG, "webview load url: " + url);
+
+                    return null;
+                }
+
+                //评论js,根据要求看是否覆盖
+                boolean commentOpen = SharedPreferenceUtils.get(activity, "comments", false);
+                //评论系统采用的是搜狐的畅言
+                if(host.equals("changyan.sohu.com")){
+                    if(commentOpen){
+                        //开启评论
+                        Log.i(TAG, "webview load url: " + url);
+                        return null;
+                    }else {
+                        //关闭评论
+                        Log.w(TAG, "webview intercept url: " + url);
+                        return response;
+                    }
+                }
+
+                //其他站外请求,根据关键词过滤
                 return filterADs(url);
             }
 
@@ -195,7 +222,8 @@ public class DetailFragment extends Fragment {
                     // js文件非空
                     mWebView.loadUrl("javascript:" + wholeJS);
                 }
-                String jsCmd;
+                String jsCmd = "";
+                boolean mNightMode = SharedPreferenceUtils.get(activity, "nightMode", false);
                 if(mNightMode){
                     jsCmd = "javascript:setTheme('night')";
                     mWebView.loadUrl(jsCmd);
@@ -203,6 +231,9 @@ public class DetailFragment extends Fragment {
                     jsCmd = "javascript:setTheme('day')";
                     mWebView.loadUrl(jsCmd);
                 }
+                Log.w(TAG, "webview current theme: " + (mNightMode ? "nightMode" : "dayMode"));
+
+
                 // 加载过滤广告js
                 jsCmd = "javascript:filterAD()";
                 mWebView.loadUrl(jsCmd);
@@ -247,21 +278,18 @@ public class DetailFragment extends Fragment {
     private String loadThemeJs(){
         InputStream is;
         try{
-            Activity context = getActivity();
-            if(context != null){
-                is = context.getAssets().open("js/theme.js");
-                StringBuilder sb = new StringBuilder();
-                String line;
-                byte[] buffer = new byte[1024];
-                int len;
-                while((len = is.read(buffer, 0, 1024)) > 0){
-                    line = new String(buffer, 0, len);
-                    sb.append(line);
-                }
-                String content = sb.toString();
-
-                return content;
+            is = activity.getAssets().open("js/theme.js");
+            StringBuilder sb = new StringBuilder();
+            String line;
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = is.read(buffer, 0, 1024)) > 0){
+                line = new String(buffer, 0, len);
+                sb.append(line);
             }
+            String content = sb.toString();
+
+            return content;
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -271,24 +299,43 @@ public class DetailFragment extends Fragment {
     /**
      * 过滤广告,禁用js
      */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private WebResourceResponse filterADs(String url){
         // API 11
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-            WebResourceResponse response =  new WebResourceResponse("text/plain", "UTF-8", null);
+        WebResourceResponse response =  new WebResourceResponse("text/plain", "UTF-8", null);
 
-            boolean exist = false;
-            for(String keywords: AD_KEYWORDS){
-                if(url.contains(keywords)){
-                    exist = true;
-                    break;
-                }
-            }
-
-            // 过滤js请求和图片请求
-            if((url.contains("js") || url.contains("img")) && exist){
-                return response;
+        //判断是否含有广告关键词
+        boolean exist = false;
+        for(String keywords: AD_KEYWORDS){
+            if(url.contains(keywords)){
+                exist = true;
+                break;
             }
         }
+
+        // 过滤js请求
+        if((url.endsWith(".js") || url.contains("javascript") || url.contains("script")) && exist){
+            Log.w(TAG, "webview intercept js url: " + url);
+
+            return response;
+        }
+
+        // 过滤图片请求
+        if((url.endsWith(".img") || url.endsWith(".jpg") || url.endsWith(".png")) && exist){
+            Log.w(TAG, "webview intercept img url: " + url);
+
+            return response;
+        }
+
+        // 过滤百度统计相关请求
+        if(url.contains("pos.baidu.com") || url.contains("baidustatic")){
+            Log.w(TAG, "webview intercept baidu url: " + url);
+
+            return response;
+        }
+
+
+        Log.i(TAG, "webview load url: " + url);
         return null;
     }
 

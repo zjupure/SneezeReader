@@ -41,6 +41,11 @@
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
+
         <RelativeLayout
             android:id="@+id/night"
             style="@style/setting_item">
@@ -60,6 +65,11 @@
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
+
         <RelativeLayout
             android:id="@+id/comments"
             style="@style/setting_item">
@@ -72,12 +82,17 @@
                 android:textColor="#c7c7c7"
                 android:text="@string/setting_advertise"/>
             <CheckBox
-                android:id="@+id/advertise_mode"
+                android:id="@+id/comments_mode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
 
         <TextView
             android:id="@+id/more_setting"
@@ -110,6 +125,11 @@
                 android:text="1.0MB"/>
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
+
         <RelativeLayout
             android:id="@+id/check_update"
             style="@style/setting_item_more">
@@ -132,6 +152,11 @@
                 android:text="2.0.8"/>
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
+
         <RelativeLayout
             android:id="@+id/go_feedback"
             style="@style/setting_item_more">
@@ -150,6 +175,11 @@
                 android:layout_centerVertical="true"
                 android:src="@mipmap/arrow"/>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
 
         <RelativeLayout
             android:id="@+id/go_rank"
@@ -170,6 +200,11 @@
                 android:src="@mipmap/arrow"/>
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
+
         <RelativeLayout
             android:id="@+id/go_share"
             style="@style/setting_item_more">
@@ -188,6 +223,11 @@
                 android:layout_centerVertical="true"
                 android:src="@mipmap/arrow"/>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5px"
+            android:background="#cccccc"/>
     </LinearLayout>
 
 </LinearLayout>

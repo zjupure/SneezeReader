@@ -66,6 +66,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         initView();
 
         Log.d("BaseActivity", this.getClass().getName() + "-->onCreate() called");
+        Log.w("BaseActivity", "current theme: " + (mNightMode ? "nightMode" : "dayMode"));
     }
 
 

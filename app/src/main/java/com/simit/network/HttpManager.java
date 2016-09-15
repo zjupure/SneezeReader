@@ -176,7 +176,11 @@ public class HttpManager {
                 Article[] articles = ParserUtils.parseArticles(resp);
 
                 ArrayList<Article> list = new ArrayList<Article>();
-                String lastPubDate = "";
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                String lastPubDate = sdf.format(new Date());
+
+
                 for(Article article : articles){
                     if(article.getTitle().equalsIgnoreCase("AD")){
                         continue;  // filter advertisement
@@ -198,8 +202,9 @@ public class HttpManager {
                     }
                     // fix "1970-01-01 08:00:00" pubDate bug
                     if(pubDate.contains("1970-01-01")){
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
                         try{
+                            Log.i(TAG, "curPubDate: " + pubDate + ", lastPubDate: " + lastPubDate);
                             Date lastDate = sdf.parse(lastPubDate);
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTime(lastDate);
@@ -209,6 +214,7 @@ public class HttpManager {
                             //
                             pubDate = sdf.format(curDate);
                         }catch (ParseException e){
+                            Log.e(TAG, "curPubDate: " + pubDate + ", lastPubDate: " + lastPubDate);
                             Log.e(TAG, "ParseException: " + e.getMessage());
                         }
                     }

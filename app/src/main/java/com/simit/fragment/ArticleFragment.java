@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -92,6 +93,7 @@ public class ArticleFragment extends Fragment {
         return fragment;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if(rootView == null){
@@ -125,10 +127,6 @@ public class ArticleFragment extends Fragment {
         super.onHiddenChanged(hidden);
 
         isShow = !hidden;
-        if(isShow){
-            //页面显示的时候需要重新请求网络
-            fetchArticleFromNetwork();
-        }
     }
 
     /**
@@ -261,7 +259,7 @@ public class ArticleFragment extends Fragment {
         });
         // 开始请求网络
         fetchArticleFromNetwork();
-        mRefreshView.setRefreshing();
+        mRefreshView.setRefreshing(true);
     }
 
     // 处理网络请求回应发过来的消息
@@ -350,7 +348,7 @@ public class ArticleFragment extends Fragment {
      */
     private void fetchArticleFromNetwork(){
 
-        HttpManager.getInstance(getActivity())
+        HttpManager.getInstance(activity)
                 .getArticle(curPos, new HttpManager.INetworkCallback<List<Article>>() {
                     @Override
                     public void onError(Exception e) {
@@ -364,6 +362,7 @@ public class ArticleFragment extends Fragment {
                         //检查是否有新的文章
                         boolean hasUpdated = false;
                         List<Article> newArticles = new ArrayList<Article>();
+
                         String username = SharedPreferenceUtils.get(activity, "username", "any");
                         for(int i = 0; i < data.size(); i++){
                             Article article = data.get(i);
@@ -413,9 +412,11 @@ public class ArticleFragment extends Fragment {
                             msg.sendToTarget();
                         }else {
                             handler.sendEmptyMessage(Constants.MSG_NO_NEW_ARTICLE);
+                            
                         }
                         //从数据库加载对应的数据,需要更新id和favorite两个属性
                         ArrayList<Article> tmpList = new ArrayList<Article>();
+
                         for(Article article : data){
                             String description = article.getDescription();
                             Article tmp = dbHelper.getArticleByLink(description, username);
@@ -439,6 +440,7 @@ public class ArticleFragment extends Fragment {
             public void run() {
                 //从数据库查询最新的数据
                 String username = SharedPreferenceUtils.get(activity, "username", "any");
+
                 List<Article> articles = dbHelper.getArticles(curPos, limit, username);
 
                 if(articles.size() > mArticles.size()){
