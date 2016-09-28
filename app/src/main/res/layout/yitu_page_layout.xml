@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.handmark.pulltorefresh.library.extras.viewpager.PullToRefreshViewPager
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:refresh="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/refresh_viewpager"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    refresh:ptrAnimationStyle="rotate"
-    refresh:ptrMode="both" />
+    android:layout_height="match_parent">
+
+    <com.handmark.pulltorefresh.library.extras.viewpager.PullToRefreshViewPager
+
+        android:id="@+id/refresh_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        refresh:ptrAnimationStyle="rotate"
+        refresh:ptrMode="both" />
+
+    <ProgressBar
+        android:id="@+id/loadingbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:indeterminateDrawable="@drawable/circle_loadingbar"/>
+</FrameLayout>
+
+

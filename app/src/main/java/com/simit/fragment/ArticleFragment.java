@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.simit.activity.BaseActivity;
@@ -67,6 +68,7 @@ public class ArticleFragment extends Fragment {
     private LinearLayoutManager mLayoutManager;
     private ArticleAdapter mAdapter;   //适配器
     private FloatingActionButton mGoTopBtn;
+    private ProgressBar mLoadingBar;  //加载进度条
     /**
      * 当前页面标识
      */
@@ -144,6 +146,8 @@ public class ArticleFragment extends Fragment {
                 //mGoTopBtn.setVisibility(View.GONE);
             }
         });
+        // ProgressBar
+        mLoadingBar = (ProgressBar) rootView.findViewById(R.id.loadingbar);
 
         // RecyclerView
         mRefreshView = (PullToRefreshRecyclerView) rootView.findViewById(R.id.tugua_list);
@@ -270,6 +274,7 @@ public class ArticleFragment extends Fragment {
             switch (msg.what){
                 case Constants.MSG_NETWORK_SUCCESS:{
                     mAdapter.notifyDataSetChanged();
+                    mLoadingBar.setVisibility(View.GONE);
                     invalidateOptionsMenu();
                     break;
                 }
@@ -281,6 +286,7 @@ public class ArticleFragment extends Fragment {
                     int size = msg.arg1;
                     limit = size + 10;
                     mAdapter.notifyDataSetChanged();
+                    mLoadingBar.setVisibility(View.GONE);
                     invalidateOptionsMenu();
                     break;
                 }
@@ -455,6 +461,11 @@ public class ArticleFragment extends Fragment {
                 }else{
                     //没有更多数据了
                     handler.sendEmptyMessage(Constants.MSG_NO_MORE_ARTICLE);
+                    //
+                    Message msg = handler.obtainMessage();
+                    msg.what = Constants.MSG_LOCAL_LOAD_SUCCESS;
+                    msg.arg1 = articles.size();
+                    msg.sendToTarget();
                 }
 
                 if(curPos == Article.DUANZI){

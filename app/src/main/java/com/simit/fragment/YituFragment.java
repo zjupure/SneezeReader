@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.simit.activity.BaseActivity;
@@ -64,7 +65,10 @@ public class YituFragment extends Fragment {
     private ILoadingLayout header, footer;
     private ViewPager mViewPager;
     private HomeViewPagerAdapter mAdapter;
-
+    private ProgressBar mLoadingBar;
+    /**
+     * 其他数据
+     */
     private int curPos;    //当前页面标识
     private boolean isShow = true;    //页面是否在前端显示
     private Activity activity;
@@ -134,6 +138,9 @@ public class YituFragment extends Fragment {
      * 初始化ViewPager
      */
     private void initViewPager(){
+        // LoaidngBar
+        mLoadingBar = (ProgressBar) rootView.findViewById(R.id.loadingbar);
+
         // ViewPager
         mRefreshView = (PullToRefreshViewPager) rootView.findViewById(R.id.refresh_viewpager);
         mViewPager = mRefreshView.getRefreshableView();
@@ -220,6 +227,7 @@ public class YituFragment extends Fragment {
             switch (msg.what){
                 case Constants.MSG_NETWORK_SUCCESS:{
                     mAdapter.notifyDataSetChanged();
+                    mLoadingBar.setVisibility(View.GONE);
                     invalidateOptionsMenu();
                     break;
                 }
@@ -231,6 +239,7 @@ public class YituFragment extends Fragment {
                     int size = msg.arg1;
                     limit = size + 10;
                     mAdapter.notifyDataSetChanged();
+                    mLoadingBar.setVisibility(View.GONE);
                     invalidateOptionsMenu();
                     break;
                 }

@@ -12,12 +12,14 @@
 
     <item android:id="@android:id/progress" >
         <clip>
-            <shape>
-                <gradient android:angle="0"
-                    android:centerColor="#ffff8c00"
-                    android:startColor="#ffee7600"
-                    android:endColor="#ffffce25"/>
-            </shape>
+        <shape>
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:centerColor="#1565c0"
+                android:startColor="#1976d2"
+                android:endColor="#0d47a1" />
+        </shape>
         </clip>
     </item>
 </layer-list>
