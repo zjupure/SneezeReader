@@ -1,5 +1,8 @@
 package com.simit.common;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Created by liuchun on 2015/12/14.
  */
@@ -40,4 +43,7 @@ public class Constants {
 
     // weixin api key
     public static final String WEIXIN_APP_KEY = "wxf92a176150a2a179";
+
+    // thread pool
+    public static final ExecutorService localFetcherPool = Executors.newCachedThreadPool();
 }

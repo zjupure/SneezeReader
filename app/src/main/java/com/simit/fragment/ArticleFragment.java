@@ -261,7 +261,8 @@ public class ArticleFragment extends Fragment {
                 }
             }
         });
-        // 开始请求网络
+        // 开始请求网络同时加载本地数据
+        fetchArticleFromLocal();
         fetchArticleFromNetwork();
         mRefreshView.setRefreshing(true);
     }
@@ -279,7 +280,7 @@ public class ArticleFragment extends Fragment {
                     break;
                 }
                 case Constants.MSG_NETWORK_ERROR:{
-                    fetchArticleFromLocal();
+                    //fetchArticleFromLocal();
                     break;
                 }
                 case Constants.MSG_LOCAL_LOAD_SUCCESS:{
@@ -426,7 +427,7 @@ public class ArticleFragment extends Fragment {
                         for(Article article : data){
                             String description = article.getDescription();
                             Article tmp = dbHelper.getArticleByLink(description, username);
-                            tmpList.add(article);
+                            tmpList.add(tmp);
                         }
                         // 更新内存中的数据集
                         mArticles.clear();
@@ -441,7 +442,7 @@ public class ArticleFragment extends Fragment {
      */
     private void fetchArticleFromLocal(){
 
-        new Thread(new Runnable() {
+        Runnable loadTask = new Runnable() {
             @Override
             public void run() {
                 //从数据库查询最新的数据
@@ -487,7 +488,9 @@ public class ArticleFragment extends Fragment {
                 }
 
             }
-        }).start();
+        };
+
+        Constants.localFetcherPool.submit(loadTask);
     }
 
     /**
