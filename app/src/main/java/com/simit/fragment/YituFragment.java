@@ -152,6 +152,7 @@ public class YituFragment extends Fragment {
         mViewPager.setCurrentItem(position);
         mViewPager.setOffscreenPageLimit(5);  //缓存5屏
         // 设置监听
+        mViewPager.setOffscreenPageLimit(4);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

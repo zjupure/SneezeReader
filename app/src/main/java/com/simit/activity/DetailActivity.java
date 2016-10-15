@@ -73,6 +73,7 @@ public class DetailActivity extends BaseActivity{
         mAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), mArticles);
         mViewPager.setAdapter(mAdapter);
         //
+        mViewPager.setOffscreenPageLimit(4);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
