@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.HashMap;
+
 /**
  * Created by liuchun on 16/9/4.
  */
 public class SharedPreferenceUtils {
     public static final String APP_PREF_NAME = "appConfig";
-
+    // cache the data in memory
+    private static final HashMap<String, Object> spCache = new HashMap<>();
 
     /**
      * 写全局sp
@@ -35,6 +38,7 @@ public class SharedPreferenceUtils {
             throw new IllegalArgumentException("unsupported type");
         }
 
+        spCache.put(name, value);
         editor.apply();
     }
 
@@ -46,8 +50,13 @@ public class SharedPreferenceUtils {
      * @param defValue
      */
     public static <T> T get(Context context, String name, T defValue){
+        Object result = spCache.get(name);
+
+        if(result != null){
+            return (T)result;
+        }
+
         SharedPreferences preferences = context.getSharedPreferences(APP_PREF_NAME, Context.MODE_PRIVATE);
-        Object result = null;
 
         if(defValue instanceof String){
             result = preferences.getString(name, (String)defValue);

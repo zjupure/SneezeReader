@@ -13,6 +13,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
 
+
         <TextView
             android:id="@+id/base_setting"
             android:layout_width="match_parent"

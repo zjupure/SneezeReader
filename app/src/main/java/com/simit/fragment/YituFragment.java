@@ -535,8 +535,14 @@ public class YituFragment extends Fragment {
      * 分享当前页面
      */
     public void shareCurrentPage(){
+
+        if(mArticles == null || mArticles.size() == 0){
+            return;
+        }
+
         position = mViewPager.getCurrentItem();
         Article article = mArticles.get(position);
+
         // 分享操作
         if(activity instanceof BaseActivity){
             ((BaseActivity)activity).shareArticle(article);

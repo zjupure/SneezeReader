@@ -17,10 +17,10 @@ import com.simit.storage.SharedPreferenceUtils;
 /**
  * Created by liuchun on 2015/7/18.
  */
-public class SplashActivity extends Activity {
+public class SplashActivity extends BaseActivity {
     private static final String TAG = "SplashActivity";
     // 闪屏页
-    private static final int SPLASH_TIME = 1000;  // 1s
+    private static final int SPLASH_TIME = 1500;  // 1.5s
     // 启动屏图片
     private SimpleDraweeView splash;
     // 当前Activity是否结束
@@ -29,10 +29,6 @@ public class SplashActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // initial fresco
-        Fresco.initialize(this);
-        //
-        setContentView(R.layout.splash_layout);
         //
         splash = (SimpleDraweeView) findViewById(R.id.splash_image);
         //
@@ -81,5 +77,11 @@ public class SplashActivity extends Activity {
                 isFinished = true;
             }
         }, SPLASH_TIME);
+    }
+
+    @Override
+    protected int getLayoutId() {
+
+        return R.layout.splash_layout;
     }
 }
