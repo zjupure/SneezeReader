@@ -24,45 +24,8 @@ function setTheme(theme){
 	}else{
 		document.appendChild(style);
 	}
-}					
 
-
-function changeTheme(cssPath){
-	var fileref = document.createElement("link");
-	fileref.setAttribute("rel", "stylesheet");
-	fileref.setAttribute("type", "text/css");
-	fileref.setAttribute("href", cssPath);
-
-	head = document.head || document.getElementsByTagName("head")[0];
-	html = document.html || document.getElementsByTagName("html")[0];
-	if(head != null){
-		head.appendChild(fileref);
-	}else if(html != null){
-		html.appendChild(fileref);
-	}else{
-		document.appendChild(fileref);
-	}
-}
-
-function replaceEmbed(){
-	var flashs = document.getElementsByTagName("embed");
-
-	for(var i = 0, n = flashs.length; i < n; i++){
-		var eb = flashs[i];
-		var parent = eb.parentNode;
-
-		var src = eb.getAttribute("src");
-		var w = eb.getAttribute("width");
-		var h = eb.getAttribute("height");
-
-		var video = document.createElement("iframe");
-		video.setAttribute("src", src);
-		video.setAttribute("frameborder", "0");
-		video.setAttribute("width", w);
-		video.setAttribute("height", h);
-
-		parent.replaceChild(video, eb);
-	}
+    filterAD();
 }
 
 function filterAD(){		
@@ -90,11 +53,18 @@ function filterAD(){
 
 		if(p.childNodes.length == 1){
 
+            var img = p.getElementsByTagName("img");
+            if(img != null){
+                continue;
+            }
+
 			var text = p.innerHTML;
 			if(text.match(comment1) || text.match(comment2)){
 				target = i;
 			}
 		}
+
+
 
 		var link = p.getElementsByTagName("a");
 		if(link == null || link.length != 1){
@@ -105,10 +75,10 @@ function filterAD(){
 			p.innerHTML = "";
 
 			if(i >= 1){
-				paragraph[i-1].innerHTML = " ";
+				paragraph[i-1].innerHTML = "";
 			}
 			if(i+1 < n){
-				paragraph[i+1].innerHTML = " ";
+				paragraph[i+1].innerHTML = "";
 			}
 		}
 	}
@@ -128,8 +98,8 @@ function filterAD(){
 		if(text == "" || (text.length == 1 && isSpace(text[0]))){
 
 			if(p.parentNode != null){
-
-				p.parentNode.removeChild(p);
+                 p.innerHTML = "";
+				/*p.parentNode.removeChild(p);*/
 			}
 			continue;
 		}
@@ -145,7 +115,8 @@ function filterAD(){
 		}
 
 		if(isempty && p.parentNode != null){
-			p.parentNode.removeChild(p);
+		    p.innerHTML = "";
+			/*p.parentNode.removeChild(p);*/
 		}
 	}
 

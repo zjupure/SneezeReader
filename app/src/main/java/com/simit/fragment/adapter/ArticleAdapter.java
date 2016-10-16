@@ -1,13 +1,21 @@
 package com.simit.fragment.adapter;
 
+import android.graphics.drawable.Animatable;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.controller.ControllerListener;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.simit.database.Article;
 import com.simit.activity.R;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -18,6 +26,8 @@ import java.util.List;
  * Created by liuchun on 2015/7/16.
  */
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHolder>{
+    private static final String TAG = "ArticleAdapter";
+
     private List<Article> mArticles;
     private OnItemClickListener mListener;
     private int type = 0;
@@ -55,6 +65,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
             holder.mTextView.setText(article.getTitle());
 
+            //loadImage(holder.mImageView, article.getImgUrl());
             holder.mImageView.setImageURI(article.getImgUrl());
 
         }else if(type == Article.LEHUO){
@@ -72,6 +83,59 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     public int getItemCount() {
 
         return (mArticles == null) ? 0 : mArticles.size();
+    }
+
+    /**
+     * 加载图片，自适应大小
+     * @param imageView
+     * @param uriString
+     */
+    private void loadImage(final SimpleDraweeView imageView, String uriString){
+
+        final ControllerListener<ImageInfo> controllerListener = new BaseControllerListener<ImageInfo>(){
+            @Override
+            public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
+
+                updateImageSize(imageView, imageInfo);
+            }
+
+            @Override
+            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+
+                updateImageSize(imageView, imageInfo);
+            }
+        };
+
+        final DraweeController controller = Fresco.newDraweeControllerBuilder()
+                .setControllerListener(controllerListener)
+                .setUri(uriString)
+                .setOldController(imageView.getController())
+                .build();
+
+        imageView.setController(controller);
+    }
+
+    /**
+     * 更新图片的尺寸
+     * @param imageView
+     * @param imageInfo
+     */
+    private void updateImageSize(SimpleDraweeView imageView, ImageInfo imageInfo){
+
+        if(imageInfo != null){
+            Log.d(TAG, "ImageInfo: width=" + imageInfo.getWidth() + ", heigh=" + imageInfo.getHeight());
+
+            ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+            final int imageWidth = imageView.getMeasuredWidth();
+            final int imageHeight = imageView.getMeasuredHeight();
+
+            lp.width = imageWidth;
+            lp.height = imageWidth * imageInfo.getHeight() / imageInfo.getWidth();
+
+            imageView.setLayoutParams(lp);
+            imageView.setAspectRatio((float)imageInfo.getWidth() / imageInfo.getHeight());
+        }
+
     }
 
 

@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -28,6 +29,7 @@ import com.simit.database.DbController;
 import com.simit.database.Article;
 import com.simit.network.NetworkMonitor;
 import com.simit.activity.R;
+import com.simit.service.UpdateService;
 import com.simit.storage.SharedPreferenceUtils;
 
 
@@ -126,8 +128,13 @@ public class DetailFragment extends Fragment {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setBlockNetworkImage(true);
+        webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
             webSettings.setDisplayZoomControls(false);
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            // allow https domain to load http content
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
 
         mWebView.setWebViewClient(new WebViewClient() {
@@ -136,6 +143,7 @@ public class DetailFragment extends Fragment {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 //
                 Uri uri = Uri.parse(url);
+                Log.i(TAG, "shouldOverrideUriLoading>>>" + uri.getHost());
                 if (uri.getHost().equals(DAPENTI_HOST)) {
                     // dapenti
                     return false;
@@ -151,8 +159,11 @@ public class DetailFragment extends Fragment {
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
                 WebResourceResponse response = new WebResourceResponse("text/plain", "UTF-8", null);
                 //站内请求,无需过滤
+                Log.w(TAG, "shouldInterceptRequest>>" + url);
                 Uri uri = Uri.parse(url);
                 String host = uri.getHost();
+                Log.i(TAG, "request host: " + host);
+
                 if(host.equals(DAPENTI_HOST) || host.equals(DAPENTI_IMG_HOST) ||
                         host.equals(DAPENTI_PIC_HOST)){
                     //主站域名和意图的域名
@@ -195,6 +206,15 @@ public class DetailFragment extends Fragment {
             }
 
             @Override
+            public void onLoadResource(WebView view, String url) {
+                super.onLoadResource(view, url);
+                Log.i(TAG, "onLoadResource>>" + url);
+                if(url.contains(DAPENTI_PIC_HOST) || url.contains(DAPENTI_IMG_HOST)){
+                    Log.i(TAG, "onLoadResource>>Image resource");
+                }
+            }
+
+            @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 // 3g条件下,本地加载失败,重新加载远程数据,可能本地缓存被删除了
@@ -208,20 +228,25 @@ public class DetailFragment extends Fragment {
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 //handler.cancel();  //默认处理方式,WebView变空白页
-                handler.proceed();  //接受证书
+                handler.proceed();   //接受证书
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                // 注入js代码
+                String wholeJS = loadThemeJs();
+                if(!TextUtils.isEmpty(wholeJS)){
+                    // js文件非空
+                    mWebView.loadUrl("javascript:" + wholeJS);
+                }
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // 开始加载图片
-                webSettings.setBlockNetworkImage(false);
-                // 注入js代码
-                String wholeJS = loadThemeJs();
-                if(!wholeJS.isEmpty()){
-                    // js文件非空
-                    mWebView.loadUrl("javascript:" + wholeJS);
-                }
+                Log.i(TAG, "onPageFinished>>" + url);
+                //执行js脚本
                 String jsCmd = "";
                 boolean mNightMode = SharedPreferenceUtils.get(activity, "nightMode", false);
                 if(mNightMode){
@@ -233,13 +258,8 @@ public class DetailFragment extends Fragment {
                 }
                 Log.w(TAG, "webview current theme: " + (mNightMode ? "nightMode" : "dayMode"));
 
-
-                // 加载过滤广告js
-                jsCmd = "javascript:filterAD()";
-                mWebView.loadUrl(jsCmd);
-                // 替换embed标签为iframe
-                //jsCmd = "javascript:replaceEmbed()";
-                //mWebView.loadUrl(jsCmd);
+                // 最后加载图片
+                webSettings.setBlockNetworkImage(false);
             }
         });
         // 设置进度条
@@ -371,6 +391,9 @@ public class DetailFragment extends Fragment {
             //wifi状态下获取页面源码,如果还没有本地缓存, 则缓存该页面
             if(localUrl.isEmpty()){
 
+                Intent intent = new Intent(activity, UpdateService.class);
+                intent.putExtra("link", article.getDescription());
+                activity.startService(intent);
             }
         }else if((networkState & NetworkMonitor.NETWORK_MOBILE_MASK) == NetworkMonitor.NETWORK_MOBILE){
             // 3g网络优先加载本地连接
