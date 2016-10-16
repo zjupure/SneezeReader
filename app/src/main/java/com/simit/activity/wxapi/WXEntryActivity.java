@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Toast;
 
 import com.simit.common.Constants;
@@ -22,10 +23,10 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// 空白View
-		View view = new View(this);
-		ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-		view.setLayoutParams(layoutParams);
-		view.setBackgroundColor(0xffffff);
+        View view = new View(this);
+        LayoutParams layoutParams = new LayoutParams(1, 1);
+        view.setLayoutParams(layoutParams);
+        view.setBackgroundColor(0x00ffffff);  //透明activity
 		setContentView(view);
 		// 注册微信分享组件
 		mWeixinShareAPI = WXAPIFactory.createWXAPI(this, Constants.WEIXIN_APP_KEY, true);

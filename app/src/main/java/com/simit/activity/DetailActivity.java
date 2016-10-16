@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -24,15 +25,15 @@ import java.util.List;
  * Created by liuchun on 2015/12/6.
  */
 public class DetailActivity extends BaseActivity{
+    private static final String TAG = "DetailActivity";
     // Component
     private ViewPager mViewPager;
     private HomeViewPagerAdapter mAdapter;
     // article info
-    private Article article;
-    private List<Article> mArticles;
+    private Article curArticle;
+    private List<Article> mArticles = new ArrayList<>();
     private int curPage;
     private int type;
-    private int limit = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +50,11 @@ public class DetailActivity extends BaseActivity{
     protected void handleIntent(Intent intent) {
         super.handleIntent(intent);
 
-        Bundle bundle = intent.getBundleExtra("detail");
-        article = bundle.getParcelable("article");
         curPage = intent.getIntExtra("position", 0);
-        type = article.getType();
+        curArticle = intent.getParcelableExtra("article");
+        type = curArticle.getType();
+
+        Log.i(TAG, "curPage: " + curPage);
     }
 
     @Override
@@ -66,10 +68,6 @@ public class DetailActivity extends BaseActivity{
 
         // ViewPager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mArticles = new ArrayList<>();
-        if(article != null){
-            mArticles.add(article);
-        }
         mAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), mArticles);
         mViewPager.setAdapter(mAdapter);
         //
@@ -82,8 +80,9 @@ public class DetailActivity extends BaseActivity{
 
             @Override
             public void onPageSelected(int position) {
-                article = mArticles.get(position);
+
                 curPage = position;
+                curArticle = mArticles.get(curPage);
                 supportInvalidateOptionsMenu();
             }
 
@@ -108,7 +107,7 @@ public class DetailActivity extends BaseActivity{
     public boolean onPrepareOptionsMenu(Menu menu) {
 
         MenuItem favorite = menu.findItem(R.id.action_favorite);
-        setFavoriteIcon(favorite, article.isFavorite());
+        setFavoriteIcon(favorite, curArticle.isFavorite());
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -118,13 +117,13 @@ public class DetailActivity extends BaseActivity{
         // 菜单点击操作
         switch (item.getItemId()){
             case R.id.action_favorite:
-                refreshFavoriteState(article);
+                refreshFavoriteState(curArticle);
                 break;
             case R.id.action_refresh:
                 refreshArticle();
                 break;
             case R.id.action_share:
-                shareArticle(article);
+                shareArticle(curArticle);
                 break;
             default:break;
         }
@@ -137,21 +136,24 @@ public class DetailActivity extends BaseActivity{
      */
     private void fetchArticleFromLocal(){
 
+        Log.i(TAG, "fetchArticleFromLocal>>>start");
         AsyncTask<Void, Void, List<Article>> asyncTask = new AsyncTask<Void, Void, List<Article>>() {
             @Override
             protected List<Article> doInBackground(Void... params) {
+                Log.i(TAG, "doInbackground>>load lcoal data");
 
                 DbController dbHelper = DbController.getInstance(DetailActivity.this);
                 //从数据库查询最新的数据
                 String username = SharedPreferenceUtils.get(DetailActivity.this, "username", "any");
-                List<Article> articles = dbHelper.getArticles(type, limit, username);
+                List<Article> articles = dbHelper.getArticles(type, 0, username);
 
                 return articles;
             }
 
-
             @Override
             protected void onPostExecute(List<Article> articles) {
+                Log.i(TAG, "load local data finished");
+
                 if(articles.size() < 0){
                     return;
                 }
@@ -160,22 +162,29 @@ public class DetailActivity extends BaseActivity{
                 for(int i = 0; i < articles.size(); i++){
                     Article tmp = articles.get(i);
 
-                    if(TextUtils.equals(article.getDescription(), tmp.getDescription())){
+                    if(tmp.getId() == curArticle.getId()){
                         index = i;
                         break;
                     }
                 }
 
+                Log.i(TAG, "find correct index: " + index);
                 if(index < 0){
-                    return;
+                    //把当前文章追加到最后
+                    articles.add(curArticle);
+                    index = articles.size() - 1;
                 }
-
-                curPage = index;
-                article = articles.get(index);
 
                 mArticles.clear();
                 mArticles.addAll(articles);
+
                 mAdapter.notifyDataSetChanged();
+
+                curPage = index;
+                curArticle = mArticles.get(curPage);
+
+                Log.i(TAG, "curPage: " + curPage);
+                Log.i(TAG, "title: " + curArticle.getTitle());
                 mViewPager.setCurrentItem(curPage);
             }
         };
@@ -184,7 +193,7 @@ public class DetailActivity extends BaseActivity{
     }
 
     public void refreshArticle(){
-        curPage = mViewPager.getCurrentItem();
+
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + curPage);
         if(fragment != null && fragment instanceof  DetailFragment){
             ((DetailFragment)fragment).displayArticle();
@@ -193,7 +202,7 @@ public class DetailActivity extends BaseActivity{
 
     @Override
     public void onBackPressed() {
-        curPage = mViewPager.getCurrentItem();
+
         Fragment fragment = getSupportFragmentManager().
                 findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + curPage);
 

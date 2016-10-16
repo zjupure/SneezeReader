@@ -25,6 +25,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.simit.database.DbController;
 import com.simit.database.Article;
 import com.simit.network.NetworkMonitor;
@@ -60,6 +64,8 @@ public class DetailFragment extends Fragment {
     private Article article;
     // 加载的是本地文件还是远程文件
     private boolean isLoadLocal;
+    // 注入js
+    private String wholeJS;
     //
     private Activity activity;
 
@@ -76,7 +82,6 @@ public class DetailFragment extends Fragment {
 
         return fragment;
     }
-
 
 
     @Override
@@ -102,6 +107,11 @@ public class DetailFragment extends Fragment {
         activity = getActivity();
         //初始化界面View
         initWebView();
+        //
+        if(!TextUtils.isEmpty(article.getImgUrl())){
+            Uri uri = Uri.parse(article.getImgUrl());
+            prefetchToBitmapCache(uri);
+        }
     }
 
 
@@ -235,7 +245,7 @@ public class DetailFragment extends Fragment {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 // 注入js代码
-                String wholeJS = loadThemeJs();
+                wholeJS = loadThemeJs();
                 if(!TextUtils.isEmpty(wholeJS)){
                     // js文件非空
                     mWebView.loadUrl("javascript:" + wholeJS);
@@ -278,6 +288,25 @@ public class DetailFragment extends Fragment {
         displayArticle();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        //重新注入js
+        if(!TextUtils.isEmpty(wholeJS)){
+            // js文件非空
+            mWebView.loadUrl("javascript:" + wholeJS);
+        }
+
+        String jsCmd = "";
+        boolean mNightMode = SharedPreferenceUtils.get(activity, "nightMode", false);
+        if(mNightMode){
+            jsCmd = "javascript:setTheme('night')";
+            mWebView.loadUrl(jsCmd);
+        }else{
+            jsCmd = "javascript:setTheme('day')";
+            mWebView.loadUrl(jsCmd);
+        }
+    }
 
     @Override
     public void onPause() {
@@ -420,6 +449,11 @@ public class DetailFragment extends Fragment {
         }
     }
 
+
+    /**
+     * 返回上级页面
+     * @return
+     */
     public boolean goBack(){
         // 能够回退到上一页
         if(mWebView.canGoBack()){
@@ -428,5 +462,19 @@ public class DetailFragment extends Fragment {
         }
 
         return false;
+    }
+
+    /**
+     *  预加载该页的图片, 用于分享
+     */
+    private void prefetchToBitmapCache(Uri uri){
+
+
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        ImageRequest imageRequest = ImageRequestBuilder
+                .newBuilderWithSource(uri)
+                .build();
+
+        imagePipeline.prefetchToBitmapCache(imageRequest, this);
     }
 }

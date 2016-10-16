@@ -9,4 +9,6 @@
     <color name="navigationBarColor">#ffffff</color>
 
     <color name="dividerColor">#cccccc</color>
+
+    <color name="share_bgcolor">#3b3b3b</color>
 </resources>

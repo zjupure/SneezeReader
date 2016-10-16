@@ -279,6 +279,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
     public void shareArticle(final Article article){
 
+        Log.i(TAG, "title: " + article.getTitle() + ", link: " + article.getDescription());
         // 构造PopupWindow
         View popView = LayoutInflater.from(this).inflate(R.layout.share_popup, null);
         TextView mWeiboPhoto = (TextView) popView.findViewById(R.id.share_weibo);

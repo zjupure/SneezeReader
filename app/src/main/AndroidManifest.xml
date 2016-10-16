@@ -99,7 +99,8 @@
         </activity>
 
         <activity android:name="com.simit.activity.ShareActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -110,7 +111,6 @@
             android:label="WXEntryActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="true">
-
         </activity>
     </application>
 

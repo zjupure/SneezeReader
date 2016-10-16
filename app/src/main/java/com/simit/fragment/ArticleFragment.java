@@ -170,11 +170,11 @@ public class ArticleFragment extends Fragment {
                 }
 
                 Intent intent = new Intent(activity, DetailActivity.class);
-                Bundle bundle = new Bundle();
+
                 Article article = mArticles.get(position);
-                bundle.putParcelable("article", article);
-                intent.putExtra("detail", bundle);
                 intent.putExtra("position", position);
+                intent.putExtra("article", article);
+
                 startActivity(intent);
             }
 
@@ -285,9 +285,11 @@ public class ArticleFragment extends Fragment {
                 }
                 case Constants.MSG_LOCAL_LOAD_SUCCESS:{
                     int size = msg.arg1;
-                    limit = size + 10;
-                    mAdapter.notifyDataSetChanged();
-                    mLoadingBar.setVisibility(View.GONE);
+                    if(size > 0) {
+                        limit = size + 10;
+                        mAdapter.notifyDataSetChanged();
+                        mLoadingBar.setVisibility(View.GONE);
+                    }
                     invalidateOptionsMenu();
                     break;
                 }
@@ -312,6 +314,7 @@ public class ArticleFragment extends Fragment {
                     break;
                 }
                 case Constants.MSG_NO_MORE_ARTICLE:{
+
                     showToast("本地数据已全部加载,没有更多数据了");
                     break;
                 }
@@ -460,13 +463,16 @@ public class ArticleFragment extends Fragment {
                     msg.arg1 = articles.size();
                     msg.sendToTarget();
                 }else{
-                    //没有更多数据了
-                    handler.sendEmptyMessage(Constants.MSG_NO_MORE_ARTICLE);
                     //
                     Message msg = handler.obtainMessage();
                     msg.what = Constants.MSG_LOCAL_LOAD_SUCCESS;
                     msg.arg1 = articles.size();
                     msg.sendToTarget();
+
+                    if(articles.size() > 0){
+                        //没有更多数据了
+                        handler.sendEmptyMessage(Constants.MSG_NO_MORE_ARTICLE);
+                    }
                 }
 
                 if(curPos == Article.DUANZI){
