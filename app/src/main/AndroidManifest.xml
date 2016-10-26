@@ -36,7 +36,8 @@
         <activity
             android:name="com.simit.activity.DetailActivity"
             android:parentActivityName="com.simit.activity.MainActivity"
-            android:hardwareAccelerated="true">
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask">
             <!-- meta-data 用于支持support 4.0以及以下指明上级活动 -->
             <meta-data
                 android:name="android:support.PARENT_ACTIVITY"

@@ -513,10 +513,8 @@ public class ArticleFragment extends Fragment {
         String contentText = article.getPubDate();
 
         Intent intent = new Intent(activity, DetailActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("article", article);
-        intent.putExtra("detail", bundle);
         intent.putExtra("position", 0);
+        intent.putExtra("article", article);
         PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(activity);

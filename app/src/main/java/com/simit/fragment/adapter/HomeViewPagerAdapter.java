@@ -3,7 +3,7 @@ package com.simit.fragment.adapter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 
 import com.simit.fragment.DetailFragment;
 import com.simit.database.Article;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by liuchun on 2015/12/12.
  */
-public class HomeViewPagerAdapter extends FragmentStatePagerAdapter {
+public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     private List<Article> mArticles;
     private HashMap<Article, Fragment> fragMaps;
 
@@ -44,11 +44,6 @@ public class HomeViewPagerAdapter extends FragmentStatePagerAdapter {
         return fragment;
     }
 
-    @Override
-    public int getItemPosition(Object object) {
-
-        return POSITION_NONE;
-    }
 
     @Override
     public int getCount() {

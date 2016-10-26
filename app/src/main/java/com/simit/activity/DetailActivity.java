@@ -47,6 +47,16 @@ public class DetailActivity extends BaseActivity{
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        curPage = intent.getIntExtra("position", 0);
+        mViewPager.setCurrentItem(curPage);
+
+        Log.i(TAG, "OnNewIntent>>curPage: " + curPage);
+    }
+
+    @Override
     protected void handleIntent(Intent intent) {
         super.handleIntent(intent);
 
@@ -162,7 +172,7 @@ public class DetailActivity extends BaseActivity{
                 for(int i = 0; i < articles.size(); i++){
                     Article tmp = articles.get(i);
 
-                    if(tmp.getId() == curArticle.getId()){
+                    if(tmp.getDescription().equals(curArticle.getDescription())){
                         index = i;
                         break;
                     }
