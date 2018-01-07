@@ -1,21 +1,29 @@
 package com.simit.fragment.adapter;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Animatable;
+import android.net.Uri;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.simit.database.Article;
 import com.simit.activity.R;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -65,8 +73,8 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
             holder.mTextView.setText(article.getTitle());
 
-            //loadImage(holder.mImageView, article.getImgUrl());
-            holder.mImageView.setImageURI(article.getImgUrl());
+            loadImage(holder.mImageView, article.getImgUrl());
+            //holder.mImageView.setImageURI(article.getImgUrl());
 
         }else if(type == Article.LEHUO){
 
@@ -96,23 +104,54 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
             @Override
             public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
 
-                updateImageSize(imageView, imageInfo);
+                //updateImageSize(imageView, imageInfo);
             }
 
             @Override
             public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
 
-                updateImageSize(imageView, imageInfo);
+                //updateImageSize(imageView, imageInfo);
             }
         };
 
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(uriString))
+                .setProgressiveRenderingEnabled(true)
+                .setResizeOptions(getResizeOptions(imageView))
+                .build();
+
         final DraweeController controller = Fresco.newDraweeControllerBuilder()
                 .setControllerListener(controllerListener)
-                .setUri(uriString)
+                .setImageRequest(imageRequest)
                 .setOldController(imageView.getController())
                 .build();
 
         imageView.setController(controller);
+    }
+
+
+    private ResizeOptions getResizeOptions(ImageView imageView) {
+
+        DisplayMetrics dm = Resources.getSystem().getDisplayMetrics();
+
+        int maxWidth = dm.widthPixels;
+        int maxHeight = dm.heightPixels;
+
+        ViewGroup.LayoutParams lp = imageView.getLayoutParams();
+        if (lp != null && lp.width > 0) {
+            maxWidth = lp.width;
+        } else {
+            maxWidth = Math.min(maxWidth, Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                    ? imageView.getMaxWidth() : Integer.MAX_VALUE);
+        }
+
+        if (lp != null && lp.height > 0) {
+            maxHeight = lp.height;
+        } else {
+            maxHeight = Math.min(maxHeight, Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                    ? imageView.getMaxHeight() : Integer.MAX_VALUE);
+        }
+
+        return new ResizeOptions(maxWidth, maxHeight);
     }
 
     /**
@@ -123,7 +162,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     private void updateImageSize(SimpleDraweeView imageView, ImageInfo imageInfo){
 
         if(imageInfo != null){
-            Log.d(TAG, "ImageInfo: width=" + imageInfo.getWidth() + ", heigh=" + imageInfo.getHeight());
+            Log.d(TAG, "ImageInfo: width=" + imageInfo.getWidth() + ", height=" + imageInfo.getHeight());
 
             ViewGroup.LayoutParams lp = imageView.getLayoutParams();
             final int imageWidth = imageView.getMeasuredWidth();

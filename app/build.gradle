@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId "com.simit.sneezereader"
-        minSdkVersion 9
-        targetSdkVersion 23
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 3
         versionName "3.1"
     }
@@ -27,17 +27,18 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
     // material design support library
-    compile 'com.android.support:design:23.4.0'
+    compile "com.android.support:design:${ANDROID_SUPPORT_VERSION}"
     // recyclerview to replace listview
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
     // cardview to show item
     //compile 'com.android.support:cardview-v7:23.4.0'
     // a high efficient network library
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.squareup.okhttp3:okhttp:3.8.1'
     // facebook image library
-    compile 'com.facebook.fresco:fresco:0.13.0'
+    compile 'com.facebook.fresco:fresco:1.2.0'
+    compile "com.facebook.fresco:imagepipeline-okhttp3:1.2.0"
     // google gson library to parse the json data
     compile 'com.google.code.gson:gson:2.7'
     // jsoup html parse library
